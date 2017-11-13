@@ -271,5 +271,11 @@ export class Manager {
   public endCurrentRound() {
     //
     console.log('endCurrentRound()')
+    if (this.match === undefined) {
+      throw new Error('UNEXPECTED! match is undefined')
+    }
+
+    this.match.endCurrentRound(this.match.getCurrentRound())
+    this.updateAppState()
   }
 }

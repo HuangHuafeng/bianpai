@@ -201,6 +201,8 @@ export class Match {
     return clone(this.players[index])
   }
 
+  private generateStatisticData() {}
+
   public updateTableResult(round: number, table: number, result: string) {
     if (round !== this.currentRound || this.status !== MatchStatus.OnGoingFighting) {
       throw new Error('UNEXPECTED! trying to update result of a table in a wrong time!')
@@ -223,28 +225,12 @@ export class Match {
     this.status = MatchStatus.OnGoingFighting
   }
 
-  public startFirstRoundPairring() {
-    assert.ok(
-      this.status === MatchStatus.NotStarted &&
-        this.currentRound === 0 &&
-        this.totalRounds > this.currentRound &&
-        this.roundData === undefined,
-      'IMPOSSIBLE! match is already started!'
-    )
-
-    this.status = MatchStatus.OnGoingPairing
-    this.currentRound = 1
-    this.roundData = []
-
-    this.pairCurrentRound()
-  }
-
   public pairCurrentRound() {
     assert.ok(
       this.status === MatchStatus.OnGoingPairing &&
         this.currentRound > 0 &&
         this.currentRound <= this.totalRounds &&
-        this.roundData.length === this.currentRound,
+        this.roundData.length === this.currentRound + 1,
       'IMPOSSIBLE! something wrong when pairing!'
     )
     let numberOfPlayers = this.players.length
@@ -260,7 +246,7 @@ export class Match {
         result: undefined,
       })
     }
-    this.roundData.push(currentRoundData)
+    this.roundData[this.currentRound] = currentRoundData
   }
 
   public getRoundData(round: number): GameData[] {
@@ -280,12 +266,36 @@ export class Match {
       'IMPOSSIBLE! match is already started!'
     )
 
-    this.status = MatchStatus.OnGoingPairing
-    this.currentRound = 1
     this.roundData = []
     this.roundData.push([])
+    this.gotoNextRound()
+  }
 
-    this.pairOpponents()
+  public endCurrentRound(currentRound: number) {
+    if (currentRound !== this.currentRound || this.status !== MatchStatus.OnGoingFighting) {
+      throw new Error('UNEXPECTED! try to end a round in a wrong time!')
+    }
+
+    // generate and save statistic data
+    this.generateStatisticData()
+
+    // go to next round
+    this.gotoNextRound()
+  }
+
+  private gotoNextRound() {
+    if (this.currentRound == this.totalRounds) {
+      // already the last round, then mark the match as finished
+      this.status = MatchStatus.Finished
+    } else {
+      this.status = MatchStatus.OnGoingPairing
+      this.currentRound++
+      // the data of round n is stored in this.roundData[n], not this.roundData[n - 1]
+      // in other words, this.roundData[0] is NOT used
+      // this.roundData.length should only be changed in this function and this.start()
+      this.roundData.push([])
+      this.pairOpponents()
+    }
   }
 
   public pairOpponents() {

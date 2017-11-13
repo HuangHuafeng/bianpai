@@ -38,6 +38,7 @@ export class PlayerTableBody extends React.Component<IPlayerTableBodyProps, IPla
   }
 
   private renderAPlayer(player: Player) {
+    console.log(player.getNumber())
     return (
       <tr key={player.getNumber()}>
         <th>{player.getNumber()}</th>

@@ -33,23 +33,42 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
       case 'ongoing':
         return this.renderOngoing()
 
+      case 'finished':
+        return this.renderFinished()
+
+      case 'match-finished':
+        return this.renderMatchFinished()
+
       default:
         throw new Error('IMPOSSIBLE!')
     }
   }
 
-  private getRoundStatus(): 'match-not-started' | 'not-started' | 'pairing' | 'ongoing' | 'finished' {
+  private getRoundStatus():
+    | 'match-not-started'
+    | 'not-started'
+    | 'pairing'
+    | 'ongoing'
+    | 'finished'
+    | 'match-finished' {
     const matchStatus = this.props.match.getStatus()
     const currentRound = this.props.match.getCurrentRound()
+
     if (matchStatus === MatchStatus.NotStarted) {
       assert.ok(currentRound === 0, 'IMPOSSIBLE!')
       return 'match-not-started'
     }
+
+    if (matchStatus === MatchStatus.Finished) {
+      assert.ok(currentRound === this.props.match.getTotalRounds(), 'IMPOSSIBLE!')
+      return 'match-finished'
+    }
+
     if (this.props.round > currentRound) {
       return 'not-started'
     }
 
-    if (this.props.round > currentRound) {
+    if (this.props.round < currentRound) {
       return 'finished'
     }
 
@@ -60,20 +79,39 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
     }
   }
 
+  private renderMatchFinished() {
+    return this.renderFinished()
+  }
+
+  private renderFinished() {
+    const roundData: GameData[] = this.props.match.getRoundData(this.props.round)
+
+    return (
+      <div id="round-view">
+        <p className="summary">本轮比赛已经结束</p>
+        <Table striped bordered condensed hover responsive>
+          <PairringTableHeader manager={this.props.manager} />
+          <PairringTableBody manager={this.props.manager} roundData={roundData} />
+        </Table>
+      </div>
+    )
+  }
+
   private renderMatchNotStarted() {
-    let start
     if (this.props.round === 1) {
-      start = (
-        <Button bsStyle="primary" onClick={this.startMatch}>
-          开始比赛
-        </Button>
+      return (
+        <div id="round-view">
+          <p className="summary">比赛还没有开始</p>
+          <Button bsStyle="primary" onClick={this.startMatch}>
+            开始比赛
+          </Button>
+        </div>
       )
     }
 
     return (
       <div id="round-view">
         <p className="summary">比赛还没有开始</p>
-        {start}
       </div>
     )
   }

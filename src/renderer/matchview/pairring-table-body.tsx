@@ -76,6 +76,9 @@ export class PairringTableBody extends React.Component<IPairringTableBodyProps, 
           <Button key="lose" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '-')}>
             黒胜
           </Button>
+          <Button key="unknown" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '?')}>
+            未知
+          </Button>
         </th>
       )
 
