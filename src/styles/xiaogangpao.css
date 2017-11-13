@@ -1,0 +1,18 @@
+@import '~bootstrap/dist/css/bootstrap.min.css';
+
+div#match {
+  text-align: center;
+}
+
+div#match h1 {
+  color: royalblue;
+}
+
+th {
+  text-align: center;
+}
+
+table thead tr {
+  color: blue;
+  background: lightblue;
+}
