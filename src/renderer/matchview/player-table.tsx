@@ -24,16 +24,9 @@ export class PlayerTable extends React.Component<IPlayerTableProps, IPlayerTable
     return (
       <div id="players">
         <div id="players-modify">
-          选手总数：{numberOfPlayers}
-          <br />
-          <Button className="addplayer" onClick={() => sendMenuEvent('add-player')}>
-            增加选手
-          </Button>
-          <Button
-            className="removeall"
-            onClick={() => sendMenuEvent('remove-all-players')}
-            disabled={numberOfPlayers === 0}
-          >
+          <p className="summary">选手总数：{numberOfPlayers}</p>
+          <Button onClick={() => sendMenuEvent('add-player')}>增加选手</Button>
+          <Button bsStyle="danger" onClick={() => sendMenuEvent('remove-all-players')} disabled={numberOfPlayers === 0}>
             全部删除
           </Button>
         </div>

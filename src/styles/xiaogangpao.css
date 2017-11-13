@@ -16,3 +16,31 @@ table thead tr {
   color: blue;
   background: lightblue;
 }
+
+/*
+https://stackoverflow.com/questions/9421966/how-do-i-center-the-twitter-bootstrap-tabs-on-the-page
+*/
+.nav-tabs > li,
+.nav-pills > li {
+  float: none;
+  display: inline-block;
+}
+
+.nav-tabs,
+.nav-pills {
+  text-align: center;
+}
+
+button {
+  margin-left: 0.25em;
+  margin-right: 0.25em;
+}
+
+div#players-modify {
+  margin-bottom: 0.25em;
+}
+
+p.summary {
+  /* color: brown; */
+  font-size: xx-large;
+}

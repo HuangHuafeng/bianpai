@@ -60,7 +60,7 @@ export class MatchRounds extends React.Component<IMatchRoundsProps, IMatchRounds
 
     return (
       <div>
-        <p>
+        <p className="summary">
           一共有{numberOfPlayers}位选手，计划进行{totalRounds}轮比赛
         </p>
         <Button type="submit" disabled={this.props.match.getTotalRounds() <= 0} onClick={this.startFirstRoundPairring}>

@@ -82,7 +82,7 @@ export class AddPlayer extends React.Component<IAddPlayerProps, IAddPlayerState>
         <Modal.Body>
           {this.renderDuplicateWarning(player)}
           <form>
-            <FormGroup controlId="name" validationState={this.validateName()} autoFocus={true}>
+            <FormGroup controlId="name" validationState={this.validateName()}>
               <ControlLabel>姓名</ControlLabel>
               <FormControl type="text" value={this.state.name} onChange={this.onNameChanged} />
               <FormControl.Feedback />
