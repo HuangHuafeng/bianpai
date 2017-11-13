@@ -4,7 +4,7 @@ import * as assert from 'assert'
 
 export enum MatchStatus {
   NotStarted,
-  OnGoingPairring,
+  OnGoingPairing,
   OnGoingFighting,
   Finished,
 }
@@ -201,6 +201,28 @@ export class Match {
     return clone(this.players[index])
   }
 
+  public updateTableResult(round: number, table: number, result: string) {
+    if (round !== this.currentRound || this.status !== MatchStatus.OnGoingFighting) {
+      throw new Error('UNEXPECTED! trying to update result of a table in a wrong time!')
+    }
+
+    let roundData = this.roundData[this.currentRound]
+    const index = roundData.findIndex(value => value.table === table)
+    if (index === -1) {
+      throw new Error('UNEXPECTED! cannot find the record of the table result!')
+    }
+
+    roundData[index].result = result
+  }
+
+  public startCurrentRound(currentRound: number) {
+    if (currentRound !== this.currentRound) {
+      throw new Error('UNEXPECTED! trying to start a noncurrent round!')
+    }
+
+    this.status = MatchStatus.OnGoingFighting
+  }
+
   public startFirstRoundPairring() {
     assert.ok(
       this.status === MatchStatus.NotStarted &&
@@ -210,7 +232,7 @@ export class Match {
       'IMPOSSIBLE! match is already started!'
     )
 
-    this.status = MatchStatus.OnGoingPairring
+    this.status = MatchStatus.OnGoingPairing
     this.currentRound = 1
     this.roundData = []
 
@@ -219,10 +241,10 @@ export class Match {
 
   public pairCurrentRound() {
     assert.ok(
-      this.status === MatchStatus.OnGoingPairring &&
+      this.status === MatchStatus.OnGoingPairing &&
         this.currentRound > 0 &&
         this.currentRound <= this.totalRounds &&
-        this.roundData.length === this.currentRound - 1,
+        this.roundData.length === this.currentRound,
       'IMPOSSIBLE! something wrong when pairing!'
     )
     let numberOfPlayers = this.players.length
@@ -246,6 +268,27 @@ export class Match {
       throw new Error('UNEXPECTED! try to get data of a round that has not played')
     }
 
-    return clone(this.roundData[round - 1])
+    return clone(this.roundData[round])
+  }
+
+  public start() {
+    if (this.status !== MatchStatus.NotStarted || this.currentRound !== 0) {
+      throw new Error('UNEXPECTED! match is already started!')
+    }
+    assert.ok(
+      this.totalRounds > this.currentRound && this.roundData === undefined,
+      'IMPOSSIBLE! match is already started!'
+    )
+
+    this.status = MatchStatus.OnGoingPairing
+    this.currentRound = 1
+    this.roundData = []
+    this.roundData.push([])
+
+    this.pairOpponents()
+  }
+
+  public pairOpponents() {
+    this.pairCurrentRound()
   }
 }

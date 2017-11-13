@@ -240,4 +240,31 @@ export class Manager {
     this.match.startFirstRoundPairring()
     this.updateAppState()
   }
+
+  public startCurrentRound(currentRound: number) {
+    if (this.match === undefined) {
+      throw new Error('UNEXPECTED! match is undefined')
+    }
+
+    this.match.startCurrentRound(currentRound)
+    this.updateAppState()
+  }
+
+  public updateTableResult(round: number, table: number, result: string) {
+    if (this.match === undefined) {
+      throw new Error('UNEXPECTED! match is undefined')
+    }
+
+    this.match.updateTableResult(round, table, result)
+    this.updateAppState()
+  }
+
+  public startMatch() {
+    if (this.match === undefined) {
+      throw new Error('UNEXPECTED! match is undefined')
+    }
+
+    this.match.start()
+    this.updateAppState()
+  }
 }

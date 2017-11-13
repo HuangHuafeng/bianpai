@@ -2,8 +2,7 @@ import * as React from 'react'
 import { Manager } from '../manager'
 import { Match, MatchStatus } from '../../common/match'
 import { RoundView } from './round-view'
-import { NextRound } from './next-round'
-import { Button } from 'react-bootstrap'
+import { Tabs, Tab } from 'react-bootstrap'
 
 interface IMatchRoundsProps {
   readonly manager: Manager
@@ -23,54 +22,28 @@ export class MatchRounds extends React.Component<IMatchRoundsProps, IMatchRounds
 
   private renderTabs() {
     let tabs = []
-    for (let index = 0; index < this.props.match.getCurrentRound(); index++) {
-      const round = index + 1
-      tabs.push(<span key={'round' + round.toString()}>第{round}轮</span>)
+    for (let index = 0; index < this.props.match.getTotalRounds(); index++) {
+      tabs.push(
+        <Tab key={'match round ' + (index + 1)} eventKey={index} title={'第' + (index + 1) + '轮'}>
+          <RoundView manager={this.props.manager} match={this.props.match} round={index + 1} />
+        </Tab>
+      )
     }
 
-    tabs.push(<span key={'nextround'}>下一轮</span>)
-
-    return <div>{tabs}</div>
-  }
-
-  private renderActiveTabContents() {
-    if (this.state.selectedIndex < this.props.match.getCurrentRound()) {
-      return <RoundView manager={this.props.manager} match={this.props.match} round={this.state.selectedIndex + 1} />
-    }
-
-    return <NextRound manager={this.props.manager} match={this.props.match} />
+    return tabs
   }
 
   public render() {
-    if (this.props.match.getStatus() === MatchStatus.NotStarted) {
-      return <div id="match-rounds">{this.renderNotStarted()}</div>
-    } else {
-      return (
-        <div id="match-rounds">
-          {this.renderTabs()}
-          {this.renderActiveTabContents()}
-        </div>
-      )
-    }
-  }
-
-  private renderNotStarted() {
     const numberOfPlayers = this.props.match.getPlayers().length
     const totalRounds = this.props.match.getTotalRounds()
 
     return (
-      <div>
+      <div id="match-rounds">
         <p className="summary">
-          一共有{numberOfPlayers}位选手，计划进行{totalRounds}轮比赛
+          一共有{numberOfPlayers}位选手，进行{totalRounds}轮比赛
         </p>
-        <Button type="submit" disabled={this.props.match.getTotalRounds() <= 0} onClick={this.startFirstRoundPairring}>
-          安排第一轮对阵表
-        </Button>
+        <Tabs id="match-content">{this.renderTabs()}</Tabs>
       </div>
     )
-  }
-
-  private startFirstRoundPairring = () => {
-    this.props.manager.startFirstRoundPairring()
   }
 }

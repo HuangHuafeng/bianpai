@@ -20,7 +20,7 @@ export class NextRound extends React.Component<INextRoundProps, INextRoundState>
       case MatchStatus.Finished:
         return this.renderFinished()
 
-      case MatchStatus.OnGoingPairring:
+      case MatchStatus.OnGoingPairing:
         return this.renderPairring()
 
       case MatchStatus.OnGoingFighting:
