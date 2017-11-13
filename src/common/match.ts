@@ -201,7 +201,10 @@ export class Match {
     return clone(this.players[index])
   }
 
-  private generateStatisticData() {}
+  private generateStatisticData() {
+    this.statisticData = 'a'
+    console.log(this.statisticData)
+  }
 
   public updateTableResult(round: number, table: number, result: string) {
     if (round !== this.currentRound || this.status !== MatchStatus.OnGoingFighting) {

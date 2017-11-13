@@ -232,15 +232,6 @@ export class Manager {
     this.updateAppState()
   }
 
-  public startFirstRoundPairring() {
-    if (this.match === undefined) {
-      throw new Error('UNEXPECTED! match is undefined')
-    }
-
-    this.match.startFirstRoundPairring()
-    this.updateAppState()
-  }
-
   public startCurrentRound(currentRound: number) {
     if (this.match === undefined) {
       throw new Error('UNEXPECTED! match is undefined')
@@ -269,8 +260,6 @@ export class Manager {
   }
 
   public endCurrentRound() {
-    //
-    console.log('endCurrentRound()')
     if (this.match === undefined) {
       throw new Error('UNEXPECTED! match is undefined')
     }
