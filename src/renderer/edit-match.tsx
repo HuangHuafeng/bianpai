@@ -21,7 +21,11 @@ export class EditMatch extends React.Component<IEditMatchProps, IEditMatchState>
   constructor(props: IEditMatchProps) {
     super(props)
 
-    this.match = this.props.manager.getMatch()
+    const match = this.props.manager.getMatch()
+    if (match === undefined) {
+      throw new Error('UNEXPECTED! match is undefined')
+    }
+    this.match = match
 
     this.state = {
       name: this.match.getName(),

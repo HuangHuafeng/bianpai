@@ -31,7 +31,11 @@ export class AddPlayer extends React.Component<IAddPlayerProps, IAddPlayerState>
   }
 
   private doesNameExist(): Player | undefined {
-    return this.props.manager.getMatch().getPlayerByName(this.state.name)
+    const match = this.props.manager.getMatch()
+    if (match === undefined) {
+      throw new Error('UNEXPECTED! match is undefined')
+    }
+    return match.getPlayerByName(this.state.name)
   }
 
   private onNameChanged = (event: any) => {
@@ -78,7 +82,7 @@ export class AddPlayer extends React.Component<IAddPlayerProps, IAddPlayerState>
         <Modal.Body>
           {this.renderDuplicateWarning(player)}
           <form>
-            <FormGroup controlId="name" validationState={this.validateName()}>
+            <FormGroup controlId="name" validationState={this.validateName()} autoFocus={true}>
               <ControlLabel>姓名</ControlLabel>
               <FormControl type="text" value={this.state.name} onChange={this.onNameChanged} />
               <FormControl.Feedback />

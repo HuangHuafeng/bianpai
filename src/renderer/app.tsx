@@ -149,7 +149,10 @@ export class App extends React.Component<IAppProps, IAppState> {
   }
 
   private renderEditMatchDialog() {
-    let match = this.props.manager.getMatch()
+    const match = this.props.manager.getMatch()
+    if (match === undefined) {
+      throw new Error('UNEXPECTED! match is undefined')
+    }
     return (
       <EditMatch
         key="editmatch"

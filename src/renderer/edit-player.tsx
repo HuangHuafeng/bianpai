@@ -50,6 +50,9 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
     }
 
     const match = this.props.manager.getMatch()
+    if (match === undefined) {
+      throw new Error('UNEXPECTED! match is undefined')
+    }
     const player = match.getPlayerByNumber(number)
     if (player === undefined) {
       return undefined
@@ -65,6 +68,9 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
 
   private doesNameExist(): Player | undefined {
     const match = this.props.manager.getMatch()
+    if (match === undefined) {
+      throw new Error('UNEXPECTED! match is undefined')
+    }
     const player = match.getPlayerByName(this.state.name)
     if (player === undefined) {
       return undefined
@@ -124,7 +130,7 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
 
     return (
       <Alert bsStyle="warning">
-        编号或姓名有冲突：已存在编号为"{player.getNumber()}"，姓名为"{player.getName()}"的选手!
+        编号或姓名有冲突：已存在编号为"{player.getNumber()}"，姓名为"{player.getName()}"的选手
       </Alert>
     )
   }
