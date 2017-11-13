@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Manager } from '../manager'
-import { Match, MatchStatus } from '../../common/match'
+import { Match } from '../../common/match'
 import { RoundView } from './round-view'
 import { Tabs, Tab } from 'react-bootstrap'
 
@@ -42,7 +42,7 @@ export class MatchRounds extends React.Component<IMatchRoundsProps, IMatchRounds
         <p className="summary">
           一共有{numberOfPlayers}位选手，进行{totalRounds}轮比赛
         </p>
-        <Tabs id="match-content">{this.renderTabs()}</Tabs>
+        <Tabs id="round-content">{this.renderTabs()}</Tabs>
       </div>
     )
   }

@@ -267,4 +267,9 @@ export class Manager {
     this.match.start()
     this.updateAppState()
   }
+
+  public endCurrentRound() {
+    //
+    console.log('endCurrentRound()')
+  }
 }

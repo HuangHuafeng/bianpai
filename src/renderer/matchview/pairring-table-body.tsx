@@ -6,8 +6,8 @@ import { Button } from 'react-bootstrap'
 interface IPairringTableBodyProps {
   readonly manager: Manager
   readonly roundData: GameData[]
-  readonly modify?: boolean
-  readonly setGameResult?: (table: number, result: string) => void
+  readonly updatable?: boolean
+  readonly updateCallback?: (table: number, result: string) => void
 }
 
 interface IPairringTableBodyState {}
@@ -31,8 +31,6 @@ export class PairringTableBody extends React.Component<IPairringTableBodyProps, 
   }
 
   private renderRow(row: GameData) {
-    const result = this.renderResult(row)
-
     return (
       <tr key={'table' + row.table}>
         <th>{row.table}</th>
@@ -40,51 +38,56 @@ export class PairringTableBody extends React.Component<IPairringTableBodyProps, 
         <th>{row.redPlayer.getOrganization()}</th>
         <th> </th>
         <th>{row.redPlayer.getName()}</th>
-        <th>{result}</th>
+        {this.renderResult(row)}
         <th>{row.blackPlayer === undefined ? '' : row.blackPlayer.getName()}</th>
         <th> </th>
         <th>{row.blackPlayer === undefined ? '' : row.blackPlayer.getOrganization()}</th>
         <th>{row.blackPlayer === undefined ? '' : row.blackPlayer.getNumber()}</th>
+        {this.renderActions(row)}
       </tr>
     )
   }
 
   private renderResult(row: GameData) {
-    let result = []
+    let gameResult
     if (row.result === '+') {
-      result.push(<p key="result">胜</p>)
+      gameResult = '胜'
     } else if (row.result === '-') {
-      result.push(<p key="result">负</p>)
+      gameResult = '负'
     } else if (row.result === '=') {
-      result.push(<p key="result">和</p>)
+      gameResult = '和'
     } else {
-      result.push(<p key="result">*</p>)
+      gameResult = '*'
     }
 
-    if (this.props.modify === true) {
-      result.push(
-        <Button key="win" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '+')}>
-          红胜
-        </Button>
+    return <th>{gameResult}</th>
+  }
+
+  private renderActions(row: GameData) {
+    if (this.props.updatable === true) {
+      const actions = (
+        <th>
+          <Button key="win" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '+')}>
+            红胜
+          </Button>
+          <Button key="draw" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '=')}>
+            和棋
+          </Button>
+          <Button key="lose" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '-')}>
+            黒胜
+          </Button>
+        </th>
       )
-      result.push(
-        <Button key="draw" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '=')}>
-          和棋
-        </Button>
-      )
-      result.push(
-        <Button key="lose" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '-')}>
-          黒胜
-        </Button>
-      )
+
+      return actions
     }
 
-    return result
+    return null
   }
 
   private setTableResult = (table: number, result: string) => {
-    if (this.props.setGameResult) {
-      this.props.setGameResult(table, result)
+    if (this.props.updateCallback) {
+      this.props.updateCallback(table, result)
     }
   }
 }

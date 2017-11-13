@@ -3,6 +3,7 @@ import { Manager } from '../manager'
 
 interface IPairringTableHeaderProps {
   readonly manager: Manager
+  readonly updatable?: boolean
 }
 
 interface IPairringTableHeaderState {}
@@ -13,6 +14,10 @@ export class PairringTableHeader extends React.Component<IPairringTableHeaderPro
   }
 
   public render() {
+    let operateColumn = null
+    if (this.props.updatable) {
+      operateColumn = <th>操作</th>
+    }
     return (
       <thead>
         <tr>
@@ -26,6 +31,7 @@ export class PairringTableHeader extends React.Component<IPairringTableHeaderPro
           <th>积分</th>
           <th>黑方单位</th>
           <th>编号</th>
+          {operateColumn}
         </tr>
       </thead>
     )

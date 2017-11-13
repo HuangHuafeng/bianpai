@@ -93,17 +93,24 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
 
   private renderOngoing() {
     const roundData: GameData[] = this.props.match.getRoundData(this.props.round)
+    const disabled =
+      roundData.findIndex(game => game.result !== '+' && game.result !== '=' && game.result !== '-') !== -1
 
     return (
-      <Table striped bordered condensed hover responsive>
-        <PairringTableHeader manager={this.props.manager} />
-        <PairringTableBody
-          manager={this.props.manager}
-          roundData={roundData}
-          modify={true}
-          setGameResult={this.updateTableResult}
-        />
-      </Table>
+      <div id="round-view">
+        <Button bsStyle="primary" onClick={this.endCurrentRound} disabled={disabled}>
+          结束本轮比赛
+        </Button>
+        <Table striped bordered condensed hover responsive>
+          <PairringTableHeader manager={this.props.manager} updatable={true} />
+          <PairringTableBody
+            manager={this.props.manager}
+            roundData={roundData}
+            updatable={true}
+            updateCallback={this.updateTableResult}
+          />
+        </Table>
+      </div>
     )
   }
 
@@ -112,7 +119,9 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
 
     return (
       <div id="round-view">
-        <Button onClick={this.startRound}>开始本轮比赛</Button>
+        <Button bsStyle="primary" onClick={this.startRound}>
+          开始本轮比赛
+        </Button>
         <Table striped bordered condensed hover responsive>
           <PairringTableHeader manager={this.props.manager} />
           <PairringTableBody manager={this.props.manager} roundData={roundData} />
@@ -127,5 +136,9 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
 
   private startMatch = () => {
     this.props.manager.startMatch()
+  }
+
+  private endCurrentRound = () => {
+    this.props.manager.endCurrentRound()
   }
 }
