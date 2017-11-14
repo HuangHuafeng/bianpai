@@ -1,8 +1,16 @@
 import { Player } from './player'
 import * as clone from 'clone'
 import * as assert from 'assert'
+import { MatchRounds } from '../renderer/matchview/match-rounds'
 
 export enum MatchStatus {
+  NotStarted,
+  OnGoingPairing,
+  OnGoingFighting,
+  Finished,
+}
+
+export enum RoundStatus {
   NotStarted,
   OnGoingPairing,
   OnGoingFighting,
@@ -65,6 +73,35 @@ export class Match {
 
   public getStatus() {
     return this.status
+  }
+
+  public getRoundStatus(round: number): RoundStatus {
+    if (round <= 0 || round > this.totalRounds) {
+      throw new Error('UNEXPECTED! try to get the status of an invalid round')
+    }
+
+    if (this.status === MatchStatus.NotStarted) {
+      return RoundStatus.NotStarted
+    }
+
+    if (this.status === MatchStatus.Finished) {
+      return RoundStatus.Finished
+    }
+
+    if (round < this.currentRound) {
+      return RoundStatus.Finished
+    }
+
+    if (round > this.currentRound) {
+      return RoundStatus.NotStarted
+    }
+
+    if (this.status === MatchStatus.OnGoingPairing) {
+      return RoundStatus.OnGoingPairing
+    }
+
+    assert.ok(this.status === MatchStatus.OnGoingFighting, 'IMPOSSIBLE!')
+    return RoundStatus.OnGoingFighting
   }
 
   public getTotalRounds() {

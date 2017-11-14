@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Manager } from '../manager'
-import { Match, MatchStatus, GameData } from '../../common/match'
+import { Match, MatchStatus, GameData, RoundStatus } from '../../common/match'
 import { PairringTableHeader } from './pairring-table-header'
 import { PairringTableBody } from './pairring-table-body'
 import { Button, Table } from 'react-bootstrap'
@@ -20,67 +20,28 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
   }
 
   public render() {
-    switch (this.getRoundStatus()) {
-      case 'match-not-started':
-        return this.renderMatchNotStarted()
-
-      case 'not-started':
-        return this.renderNotStarted()
-
-      case 'pairing':
-        return this.renderPairing()
-
-      case 'ongoing':
-        return this.renderOngoing()
-
-      case 'finished':
-        return this.renderFinished()
-
-      case 'match-finished':
-        return this.renderMatchFinished()
-
-      default:
-        throw new Error('IMPOSSIBLE!')
-    }
-  }
-
-  private getRoundStatus():
-    | 'match-not-started'
-    | 'not-started'
-    | 'pairing'
-    | 'ongoing'
-    | 'finished'
-    | 'match-finished' {
     const matchStatus = this.props.match.getStatus()
-    const currentRound = this.props.match.getCurrentRound()
+    if (matchStatus !== MatchStatus.NotStarted) {
+      switch (this.props.match.getRoundStatus(this.props.round)) {
+        case RoundStatus.NotStarted:
+          return this.renderNotStarted()
 
-    if (matchStatus === MatchStatus.NotStarted) {
-      assert.ok(currentRound === 0, 'IMPOSSIBLE!')
-      return 'match-not-started'
-    }
+        case RoundStatus.OnGoingPairing:
+          return this.renderPairing()
 
-    if (matchStatus === MatchStatus.Finished) {
-      assert.ok(currentRound === this.props.match.getTotalRounds(), 'IMPOSSIBLE!')
-      return 'match-finished'
-    }
+        case RoundStatus.OnGoingFighting:
+          return this.renderOngoing()
 
-    if (this.props.round > currentRound) {
-      return 'not-started'
-    }
+        case RoundStatus.Finished:
+          return this.renderFinished()
 
-    if (this.props.round < currentRound) {
-      return 'finished'
-    }
-
-    if (matchStatus === MatchStatus.OnGoingPairing) {
-      return 'pairing'
+        default:
+          assert.ok(false, 'IMPOSSIBLE!')
+          return null
+      }
     } else {
-      return 'ongoing'
+      return this.renderMatchNotStarted()
     }
-  }
-
-  private renderMatchFinished() {
-    return this.renderFinished()
   }
 
   private renderFinished() {
@@ -98,17 +59,6 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
   }
 
   private renderMatchNotStarted() {
-    if (this.props.round === 1) {
-      return (
-        <div id="round-view">
-          <p className="summary">比赛还没有开始</p>
-          <Button bsStyle="primary" onClick={this.startMatch}>
-            开始比赛
-          </Button>
-        </div>
-      )
-    }
-
     return (
       <div id="round-view">
         <p className="summary">比赛还没有开始</p>
@@ -117,12 +67,7 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
   }
 
   private renderNotStarted() {
-    const currentRound = this.props.match.getCurrentRound()
-    return (
-      <p className="summary">
-        正在进行第{currentRound}轮比赛，第{this.props.round}轮比赛还没有开始
-      </p>
-    )
+    return <p className="summary">本轮比赛还没有开始</p>
   }
 
   private updateTableResult = (table: number, result: string) => {
@@ -170,10 +115,6 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
 
   private startRound = () => {
     this.props.manager.startCurrentRound(this.props.round)
-  }
-
-  private startMatch = () => {
-    this.props.manager.startMatch()
   }
 
   private endCurrentRound = () => {

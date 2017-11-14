@@ -36,8 +36,8 @@ export class MatchView extends React.Component<IMatchViewProps, IMatchViewState>
   private renderNewMatch() {
     return (
       <div id="match">
-        <Button onClick={() => sendMenuEvent('file-new')}>
-          <h2>创建比赛</h2>
+        <Button bsSize="large" className="btn btn-lg btn-primary" onClick={() => sendMenuEvent('file-new')}>
+          创建比赛
         </Button>
       </div>
     )
