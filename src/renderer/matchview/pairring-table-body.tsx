@@ -36,11 +36,11 @@ export class PairringTableBody extends React.Component<IPairringTableBodyProps, 
         <th>{row.table}</th>
         <th>{row.redPlayer.getNumber()}</th>
         <th>{row.redPlayer.getOrganization()}</th>
-        <th> </th>
+        <th>{row.redPlayer.getScore()}</th>
         <th>{row.redPlayer.getName()}</th>
         {this.renderResult(row)}
         <th>{row.blackPlayer === undefined ? '' : row.blackPlayer.getName()}</th>
-        <th> </th>
+        <th>{row.blackPlayer === undefined ? '' : row.blackPlayer.getScore()}</th>
         <th>{row.blackPlayer === undefined ? '' : row.blackPlayer.getOrganization()}</th>
         <th>{row.blackPlayer === undefined ? '' : row.blackPlayer.getNumber()}</th>
         {this.renderActions(row)}

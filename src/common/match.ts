@@ -1,7 +1,6 @@
 import { Player } from './player'
 import * as clone from 'clone'
 import * as assert from 'assert'
-import { MatchRounds } from '../renderer/matchview/match-rounds'
 
 export enum MatchStatus {
   NotStarted,
@@ -19,6 +18,9 @@ export enum RoundStatus {
 
 export const MAXIMUM_TOTAL_ROUNDS = 20
 
+/**
+ * represents the information of the game in a table
+ */
 export class GameData {
   table: number
   redPlayer: Player
@@ -38,8 +40,10 @@ export class Match {
    */
   private currentRound: number
   private status: MatchStatus
-  private roundData: GameData[][]
-  private statisticData: any
+  private matchData: GameData[][]
+  private winScore: number
+  private loseScore: number
+  private drawScore: number
 
   constructor(name: string, totalRounds: number, organizer: string = '') {
     this.name = name
@@ -48,6 +52,9 @@ export class Match {
     this.totalRounds = totalRounds
     this.currentRound = 0
     this.status = MatchStatus.NotStarted
+    this.winScore = 2
+    this.drawScore = 1
+    this.loseScore = 0
 
     if (this.totalRounds > MAXIMUM_TOTAL_ROUNDS) {
       throw new Error(`totalRounds ${this.totalRounds} is bigger than MAXIMUM_TOTAL_ROUNDS`)
@@ -104,16 +111,12 @@ export class Match {
     return RoundStatus.OnGoingFighting
   }
 
-  public getTotalRounds() {
-    return this.totalRounds
-  }
-
   public getCurrentRound() {
     return this.currentRound
   }
 
-  public getPlayers() {
-    return clone(this.players)
+  public getTotalRounds() {
+    return this.totalRounds
   }
 
   public setTotalRounds(totalRounds: number) {
@@ -145,71 +148,13 @@ export class Match {
   }
 
   /**
-   * add a player to the match
-   * @param name
-   * @param organization
+   * get the players in the match
    */
-  public addPlayer(name: string, organization: string = '') {
-    const newPlayer = new Player(this.generatePlayerNumber(), name, organization)
-    this.players.push(newPlayer)
-  }
-
-  /**
-   * generate a uniqe number for a new player.
-   */
-  private generatePlayerNumber(): number {
-    // step 1: generate an array that contains preferred numbers
-    let preferred = []
-    for (let index = 0; index <= this.players.length; index++) {
-      preferred.push(index + 1)
-    }
-    // step 2: remove the numbers that are already used by existing players
-    for (let index = 0; index < this.players.length; index++) {
-      const toBeRemoved = preferred.indexOf(this.players[index].getNumber())
-      if (toBeRemoved !== -1) {
-        preferred.splice(toBeRemoved, 1)
-      }
-    }
-    // step 3: return the smallest number of remaining preferred numbers
-    return preferred[0]
-  }
-
-  /**
-   * remove the player with number "number"
-   * @param number
-   */
-  public removePlayer(number: number) {
-    const index = this.players.findIndex(player => player.getNumber() === number)
-    if (index === -1) {
-      throw new Error(`UNEXPECTED! failed to find the player with number "${number}"`)
-    }
-    this.players.splice(index, 1)
-  }
-
-  /**
-   * remove all players
-   */
-  public removeAllPlayers() {
-    this.players = []
-  }
-
-  /**
-   * It's probably OK to not use clone, but we use it in order to be more safe.
-   * Any change should be make through the public interface, not by accessing
-   * the data directly!
-   */
-
-  /**
-   * update a player.
-   * @param number
-   * @param player
-   */
-  public updatePlayer(number: number, player: Player) {
-    const index = this.players.findIndex(player => player.getNumber() === number)
-    if (index === -1) {
-      throw new Error(`UNEXPECTED! failed to find the player with number "${number}"`)
-    }
-    this.players[index] = clone(player)
+  public getPlayers() {
+    // TODO: use clone is safe, but copying objects is time consuming!
+    // especially, when copying MANY BIG objects
+    //return clone(this.players)
+    return this.players
   }
 
   /**
@@ -238,17 +183,80 @@ export class Match {
     return clone(this.players[index])
   }
 
-  private generateStatisticData() {
-    this.statisticData = 'a'
-    console.log(this.statisticData)
+  /**
+   * add a player to the match
+   * @param name
+   * @param organization
+   */
+  public addPlayer(name: string, organization: string = '') {
+    const newPlayer = new Player(this.generatePlayerNumber(), name, organization)
+    this.players.push(newPlayer)
   }
+
+  /**
+     * update a player.
+     * @param number
+     * @param player
+     */
+  public updatePlayer(number: number, player: Player) {
+    const index = this.players.findIndex(player => player.getNumber() === number)
+    if (index === -1) {
+      throw new Error(`UNEXPECTED! failed to find the player with number "${number}"`)
+    }
+    this.players[index] = clone(player)
+  }
+
+  /**
+     * remove the player with number "number"
+     * @param number
+     */
+  public removePlayer(number: number) {
+    const index = this.players.findIndex(player => player.getNumber() === number)
+    if (index === -1) {
+      throw new Error(`UNEXPECTED! failed to find the player with number "${number}"`)
+    }
+    this.players.splice(index, 1)
+  }
+
+  /**
+   * remove all players
+   */
+  public removeAllPlayers() {
+    this.players = []
+  }
+
+  /**
+   * generate a uniqe number for a new player.
+   */
+  private generatePlayerNumber(): number {
+    // step 1: generate an array that contains preferred numbers
+    let preferred = []
+    for (let index = 0; index <= this.players.length; index++) {
+      preferred.push(index + 1)
+    }
+    // step 2: remove the numbers that are already used by existing players
+    for (let index = 0; index < this.players.length; index++) {
+      const toBeRemoved = preferred.indexOf(this.players[index].getNumber())
+      if (toBeRemoved !== -1) {
+        preferred.splice(toBeRemoved, 1)
+      }
+    }
+    // step 3: return the smallest number of remaining preferred numbers
+    return preferred[0]
+  }
+
+  /**
+   * It's probably OK to not use clone, but we use it in order to be more safe.
+   * Any change should be make through the public interface, not by accessing
+   * the data directly!
+   */
 
   public updateTableResult(round: number, table: number, result: string) {
     if (round !== this.currentRound || this.status !== MatchStatus.OnGoingFighting) {
       throw new Error('UNEXPECTED! trying to update result of a table in a wrong time!')
     }
 
-    let roundData = this.roundData[this.currentRound]
+    let roundData = this.matchData[this.currentRound]
     const index = roundData.findIndex(value => value.table === table)
     if (index === -1) {
       throw new Error('UNEXPECTED! cannot find the record of the table result!')
@@ -270,7 +278,7 @@ export class Match {
       this.status === MatchStatus.OnGoingPairing &&
         this.currentRound > 0 &&
         this.currentRound <= this.totalRounds &&
-        this.roundData.length === this.currentRound + 1,
+        this.matchData.length === this.currentRound + 1,
       'IMPOSSIBLE! something wrong when pairing!'
     )
     let numberOfPlayers = this.players.length
@@ -286,15 +294,19 @@ export class Match {
         result: undefined,
       })
     }
-    this.roundData[this.currentRound] = currentRoundData
+    this.matchData[this.currentRound] = currentRoundData
   }
 
   public getRoundData(round: number): GameData[] {
-    if (round > this.currentRound) {
-      throw new Error('UNEXPECTED! try to get data of a round that has not played')
+    if (round <= 0 || round > this.totalRounds) {
+      throw new Error('UNEXPECTED!')
     }
 
-    return clone(this.roundData[round])
+    if (round > this.currentRound) {
+      return []
+    }
+
+    return clone(this.matchData[round])
   }
 
   public start() {
@@ -302,25 +314,105 @@ export class Match {
       throw new Error('UNEXPECTED! match is already started!')
     }
     assert.ok(
-      this.totalRounds > this.currentRound && this.roundData === undefined,
+      this.totalRounds > this.currentRound && this.matchData === undefined,
       'IMPOSSIBLE! match is already started!'
     )
 
-    this.roundData = []
-    this.roundData.push([])
+    this.matchData = []
+    this.matchData.push([])
     this.gotoNextRound()
   }
 
   public endCurrentRound(currentRound: number) {
-    if (currentRound !== this.currentRound || this.status !== MatchStatus.OnGoingFighting) {
-      throw new Error('UNEXPECTED! try to end a round in a wrong time!')
+    if (
+      currentRound <= 0 ||
+      currentRound > this.totalRounds ||
+      currentRound !== this.currentRound ||
+      this.status !== MatchStatus.OnGoingFighting
+    ) {
+      throw new Error('UNEXPECTED!')
     }
 
-    // generate and save statistic data
-    this.generateStatisticData()
+    let roundData = this.matchData[this.currentRound]
+    const cannotEnd =
+      roundData.findIndex(game => game.result !== '+' && game.result !== '=' && game.result !== '-') !== -1
+    if (cannotEnd) {
+      // there's still game not finished, so we do nothing
+      return
+    }
+
+    // we copy the roundData and save it to the matchData BEFORE we update the players' data
+    this.matchData[this.currentRound] = clone(roundData)
+    // then update the scores, sides of the players according to the round result
+    this.updateRoundData(roundData)
 
     // go to next round
     this.gotoNextRound()
+  }
+
+  private updateRoundData(roundData: GameData[]) {
+    assert.ok(roundData.length != 0, 'IMPOSSIBLE! we cannot update a round without any game!')
+
+    for (let game of roundData) {
+      this.updatePlayers(game)
+    }
+  }
+
+  private updatePlayers(game: GameData) {
+    // opponents
+    this.updatePlayerOpponents(game.redPlayer, game.blackPlayer)
+    this.updatePlayerOpponents(game.blackPlayer, game.redPlayer)
+
+    // update the score
+    switch (game.result) {
+      case '+':
+        this.updatePlayerScore(game.redPlayer, this.winScore)
+        this.updatePlayerScore(game.blackPlayer, this.loseScore)
+        break
+
+      case '-':
+        this.updatePlayerScore(game.redPlayer, this.loseScore)
+        this.updatePlayerScore(game.blackPlayer, this.winScore)
+        break
+
+      case '=':
+        this.updatePlayerScore(game.redPlayer, this.drawScore)
+        this.updatePlayerScore(game.blackPlayer, this.drawScore)
+        break
+
+      default:
+        assert.ok(false, 'IMPOSSIBLE! we are updating a round that still has game unfinished!')
+    }
+
+    // red, black
+    this.updatePlayerSides(game.redPlayer, 'red')
+    this.updatePlayerSides(game.blackPlayer, 'black')
+  }
+
+  private updatePlayerScore(player: Player | undefined, gain: number) {
+    if (player) {
+      const score = player.getScore()
+      player.setScore(score + gain)
+    }
+  }
+
+  private updatePlayerSides(player: Player | undefined, side: string) {
+    if (player) {
+      let sides = player.getSides()
+      sides.push(side)
+      player.setSides(sides)
+    }
+  }
+
+  private updatePlayerOpponents(player: Player | undefined, opponent: Player | undefined) {
+    // TODO: this seems creating too many objects, make the program slow
+    // Should I only send minimal data to react objects?
+    if (player) {
+      let opponents = player.getOpponents()
+      opponents.push(opponent)
+      player.setOpponents(opponents)
+      console.log('updatePlayerOpponents()')
+    }
   }
 
   private gotoNextRound() {
@@ -330,10 +422,10 @@ export class Match {
     } else {
       this.status = MatchStatus.OnGoingPairing
       this.currentRound++
-      // the data of round n is stored in this.roundData[n], not this.roundData[n - 1]
-      // in other words, this.roundData[0] is NOT used
-      // this.roundData.length should only be changed in this function and this.start()
-      this.roundData.push([])
+      // the data of round n is stored in this.matchData[n], not this.matchData[n - 1]
+      // in other words, this.matchData[0] is NOT used
+      // this.matchData.length should only be changed in this function and this.start()
+      this.matchData.push([])
       this.pairOpponents()
     }
   }
