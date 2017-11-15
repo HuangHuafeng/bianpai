@@ -10,16 +10,30 @@ interface IMatchContentProps {
   readonly match: Match
 }
 
-interface IMatchContentState {}
+interface IMatchContentState {
+  readonly activeTab: number
+}
 
 export class MatchContent extends React.Component<IMatchContentProps, IMatchContentState> {
   constructor(props: IMatchContentProps) {
     super(props)
+
+    this.state = { activeTab: 2 }
   }
 
+  private handleSelect = (key: any) => {
+    this.setState({ activeTab: key })
+  }
+
+  /**
+   * it seems setting "animation={false}" causes the Tabs to be a uncontrolled React component
+   * Tabs with animation seems update multiple times. This requires its childrens to be smart
+   * to know when no need to render.
+   * For now, we use "animation={false}" with Tabs
+   */
   public render() {
     return (
-      <Tabs id="match-content">
+      <Tabs activeKey={this.state.activeTab} onSelect={this.handleSelect} animation={false} id="match-content">
         <Tab eventKey={1} title="比赛设置">
           Tab 1 content
         </Tab>

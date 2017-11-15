@@ -12,21 +12,23 @@ interface IMatchRoundsProps {
 
 interface IMatchRoundsState {
   readonly selectedIndex: number
+  readonly activeTab: number
 }
 
 export class MatchRounds extends React.Component<IMatchRoundsProps, IMatchRoundsState> {
   constructor(props: IMatchRoundsProps) {
     super(props)
 
-    this.state = { selectedIndex: 0 }
+    this.state = { selectedIndex: 0, activeTab: 1 }
   }
 
   private renderTabs() {
     let tabs = []
     for (let index = 0; index < this.props.match.getTotalRounds(); index++) {
+      const round = index + 1
       tabs.push(
-        <Tab key={index + 1} eventKey={index} title={'第' + (index + 1) + '轮'}>
-          <RoundView manager={this.props.manager} match={this.props.match} round={index + 1} />
+        <Tab key={round} eventKey={round} title={'第' + round + '轮'}>
+          <RoundView manager={this.props.manager} match={this.props.match} round={round} />
         </Tab>
       )
     }
@@ -82,12 +84,18 @@ export class MatchRounds extends React.Component<IMatchRoundsProps, IMatchRounds
     return null
   }
 
+  private handleSelect = (key: any) => {
+    this.setState({ activeTab: key })
+  }
+
   public render() {
     return (
       <div id="match-rounds">
         {this.renderMessage()}
         {this.renderStartMatch()}
-        <Tabs id="round-content">{this.renderTabs()}</Tabs>
+        <Tabs activeKey={this.state.activeTab} onSelect={this.handleSelect} animation={false} id="round-content">
+          {this.renderTabs()}
+        </Tabs>
       </div>
     )
   }

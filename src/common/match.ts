@@ -405,7 +405,7 @@ export class Match {
   }
 
   private updatePlayerOpponents(player: Player | undefined, opponent: Player | undefined) {
-    // TODO: this seems creating too many objects, make the program slow
+    // TODO: this seems creating too MANY BIG objects, make the program slow
     // Should I only send minimal data to react objects?
     if (player) {
       let opponents = player.getOpponents()
