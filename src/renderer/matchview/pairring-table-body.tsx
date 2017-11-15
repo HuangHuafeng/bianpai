@@ -32,7 +32,7 @@ export class PairringTableBody extends React.Component<IPairringTableBodyProps, 
 
   private renderRow(row: GameData) {
     return (
-      <tr key={'table' + row.table}>
+      <tr key={row.table}>
         <th>{row.table}</th>
         <th>{row.redPlayer.getNumber()}</th>
         <th>{row.redPlayer.getOrganization()}</th>
@@ -67,16 +67,16 @@ export class PairringTableBody extends React.Component<IPairringTableBodyProps, 
     if (this.props.updatable === true) {
       const actions = (
         <th>
-          <Button key="win" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '+')}>
+          <Button bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '+')}>
             红胜
           </Button>
-          <Button key="draw" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '=')}>
+          <Button bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '=')}>
             和棋
           </Button>
-          <Button key="lose" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '-')}>
+          <Button bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '-')}>
             黒胜
           </Button>
-          <Button key="unknown" bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '?')}>
+          <Button bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '?')}>
             未知
           </Button>
         </th>

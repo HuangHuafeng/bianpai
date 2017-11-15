@@ -25,7 +25,7 @@ export class MatchRounds extends React.Component<IMatchRoundsProps, IMatchRounds
     let tabs = []
     for (let index = 0; index < this.props.match.getTotalRounds(); index++) {
       tabs.push(
-        <Tab key={'match round ' + (index + 1)} eventKey={index} title={'第' + (index + 1) + '轮'}>
+        <Tab key={index + 1} eventKey={index} title={'第' + (index + 1) + '轮'}>
           <RoundView manager={this.props.manager} match={this.props.match} round={index + 1} />
         </Tab>
       )

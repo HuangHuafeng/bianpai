@@ -103,7 +103,7 @@ export class App extends React.Component<IAppProps, IAppState> {
   private renderEditPlayerDialog() {
     return (
       <EditPlayer
-        key="removeplayer"
+        key="editplayer"
         onDismissed={() => {
           this.onPopupDismissed(PopupType.EditPlayer)
         }}

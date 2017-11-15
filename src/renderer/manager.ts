@@ -164,14 +164,15 @@ export class Manager {
   public registerApp(app: App) {
     if (this.app === undefined) {
       this.app = app
-      this.updateAppState()
+      // probably it's not a good idea to call update app state here
+      //this.updateAppState()
     }
   }
 
   private updateAppState() {
     if (this.app !== undefined) {
       let state = { match: this.match }
-      this.app.setState(clone(state))
+      this.app.setState(state)
     }
   }
 

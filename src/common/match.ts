@@ -306,7 +306,7 @@ export class Match {
       return []
     }
 
-    return clone(this.matchData[round])
+    return this.matchData[round]
   }
 
   public start() {
