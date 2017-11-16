@@ -1,11 +1,12 @@
 import * as React from 'react'
-import { Manager } from '../manager'
-import { GameData } from '../../common/match'
 import { Button } from 'react-bootstrap'
+import { Manager } from '../manager'
+import { Round } from '../../common/immutable-round'
+import { Game } from '../../common/immutable-game'
 
 interface IPairringTableBodyProps {
   readonly manager: Manager
-  readonly roundData: GameData[]
+  readonly roundData: Round
   readonly updatable?: boolean
   readonly updateCallback?: (table: number, result: string) => void
 }
@@ -23,32 +24,32 @@ export class PairringTableBody extends React.Component<IPairringTableBodyProps, 
 
   private renderPairringTableBody() {
     let ret = []
-    for (let table of this.props.roundData) {
+    for (let table of this.props.roundData.toArray()) {
       ret.push(this.renderRow(table))
     }
 
     return ret
   }
 
-  private renderRow(row: GameData) {
+  private renderRow(row: Game) {
     return (
       <tr key={row.table}>
         <th>{row.table}</th>
-        <th>{row.redPlayer.getNumber()}</th>
-        <th>{row.redPlayer.getOrganization()}</th>
-        <th>{row.redPlayer.getScore()}</th>
-        <th>{row.redPlayer.getName()}</th>
+        <th>{row.redNumber}</th>
+        <th>{row.redNumber}</th>
+        <th>{row.redNumber}</th>
+        <th>{row.redNumber}</th>
         {this.renderResult(row)}
-        <th>{row.blackPlayer === undefined ? '' : row.blackPlayer.getName()}</th>
-        <th>{row.blackPlayer === undefined ? '' : row.blackPlayer.getScore()}</th>
-        <th>{row.blackPlayer === undefined ? '' : row.blackPlayer.getOrganization()}</th>
-        <th>{row.blackPlayer === undefined ? '' : row.blackPlayer.getNumber()}</th>
+        <th>{row.blackNumber}</th>
+        <th>{row.blackNumber}</th>
+        <th>{row.blackNumber}</th>
+        <th>{row.blackNumber}</th>
         {this.renderActions(row)}
       </tr>
     )
   }
 
-  private renderResult(row: GameData) {
+  private renderResult(row: Game) {
     let gameResult
     if (row.result === '+') {
       gameResult = '胜'
@@ -63,7 +64,7 @@ export class PairringTableBody extends React.Component<IPairringTableBodyProps, 
     return <th>{gameResult}</th>
   }
 
-  private renderActions(row: GameData) {
+  private renderActions(row: Game) {
     if (this.props.updatable === true) {
       const actions = (
         <th>

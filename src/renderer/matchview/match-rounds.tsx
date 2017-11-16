@@ -1,13 +1,13 @@
 import * as React from 'react'
 import { Manager } from '../manager'
-import { Match, MatchStatus } from '../../common/match'
+import { ImmutableMatch, MatchStatus } from '../../common/immutable-match'
 import { RoundView } from './round-view'
 import { Tabs, Tab, Button } from 'react-bootstrap'
 import * as assert from 'assert'
 
 interface IMatchRoundsProps {
   readonly manager: Manager
-  readonly match: Match
+  readonly match: ImmutableMatch
 }
 
 interface IMatchRoundsState {
@@ -24,7 +24,7 @@ export class MatchRounds extends React.Component<IMatchRoundsProps, IMatchRounds
 
   private renderTabs() {
     let tabs = []
-    for (let index = 0; index < this.props.match.getTotalRounds(); index++) {
+    for (let index = 0; index < this.props.match.totalRounds; index++) {
       const round = index + 1
       tabs.push(
         <Tab key={round} eventKey={round} title={'第' + round + '轮'}>
@@ -37,10 +37,10 @@ export class MatchRounds extends React.Component<IMatchRoundsProps, IMatchRounds
   }
 
   private renderMessage() {
-    const numberOfPlayers = this.props.match.getPlayers().length
-    const totalRounds = this.props.match.getTotalRounds()
-    const currentRound = this.props.match.getCurrentRound()
-    const matchStatus = this.props.match.getStatus()
+    const numberOfPlayers = this.props.match.players.size
+    const totalRounds = this.props.match.totalRounds
+    const currentRound = this.props.match.currentRound
+    const matchStatus = this.props.match.status
     let message = `一共有${numberOfPlayers}位选手，`
     switch (matchStatus) {
       case MatchStatus.NotStarted:
@@ -71,9 +71,9 @@ export class MatchRounds extends React.Component<IMatchRoundsProps, IMatchRounds
   }
 
   private renderStartMatch() {
-    const currentRound = this.props.match.getCurrentRound()
+    const currentRound = this.props.match.currentRound
     if (currentRound === 0) {
-      assert.ok(MatchStatus.NotStarted === this.props.match.getStatus(), 'IMPOSSIBLE!')
+      assert.ok(MatchStatus.NotStarted === this.props.match.status, 'IMPOSSIBLE!')
       return (
         <Button bsStyle="primary" onClick={this.startMatch}>
           开始比赛

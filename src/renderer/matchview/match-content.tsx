@@ -1,13 +1,14 @@
 import * as React from 'react'
 import { Manager } from '../manager'
-import { Match } from '../../common/match'
+import { ImmutableMatch } from '../../common/immutable-match'
 import { PlayerTable } from './player-table'
 import { MatchRounds } from './match-rounds'
 import { Tabs, Tab } from 'react-bootstrap'
+import { Test } from '../test'
 
 interface IMatchContentProps {
   readonly manager: Manager
-  readonly match: Match
+  readonly match: ImmutableMatch
 }
 
 interface IMatchContentState {
@@ -35,7 +36,7 @@ export class MatchContent extends React.Component<IMatchContentProps, IMatchCont
     return (
       <Tabs activeKey={this.state.activeTab} onSelect={this.handleSelect} animation={false} id="match-content">
         <Tab eventKey={1} title="比赛设置">
-          Tab 1 content
+          <Test manager={this.props.manager} match={this.props.match} />
         </Tab>
         <Tab eventKey={2} title="选手管理">
           <PlayerTable manager={this.props.manager} match={this.props.match} />

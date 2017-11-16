@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Manager } from '../manager'
-import { Match, MatchStatus, GameData, RoundStatus } from '../../common/match'
+import { ImmutableMatch, MatchStatus, RoundStatus } from '../../common/immutable-match'
+import { Round } from '../../common/immutable-round'
 import { PairringTableHeader } from './pairring-table-header'
 import { PairringTableBody } from './pairring-table-body'
 import { Button, Table } from 'react-bootstrap'
@@ -8,7 +9,7 @@ import * as assert from 'assert'
 
 interface IRoundViewProps {
   readonly manager: Manager
-  readonly match: Match
+  readonly match: ImmutableMatch
   readonly round: number
 }
 
@@ -20,7 +21,7 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
   }
 
   public render() {
-    const matchStatus = this.props.match.getStatus()
+    const matchStatus = this.props.match.status
     if (matchStatus !== MatchStatus.NotStarted) {
       switch (this.props.match.getRoundStatus(this.props.round)) {
         case RoundStatus.NotStarted:
@@ -45,7 +46,7 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
   }
 
   private renderFinished() {
-    const roundData: GameData[] = this.props.match.getRoundData(this.props.round)
+    const roundData: Round = this.props.match.getRoundData(this.props.round)
 
     return (
       <div id="round-view">
@@ -71,13 +72,12 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
   }
 
   private updateTableResult = (table: number, result: string) => {
-    this.props.manager.updateTableResult(this.props.match.getCurrentRound(), table, result)
+    this.props.manager.updateTableResult(this.props.match.currentRound, table, result)
   }
 
   private renderOngoing() {
-    const roundData: GameData[] = this.props.match.getRoundData(this.props.round)
-    const disabled =
-      roundData.findIndex(game => game.result !== '+' && game.result !== '=' && game.result !== '-') !== -1
+    const roundData: Round = this.props.match.getRoundData(this.props.round)
+    const disabled = roundData.canEnd() === false
 
     return (
       <div id="round-view">
@@ -98,7 +98,7 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
   }
 
   private renderPairing() {
-    const roundData: GameData[] = this.props.match.getRoundData(this.props.round)
+    const roundData: Round = this.props.match.getRoundData(this.props.round)
 
     return (
       <div id="round-view">

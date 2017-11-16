@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Manager } from './manager'
-import { Player } from '../common/player'
+import { Player } from '../common/immutable-player'
 import { Alert, Modal, Button, FormGroup, FormControl, ControlLabel } from 'react-bootstrap'
 
 interface IEditPlayerProps {
@@ -27,19 +27,16 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
     this.player = player
 
     this.state = {
-      number: this.player.getNumber().toString(),
-      name: this.player.getName(),
-      organization: this.player.getOrganization(),
+      number: this.player.number.toString(),
+      name: this.player.name,
+      organization: this.player.organization,
     }
   }
 
   private onOK = () => {
-    let number = this.player.getNumber()
-    this.player.setNumber(Number(this.state.number))
-    this.player.setName(this.state.name)
-    this.player.setOrganization(this.state.organization)
+    const updatedPlayer = new Player(Number(this.state.number), this.state.name, this.state.organization)
 
-    this.props.manager.updatePlayer(number, this.player)
+    this.props.manager.updatePlayer(this.player.number, updatedPlayer)
     this.props.onDismissed()
   }
 
@@ -50,16 +47,13 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
     }
 
     const match = this.props.manager.getMatch()
-    if (match === undefined) {
-      throw new Error('UNEXPECTED! match is undefined')
-    }
     const player = match.getPlayerByNumber(number)
     if (player === undefined) {
       return undefined
     }
 
-    // if the the player under editting
-    if (player.getNumber() == this.player.getNumber() && player.getName() == this.player.getName()) {
+    // if the same as the player under editting
+    if (player.number === this.player.number && player.name == this.player.name) {
       return undefined
     }
 
@@ -76,8 +70,8 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
       return undefined
     }
 
-    // if the the player under editting
-    if (player.getNumber() == this.player.getNumber() && player.getName() == this.player.getName()) {
+    // if the same as the player under editting
+    if (player.number === this.player.number && player.name == this.player.name) {
       return undefined
     }
 
@@ -130,16 +124,16 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
 
     return (
       <Alert bsStyle="warning">
-        编号或姓名有冲突：已存在编号为"{player.getNumber()}"，姓名为"{player.getName()}"的选手
+        编号或姓名有冲突：已存在编号为"{player.number}"，姓名为"{player.name}"的选手
       </Alert>
     )
   }
 
   private isChanged(): boolean {
     return (
-      this.state.name !== this.player.getName() ||
-      this.state.organization !== this.player.getOrganization() ||
-      this.state.number !== this.player.getNumber().toString()
+      this.state.name !== this.player.name ||
+      this.state.organization !== this.player.organization ||
+      this.state.number !== this.player.number.toString()
     )
   }
 

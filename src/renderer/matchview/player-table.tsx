@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Manager } from '../manager'
-import { Match } from '../../common/match'
+import { ImmutableMatch } from '../../common/immutable-match'
 import { PlayerTableHeader } from './player-table-header'
 import { PlayerTableBody } from './player-table-body'
 import { sendMenuEvent } from '../../common/menu-event'
@@ -8,7 +8,7 @@ import { Button, Table } from 'react-bootstrap'
 
 interface IPlayerTableProps {
   readonly manager: Manager
-  readonly match: Match
+  readonly match: ImmutableMatch
 }
 
 interface IPlayerTableState {}
@@ -19,7 +19,7 @@ export class PlayerTable extends React.Component<IPlayerTableProps, IPlayerTable
   }
 
   public render() {
-    const numberOfPlayers = this.props.match.getPlayers().length
+    const numberOfPlayers = this.props.match.players.size
 
     return (
       <div id="players">

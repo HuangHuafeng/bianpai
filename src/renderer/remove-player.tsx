@@ -20,7 +20,7 @@ export class RemovePlayer extends React.Component<IRemovePlayerProps, IRemovePla
       throw new Error('UNEXPECTED! there is no player to be removed!')
     }
 
-    this.props.manager.removePlayerConfirmed(player.getNumber())
+    this.props.manager.removePlayerConfirmed(player.number)
     this.props.onDismissed()
   }
 
@@ -34,11 +34,11 @@ export class RemovePlayer extends React.Component<IRemovePlayerProps, IRemovePla
       <Modal show={true} onHide={this.props.onDismissed} backdrop="static">
         <Modal.Body>
           <h4>确定删除这位选手吗？</h4>
-          编号：{player.getNumber().toString()}
+          编号：{player.number.toString()}
           <br />
-          姓名：{player.getName()}
+          姓名：{player.name}
           <br />
-          单位：{player.getOrganization()}
+          单位：{player.organization}
           <br />
         </Modal.Body>
         <Modal.Footer>

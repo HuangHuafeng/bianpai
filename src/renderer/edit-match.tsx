@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { Manager } from './manager'
-import { Match } from '../common/match'
+import { ImmutableMatch } from '../common/immutable-match'
 import { Alert, Modal, Button, FormGroup, FormControl, ControlLabel } from 'react-bootstrap'
 
 interface IEditMatchProps {
   readonly manager: Manager
-  readonly match: Match
+  readonly match: ImmutableMatch
   readonly onDismissed: () => void
 }
 
@@ -16,7 +16,7 @@ interface IEditMatchState {
 }
 
 export class EditMatch extends React.Component<IEditMatchProps, IEditMatchState> {
-  private match: Match
+  private match: ImmutableMatch
 
   constructor(props: IEditMatchProps) {
     super(props)
@@ -28,9 +28,9 @@ export class EditMatch extends React.Component<IEditMatchProps, IEditMatchState>
     this.match = match
 
     this.state = {
-      name: this.match.getName(),
-      organizer: this.match.getOrganizer(),
-      totalRounds: this.props.match.getTotalRounds() ? this.props.match.getTotalRounds().toString() : '',
+      name: this.match.name,
+      organizer: this.match.organizer,
+      totalRounds: this.props.match.totalRounds ? this.props.match.totalRounds.toString() : '',
     }
   }
 

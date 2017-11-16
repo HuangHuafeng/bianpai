@@ -1,12 +1,12 @@
 import * as React from 'react'
 import { Manager } from '../manager'
-import { Match } from '../../common/match'
-import { Player } from '../../common/player'
+import { ImmutableMatch } from '../../common/immutable-match'
+import { Player } from '../../common/immutable-player'
 import { Button } from 'react-bootstrap'
 
 interface IPlayerTableBodyProps {
   readonly manager: Manager
-  readonly match: Match
+  readonly match: ImmutableMatch
 }
 
 interface IPlayerTableBodyState {}
@@ -21,7 +21,7 @@ export class PlayerTableBody extends React.Component<IPlayerTableBodyProps, IPla
   }
 
   private renderPlayerTableBody() {
-    const players = this.props.match.getPlayers()
+    const players = this.props.match.players.toArray()
     let ret: any[] = []
     for (let player of players) {
       ret.push(this.renderAPlayer(player))
@@ -39,15 +39,15 @@ export class PlayerTableBody extends React.Component<IPlayerTableBodyProps, IPla
 
   private renderAPlayer(player: Player) {
     return (
-      <tr key={player.getNumber()}>
-        <th>{player.getNumber()}</th>
-        <th>{player.getName()}</th>
-        <th>{player.getOrganization()}</th>
+      <tr key={player.number}>
+        <th>{player.number}</th>
+        <th>{player.name}</th>
+        <th>{player.organization}</th>
         <th>
-          <Button bsSize="xsmall" onClick={() => this.editPlayer(player.getNumber())}>
+          <Button bsSize="xsmall" onClick={() => this.editPlayer(player.number)}>
             编辑
           </Button>
-          <Button bsSize="xsmall" bsStyle="danger" onClick={() => this.removePlayer(player.getNumber())}>
+          <Button bsSize="xsmall" bsStyle="danger" onClick={() => this.removePlayer(player.number)}>
             删除
           </Button>
         </th>

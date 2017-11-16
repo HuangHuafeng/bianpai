@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { Manager } from '../manager'
-import { Match } from '../../common/match'
+import { ImmutableMatch } from '../../common/immutable-match'
 
 interface IMatchFooterProps {
   readonly manager: Manager
-  readonly match: Match
+  readonly match: ImmutableMatch
 }
 
 interface IMatchFooterState {}

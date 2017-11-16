@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { Manager } from '../manager'
-import { Match } from '../../common/match'
+import { ImmutableMatch } from '../../common/immutable-match'
 
 interface IMatchHeaderProps {
   readonly manager: Manager
-  readonly match: Match
+  readonly match: ImmutableMatch
 }
 
 interface IMatchHeaderState {}
@@ -17,8 +17,8 @@ export class MatchHeader extends React.Component<IMatchHeaderProps, IMatchHeader
   public render() {
     return (
       <div id="match-header">
-        <h1>{this.props.match.getName()}</h1>
-        <h3>{this.props.match.getOrganizer()}</h3>
+        <h1>{this.props.match.name}</h1>
+        <h3>{this.props.match.organizer}</h3>
       </div>
     )
   }

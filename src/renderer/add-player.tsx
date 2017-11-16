@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Manager } from './manager'
-import { Player } from '../common/player'
+import { Player } from '../common/immutable-player'
 import { Alert, Modal, Button, FormGroup, FormControl, ControlLabel } from 'react-bootstrap'
 
 interface IAddPlayerProps {
@@ -65,7 +65,7 @@ export class AddPlayer extends React.Component<IAddPlayerProps, IAddPlayerState>
 
     return (
       <Alert bsStyle="warning">
-        姓名有冲突：已存在编号为"{player.getNumber()}"，姓名为"{player.getName()}"的选手
+        姓名有冲突：已存在编号为"{player.number}"，姓名为"{player.name}"的选手
       </Alert>
     )
   }

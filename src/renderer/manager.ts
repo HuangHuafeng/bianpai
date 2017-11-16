@@ -9,9 +9,10 @@
 
 import { App } from './app'
 import * as assert from 'assert'
-import { Match, MAXIMUM_TOTAL_ROUNDS } from '../common/match'
 import * as clone from 'clone'
-import { Player } from '../common/player'
+import { Player } from '../common/immutable-player'
+import { MatchStore } from './match-store'
+import { ImmutableMatch, MAXIMUM_TOTAL_ROUNDS } from '../common/immutable-match'
 
 export enum PopupType {
   About = 1,
@@ -26,23 +27,20 @@ export enum PopupType {
 export class Manager {
   private openDialogs: PopupType[]
   private app?: App
-  private match?: Match
+  private matchStore: MatchStore
   private playerToDeleteOrEdit: number | undefined
 
   constructor() {
     this.openDialogs = []
+    this.matchStore = new MatchStore()
   }
 
-  public getMatch(): Match | undefined {
-    if (this.match) {
-      return clone(this.match)
-    }
-
-    return undefined
+  public getMatch(): ImmutableMatch {
+    return this.matchStore.getMatch()
   }
 
-  public updateMatch(match: Match) {
-    this.match = clone(match)
+  public updateMatch(match: ImmutableMatch) {
+    // TODO
   }
 
   public getOpenDialogs() {
@@ -58,10 +56,7 @@ export class Manager {
    */
   public getPlayerToDeleteOrEdit(): Player | undefined {
     if (this.playerToDeleteOrEdit !== undefined) {
-      if (this.match === undefined) {
-        throw new Error('UNEXPECTED! match is undefined')
-      }
-      return this.match.getPlayerByNumber(this.playerToDeleteOrEdit)
+      return this.matchStore.getMatch().getPlayerByNumber(this.playerToDeleteOrEdit)
     }
 
     return undefined
@@ -73,10 +68,10 @@ export class Manager {
    * @param player
    */
   public updatePlayer(number: number, player: Player) {
-    if (this.match === undefined || number !== this.playerToDeleteOrEdit) {
-      throw new Error('UNEXPECTED! match is undefined')
+    if (number !== this.playerToDeleteOrEdit) {
+      throw new Error('UNEXPECTED! playerToDeleteOrEdit is undefined')
     }
-    this.match.updatePlayer(number, player)
+    this.matchStore.updatePlayer(number, player)
   }
 
   /**
@@ -146,14 +141,16 @@ export class Manager {
 
   /**
    * create a new match and then work on the new match
-   * @param match the new Match
+   * @param match the new ImmutableMatch
    */
   public newMatch(name: string, totalRounds: number, organizer: string = '') {
-    if (this.match) {
+    if (true) {
       // do somethign with the current match?
     }
 
-    this.match = new Match(name, totalRounds, organizer)
+    this.matchStore.setName(name)
+    this.matchStore.setTotalRounds(totalRounds)
+    this.matchStore.setOrganizer(organizer)
     this.updateAppState()
   }
 
@@ -171,19 +168,17 @@ export class Manager {
 
   private updateAppState() {
     if (this.app !== undefined) {
-      let state = { match: this.match }
+      let state = { match: this.matchStore.getMatch() }
       this.app.setState(state)
     }
   }
 
   /**
    * create a new match and then work on the new match
-   * @param match the new Match
+   * @param match the new ImmutableMatch
    */
   public addPlayer(name: string, organization: string = '') {
-    if (this.match) {
-      this.match.addPlayer(name, organization)
-    }
+    this.matchStore.addPlayer(name, organization)
 
     this.updateAppState()
   }
@@ -201,11 +196,11 @@ export class Manager {
    * @param number
    */
   public removePlayerConfirmed(number: number) {
-    if (this.match === undefined || number !== this.playerToDeleteOrEdit) {
-      throw new Error('UNEXPECTED! match is undefined')
+    if (number !== this.playerToDeleteOrEdit) {
+      throw new Error('UNEXPECTED! number does NOT equal to playerToDeleteOrEdit.')
     }
 
-    this.match.removePlayer(number)
+    this.matchStore.removePlayer(number)
     this.updateAppState()
   }
 
@@ -225,47 +220,28 @@ export class Manager {
    * remove all players. this is after user confirmation!
    */
   public removeAllPlayersConfirmed() {
-    if (this.match === undefined) {
-      throw new Error('UNEXPECTED! match is undefined')
-    }
-
-    this.match.removeAllPlayers()
+    this.matchStore.removeAllPlayers()
     this.updateAppState()
   }
 
   public startCurrentRound(currentRound: number) {
-    if (this.match === undefined) {
-      throw new Error('UNEXPECTED! match is undefined')
-    }
-
-    this.match.startCurrentRound(currentRound)
+    this.matchStore.startCurrentRound(currentRound)
     this.updateAppState()
   }
 
   public updateTableResult(round: number, table: number, result: string) {
-    if (this.match === undefined) {
-      throw new Error('UNEXPECTED! match is undefined')
-    }
-
-    this.match.updateTableResult(round, table, result)
+    this.matchStore.updateTableResult(round, table, result)
     this.updateAppState()
   }
 
   public startMatch() {
-    if (this.match === undefined) {
-      throw new Error('UNEXPECTED! match is undefined')
-    }
-
-    this.match.start()
+    this.matchStore.start()
     this.updateAppState()
   }
 
   public endCurrentRound() {
-    if (this.match === undefined) {
-      throw new Error('UNEXPECTED! match is undefined')
-    }
-
-    this.match.endCurrentRound(this.match.getCurrentRound())
+    const currentRound = this.matchStore.getMatch().currentRound
+    this.matchStore.endCurrentRound(currentRound)
     this.updateAppState()
   }
 }
