@@ -158,10 +158,15 @@ export class ImmutableMatch extends MatchBase {
   }
 
   public addPlayer(name: string, organization: string = ''): this {
+    if (this.disallowUpdatePlayers()) {
+      return this
+    }
+
     const newPlayer = new Player(this.generatePlayerNumber(), name, organization)
 
     let players = this.players.push(newPlayer)
-    return this.set('players', players) as this
+    const tempMatch = this.set('players', players) as this
+    return tempMatch.playersUpdated()
   }
 
   /**
@@ -170,13 +175,18 @@ export class ImmutableMatch extends MatchBase {
      * @param player
      */
   public updatePlayer(number: number, player: Player): this {
+    if (this.disallowUpdatePlayers()) {
+      return this
+    }
+
     const index = this.players.findIndex(v => (v ? v.number === number : false))
     if (index === -1) {
       throw new Error(`UNEXPECTED! failed to find the player with number "${number}"`)
     }
 
     const players = this.players.set(index, player)
-    return this.set('players', players) as this
+    const tempMatch = this.set('players', players) as this
+    return tempMatch.playersUpdated()
   }
 
   /**
@@ -184,20 +194,52 @@ export class ImmutableMatch extends MatchBase {
      * @param number
      */
   public removePlayer(number: number): this {
+    if (this.disallowUpdatePlayers()) {
+      return this
+    }
+
     const index = this.players.findIndex(v => (v ? v.number === number : false))
     if (index === -1) {
       throw new Error(`UNEXPECTED! failed to find the player with number "${number}"`)
     }
 
     let players = this.players.remove(index)
-    return this.set('players', players) as this
+    const tempMatch = this.set('players', players) as this
+    return tempMatch.playersUpdated()
+  }
+
+  private playersUpdated(): this {
+    // it's not allowed to add/remove/modify player when the players are fighting
+    assert.ok(this.disallowUpdatePlayers() === false, 'IMPOSSIBLE!')
+
+    // if match is not started or already finished, nothing to do
+    if (this.status === MatchStatus.NotStarted || this.status === MatchStatus.Finished) {
+      return this
+    }
+
+    assert.ok(this.status === MatchStatus.OnGoingPairing, 'IMPOSSIBLE!')
+    // re-pairing the opponents
+    return this.pairOpponents()
+  }
+
+  public disallowUpdatePlayers(): boolean {
+    if (this.status === MatchStatus.Finished || this.status === MatchStatus.OnGoingFighting) {
+      return true
+    }
+
+    return false
   }
 
   /**
    * remove all players
    */
   public removeAllPlayers(): this {
-    return this.set('players', Immutable.List()) as this
+    if (this.disallowUpdatePlayers()) {
+      return this
+    }
+
+    const tempMatch = this.set('players', Immutable.List()) as this
+    return tempMatch.playersUpdated()
   }
 
   public updateTableResult(round: number, table: number, result: string): this {
@@ -236,8 +278,6 @@ export class ImmutableMatch extends MatchBase {
     } else {
       let tempMatch = this.set('status', MatchStatus.OnGoingPairing) as this
       tempMatch = tempMatch.set('currentRound', tempMatch.currentRound + 1) as this
-
-      // the data of round n is stored in this.matchData[n - 1]
       return tempMatch.pairOpponents()
     }
   }
@@ -261,7 +301,7 @@ export class ImmutableMatch extends MatchBase {
     }
     let currentRoundData: Round = new Round(this.currentRound)
     for (let index = 0; index < players.size; index += 2) {
-      const game = new Game((index + 2) / 2, players.get(index).number, players.get(index + 1).number)
+      const game = new Game((index + 2) / 2, players.get(index), players.get(index + 1))
       currentRoundData = currentRoundData.addGame(game)
     }
     let matchData = this.matchData.set(this.currentRound - 1, currentRoundData)
@@ -285,13 +325,62 @@ export class ImmutableMatch extends MatchBase {
     }
 
     // then update the scores, sides of the players according to the round result
-    this.updateRoundData()
+    let tempPlayers = this.updatePlayersScore(roundData)
+    const tempMatch = this.set('players', tempPlayers) as this
 
     // go to next round
-    return this.gotoNextRound()
+    return tempMatch.gotoNextRound()
   }
 
-  private updateRoundData() {
-    // to update later
+  private updatePlayersScore(roundData: Round): Immutable.List<Player> {
+    let tempPlayers = this.players
+    roundData.games.forEach(game => {
+      if (game) {
+        let redDiff, blackDiff
+        switch (game.result) {
+          case '+':
+            redDiff = this.winScore
+            blackDiff = this.loseScore
+            break
+
+          case '-':
+            redDiff = this.loseScore
+            blackDiff = this.winScore
+            break
+
+          case '=':
+            redDiff = this.drawScore
+            blackDiff = this.drawScore
+            break
+
+          default:
+            throw new Error('IMPOSSIBLE! game is not finished!')
+        }
+
+        // update the red player if not a fake player
+        if (game.redPlayer.number !== 0) {
+          const updatedRedPlayer = game.redPlayer.setScore(game.redPlayer.score + redDiff)
+          const redPlayerIndex = tempPlayers.findIndex(v => (v ? v.number === updatedRedPlayer.number : false))
+          if (redPlayerIndex === -1) {
+            throw new Error(`IMPOSSIBLE! failed to find the player with number "${updatedRedPlayer.number}"`)
+          }
+          tempPlayers = tempPlayers.set(redPlayerIndex, updatedRedPlayer)
+        }
+
+        // update the black player if not a fake player
+        if (game.blackPlayer.number !== 0) {
+          const updatedBlackPlayer = game.blackPlayer.setScore(game.blackPlayer.score + blackDiff)
+          const blackPlayerIndex = tempPlayers.findIndex(v => (v ? v.number === updatedBlackPlayer.number : false))
+          if (blackPlayerIndex === -1) {
+            throw new Error(`IMPOSSIBLE! failed to find the player with number "${updatedBlackPlayer.number}"`)
+          }
+          tempPlayers = tempPlayers.set(blackPlayerIndex, updatedBlackPlayer)
+        }
+      } else {
+        throw new Error('IMPOSSIBLE! game is undefined!')
+      }
+    })
+
+    return tempPlayers
   }
 }

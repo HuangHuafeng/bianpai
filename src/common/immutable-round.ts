@@ -18,10 +18,10 @@ export class Round extends RoundRecord {
     const index = this.games.findIndex(v => {
       return v
         ? v.table === game.table ||
-            v.redNumber === game.redNumber ||
-            v.redNumber === game.blackNumber ||
-            v.blackNumber === game.redNumber ||
-            v.blackNumber === game.blackNumber
+            v.redPlayer === game.redPlayer ||
+            v.redPlayer === game.blackPlayer ||
+            v.blackPlayer === game.redPlayer ||
+            v.blackPlayer === game.blackPlayer
         : false
     })
     if (index !== -1) {
@@ -38,8 +38,8 @@ export class Round extends RoundRecord {
       throw new Error(`UNEXPECTED! try to add a game that does not exit in the round`)
     }
 
-    const gameToRemove = this.games.get(index)
-    const newgame = new Game(table, gameToRemove.redNumber, gameToRemove.blackNumber, result)
+    const gameToReplace = this.games.get(index)
+    const newgame = new Game(table, gameToReplace.redPlayer, gameToReplace.blackPlayer, result)
     const games = this.games.set(index, newgame)
     return this.set('games', games) as this
   }

@@ -1,12 +1,10 @@
 import * as React from 'react'
 import { Button } from 'react-bootstrap'
-import { ImmutableMatch } from '../../common/immutable-match'
 import { Round } from '../../common/immutable-round'
 import { Game } from '../../common/immutable-game'
 
 interface IPairringTableBodyProps {
   readonly roundData: Round
-  readonly match: ImmutableMatch
   readonly updatable?: boolean
   readonly updateCallback?: (table: number, result: string) => void
 }
@@ -24,8 +22,8 @@ export class PairringTableBody extends React.PureComponent<IPairringTableBodyPro
 
   private renderPairringTableBody() {
     let ret: any[] = []
-    this.props.roundData.games.forEach(table => {
-      ret.push(this.renderRow(table))
+    this.props.roundData.games.forEach(game => {
+      ret.push(this.renderRow(game))
     })
 
     return ret
@@ -33,20 +31,18 @@ export class PairringTableBody extends React.PureComponent<IPairringTableBodyPro
 
   private renderRow(row: Game | undefined) {
     if (row) {
-      const redPlayer = this.props.match.getPlayerByNumber(row.redNumber)
-      const blackPlayer = this.props.match.getPlayerByNumber(row.blackNumber)
       return (
-        <tr key={row.table.toString() + row.redNumber + row.blackNumber}>
+        <tr key={row.table.toString() + row.redPlayer.name + row.blackPlayer.name}>
           <th>{row.table}</th>
-          <th>{row.redNumber}</th>
-          <th>{redPlayer ? redPlayer.organization : ''}</th>
-          <th>{redPlayer ? '' : ''}</th>
-          <th>{redPlayer ? redPlayer.name : ''}</th>
+          <th>{row.redPlayer.number}</th>
+          <th>{row.redPlayer.organization}</th>
+          <th>{row.redPlayer.score}</th>
+          <th>{row.redPlayer.name}</th>
           {this.renderResult(row)}
-          <th>{blackPlayer ? blackPlayer.name : ''}</th>
-          <th>{blackPlayer ? '' : ''}</th>
-          <th>{blackPlayer ? blackPlayer.organization : ''}</th>
-          <th>{row.blackNumber}</th>
+          <th>{row.blackPlayer.name}</th>
+          <th>{row.blackPlayer.score}</th>
+          <th>{row.blackPlayer.organization}</th>
+          <th>{row.blackPlayer.number}</th>
           {this.renderActions(row)}
         </tr>
       )

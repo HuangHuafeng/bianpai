@@ -9,7 +9,6 @@
 
 import { App } from './app'
 import * as assert from 'assert'
-import * as clone from 'clone'
 import { Player } from '../common/immutable-player'
 import { MatchStore } from './match-store'
 import { ImmutableMatch, MAXIMUM_TOTAL_ROUNDS } from '../common/immutable-match'
@@ -44,7 +43,7 @@ export class Manager {
   }
 
   public getOpenDialogs() {
-    return clone(this.openDialogs)
+    return this.openDialogs
   }
 
   public getMaximumTotalRounds() {
@@ -148,9 +147,7 @@ export class Manager {
       // do somethign with the current match?
     }
 
-    this.matchStore.setName(name)
-    this.matchStore.setTotalRounds(totalRounds)
-    this.matchStore.setOrganizer(organizer)
+    this.matchStore.newMatch(name, totalRounds, organizer)
     this.updateAppState()
   }
 

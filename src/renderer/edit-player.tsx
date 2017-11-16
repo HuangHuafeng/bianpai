@@ -34,8 +34,9 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
   }
 
   private onOK = () => {
-    const updatedPlayer = new Player(Number(this.state.number), this.state.name, this.state.organization)
-
+    let updatedPlayer = this.player.setName(this.state.name)
+    updatedPlayer = updatedPlayer.setNumber(Number(this.state.number))
+    updatedPlayer = updatedPlayer.setOrganization(this.state.organization)
     this.props.manager.updatePlayer(this.player.number, updatedPlayer)
     this.props.onDismissed()
   }

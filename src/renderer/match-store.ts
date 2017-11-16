@@ -8,15 +8,14 @@ export class MatchStore {
     this.match = new ImmutableMatch()
 
     if (__DEV__) {
-      this.generateSomeDevData()
+      this.setName('2017年全国象棋锦标赛(个人)')
+      this.setOrganizer('国家体育总局棋牌运动管理中心、中国象棋协会')
+      this.setTotalRounds(7)
+      this.generateSomeDevPlayers()
     }
   }
 
-  private generateSomeDevData() {
-    this.setName('2017年全国象棋锦标赛(个人)')
-    this.setOrganizer('国家体育总局棋牌运动管理中心、中国象棋协会')
-    this.setTotalRounds(7)
-
+  private generateSomeDevPlayers() {
     this.addPlayer('赵子雨', '湖北棋牌运动管理中心')
     this.addPlayer('崔革', '黑龙江省棋牌管理中心')
     this.addPlayer('鲁天', '江苏棋院')
@@ -35,6 +34,17 @@ export class MatchStore {
 
   public getMatch() {
     return this.match
+  }
+
+  public newMatch(name: string, totalRounds: number, organizer: string = '') {
+    this.match = new ImmutableMatch()
+    this.setName(name)
+    this.setTotalRounds(totalRounds)
+    this.setOrganizer(organizer)
+
+    if (__DEV__) {
+      this.generateSomeDevPlayers()
+    }
   }
 
   public setName(name: string) {

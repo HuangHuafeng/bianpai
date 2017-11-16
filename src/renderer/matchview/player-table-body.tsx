@@ -44,10 +44,19 @@ export class PlayerTableBody extends React.PureComponent<IPlayerTableBodyProps, 
         <th>{player.name}</th>
         <th>{player.organization}</th>
         <th>
-          <Button bsSize="xsmall" onClick={() => this.editPlayer(player.number)}>
+          <Button
+            bsSize="xsmall"
+            onClick={() => this.editPlayer(player.number)}
+            disabled={this.props.match.disallowUpdatePlayers()}
+          >
             编辑
           </Button>
-          <Button bsSize="xsmall" bsStyle="danger" onClick={() => this.removePlayer(player.number)}>
+          <Button
+            bsSize="xsmall"
+            bsStyle="danger"
+            onClick={() => this.removePlayer(player.number)}
+            disabled={this.props.match.disallowUpdatePlayers()}
+          >
             删除
           </Button>
         </th>

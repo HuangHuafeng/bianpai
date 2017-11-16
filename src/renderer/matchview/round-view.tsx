@@ -53,7 +53,7 @@ export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewSt
         <p className="summary">本轮比赛已经结束</p>
         <Table striped bordered condensed hover responsive>
           <PairringTableHeader />
-          <PairringTableBody match={this.props.match} roundData={roundData} />
+          <PairringTableBody roundData={roundData} />
         </Table>
       </div>
     )
@@ -86,12 +86,7 @@ export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewSt
         </Button>
         <Table striped bordered condensed hover responsive>
           <PairringTableHeader updatable={true} />
-          <PairringTableBody
-            roundData={roundData}
-            match={this.props.match}
-            updatable={true}
-            updateCallback={this.updateTableResult}
-          />
+          <PairringTableBody roundData={roundData} updatable={true} updateCallback={this.updateTableResult} />
         </Table>
       </div>
     )
@@ -107,7 +102,7 @@ export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewSt
         </Button>
         <Table striped bordered condensed hover responsive>
           <PairringTableHeader />
-          <PairringTableBody match={this.props.match} roundData={roundData} />
+          <PairringTableBody roundData={roundData} />
         </Table>
       </div>
     )
