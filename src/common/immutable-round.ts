@@ -40,12 +40,11 @@ export class Round extends RoundRecord {
 
     const gameToRemove = this.games.get(index)
     const newgame = new Game(table, gameToRemove.redNumber, gameToRemove.blackNumber, result)
-    let games = this.games.remove(index)
-    games = games.push(newgame)
+    const games = this.games.set(index, newgame)
     return this.set('games', games) as this
   }
 
   public canEnd(): boolean {
-    return this.games.findIndex(v => (v ? v.result !== '+' && v.result !== '=' && v.result !== '-' : false)) !== -1
+    return this.games.findIndex(v => (v ? v.result !== '+' && v.result !== '=' && v.result !== '-' : false)) === -1
   }
 }

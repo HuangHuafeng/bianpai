@@ -15,7 +15,7 @@ interface IRoundViewProps {
 
 interface IRoundViewState {}
 
-export class RoundView extends React.Component<IRoundViewProps, IRoundViewState> {
+export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewState> {
   constructor(props: IRoundViewProps) {
     super(props)
   }
@@ -52,8 +52,8 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
       <div id="round-view">
         <p className="summary">本轮比赛已经结束</p>
         <Table striped bordered condensed hover responsive>
-          <PairringTableHeader manager={this.props.manager} />
-          <PairringTableBody manager={this.props.manager} roundData={roundData} />
+          <PairringTableHeader />
+          <PairringTableBody match={this.props.match} roundData={roundData} />
         </Table>
       </div>
     )
@@ -85,10 +85,10 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
           结束本轮比赛
         </Button>
         <Table striped bordered condensed hover responsive>
-          <PairringTableHeader manager={this.props.manager} updatable={true} />
+          <PairringTableHeader updatable={true} />
           <PairringTableBody
-            manager={this.props.manager}
             roundData={roundData}
+            match={this.props.match}
             updatable={true}
             updateCallback={this.updateTableResult}
           />
@@ -106,8 +106,8 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
           开始本轮比赛
         </Button>
         <Table striped bordered condensed hover responsive>
-          <PairringTableHeader manager={this.props.manager} />
-          <PairringTableBody manager={this.props.manager} roundData={roundData} />
+          <PairringTableHeader />
+          <PairringTableBody match={this.props.match} roundData={roundData} />
         </Table>
       </div>
     )

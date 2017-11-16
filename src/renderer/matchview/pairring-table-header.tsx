@@ -1,14 +1,12 @@
 import * as React from 'react'
-import { Manager } from '../manager'
 
 interface IPairringTableHeaderProps {
-  readonly manager: Manager
   readonly updatable?: boolean
 }
 
 interface IPairringTableHeaderState {}
 
-export class PairringTableHeader extends React.Component<IPairringTableHeaderProps, IPairringTableHeaderState> {
+export class PairringTableHeader extends React.PureComponent<IPairringTableHeaderProps, IPairringTableHeaderState> {
   constructor(props: IPairringTableHeaderProps) {
     super(props)
   }

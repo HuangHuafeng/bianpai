@@ -9,12 +9,12 @@ import { Button } from 'react-bootstrap'
 
 interface IMatchViewProps {
   readonly manager: Manager
-  readonly match?: ImmutableMatch
+  readonly match: ImmutableMatch
 }
 
 interface IMatchViewState {}
 
-export class MatchView extends React.Component<IMatchViewProps, IMatchViewState> {
+export class MatchView extends React.PureComponent<IMatchViewProps, IMatchViewState> {
   constructor(props: IMatchViewProps) {
     super(props)
   }

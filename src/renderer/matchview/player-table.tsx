@@ -13,7 +13,7 @@ interface IPlayerTableProps {
 
 interface IPlayerTableState {}
 
-export class PlayerTable extends React.Component<IPlayerTableProps, IPlayerTableState> {
+export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerTableState> {
   constructor(props: IPlayerTableProps) {
     super(props)
   }
@@ -32,7 +32,7 @@ export class PlayerTable extends React.Component<IPlayerTableProps, IPlayerTable
         </div>
         <div id="players-list">
           <Table striped bordered condensed hover responsive>
-            <PlayerTableHeader manager={this.props.manager} />
+            <PlayerTableHeader />
             <PlayerTableBody manager={this.props.manager} match={this.props.match} />
           </Table>
         </div>

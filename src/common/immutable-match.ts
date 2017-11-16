@@ -175,8 +175,7 @@ export class ImmutableMatch extends MatchBase {
       throw new Error(`UNEXPECTED! failed to find the player with number "${number}"`)
     }
 
-    let players = this.players.remove(index)
-    players = players.push(player)
+    const players = this.players.set(index, player)
     return this.set('players', players) as this
   }
 
@@ -244,17 +243,25 @@ export class ImmutableMatch extends MatchBase {
   }
 
   private pairOpponents(): this {
+    return this.pairOpponentsV1()
+  }
+
+  /**
+   * the simplest pairing: 1&2, 3&4, ...
+   */
+  private pairOpponentsV1(): this {
     assert.ok(
       this.status === MatchStatus.OnGoingPairing && this.currentRound > 0 && this.currentRound <= this.totalRounds,
       'IMPOSSIBLE! something wrong when pairing!'
     )
-    let numberOfPlayers = this.players.size
-    if (numberOfPlayers % 2) {
-      numberOfPlayers += 1
+    let players = this.players
+    if (this.players.size % 2) {
+      const fakePlayer = new Player(0, '轮空')
+      players = players.push(fakePlayer)
     }
     let currentRoundData: Round = new Round(this.currentRound)
-    for (let index = 0; index < numberOfPlayers; index += 2) {
-      const game = new Game((index + 2) / 2, this.players.get(index).number, this.players.get(index + 1).number)
+    for (let index = 0; index < players.size; index += 2) {
+      const game = new Game((index + 2) / 2, players.get(index).number, players.get(index + 1).number)
       currentRoundData = currentRoundData.addGame(game)
     }
     let matchData = this.matchData.set(this.currentRound - 1, currentRoundData)

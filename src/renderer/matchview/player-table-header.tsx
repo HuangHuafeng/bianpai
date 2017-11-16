@@ -1,13 +1,10 @@
 import * as React from 'react'
-import { Manager } from '../manager'
 
-interface IPlayerTableHeaderProps {
-  readonly manager: Manager
-}
+interface IPlayerTableHeaderProps {}
 
 interface IPlayerTableHeaderState {}
 
-export class PlayerTableHeader extends React.Component<IPlayerTableHeaderProps, IPlayerTableHeaderState> {
+export class PlayerTableHeader extends React.PureComponent<IPlayerTableHeaderProps, IPlayerTableHeaderState> {
   constructor(props: IPlayerTableHeaderProps) {
     super(props)
   }

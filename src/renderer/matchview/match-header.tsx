@@ -9,7 +9,7 @@ interface IMatchHeaderProps {
 
 interface IMatchHeaderState {}
 
-export class MatchHeader extends React.Component<IMatchHeaderProps, IMatchHeaderState> {
+export class MatchHeader extends React.PureComponent<IMatchHeaderProps, IMatchHeaderState> {
   constructor(props: IMatchHeaderProps) {
     super(props)
   }

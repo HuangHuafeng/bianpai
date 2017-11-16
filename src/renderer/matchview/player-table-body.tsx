@@ -11,7 +11,7 @@ interface IPlayerTableBodyProps {
 
 interface IPlayerTableBodyState {}
 
-export class PlayerTableBody extends React.Component<IPlayerTableBodyProps, IPlayerTableBodyState> {
+export class PlayerTableBody extends React.PureComponent<IPlayerTableBodyProps, IPlayerTableBodyState> {
   constructor(props: IPlayerTableBodyProps) {
     super(props)
   }

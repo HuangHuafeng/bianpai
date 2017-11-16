@@ -9,7 +9,7 @@ interface IMatchFooterProps {
 
 interface IMatchFooterState {}
 
-export class MatchFooter extends React.Component<IMatchFooterProps, IMatchFooterState> {
+export class MatchFooter extends React.PureComponent<IMatchFooterProps, IMatchFooterState> {
   constructor(props: IMatchFooterProps) {
     super(props)
   }
