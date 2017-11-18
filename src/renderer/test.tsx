@@ -9,6 +9,7 @@ import { Button } from 'react-bootstrap'
 import { Manager } from './manager'
 import { MatchStore } from './match-store'
 import { ImmutableMatch } from '../common/immutable-match'
+import { debugLog } from '../common/debug-log'
 
 export enum PopupType {
   About = 1,
@@ -33,8 +34,8 @@ export class Test extends React.Component<ITestProps, ITestState> {
   }
 
   private printMatch(match: ImmutableMatch) {
-    console.log(match)
-    console.log(match.toJS())
+    debugLog(match)
+    debugLog(match.toJS())
   }
 
   private testCode = () => {
@@ -62,14 +63,14 @@ export class Test extends React.Component<ITestProps, ITestState> {
     const match4 = match3.start()
     this.printMatch(match4)
     let player = match4.getPlayerByName('taxi')
-    console.log(player)
+    debugLog(player)
     /*
-    console.log('match1: ' + match1.name)
-    console.log('match1: ' + match1.organizer)
-    console.log('match1: ' + match1.totalRounds)
-    console.log('match2: ' + match2.name)
-    console.log('match2: ' + match2.organizer)
-    console.log('match2: ' + match2.totalRounds)*/
+    debugLog('match1: ' + match1.name)
+    debugLog('match1: ' + match1.organizer)
+    debugLog('match1: ' + match1.totalRounds)
+    debugLog('match2: ' + match2.name)
+    debugLog('match2: ' + match2.organizer)
+    debugLog('match2: ' + match2.totalRounds)*/
   }
 
   public render() {

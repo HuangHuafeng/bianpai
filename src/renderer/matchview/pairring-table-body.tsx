@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Button } from 'react-bootstrap'
 import { Round } from '../../common/immutable-round'
 import { Game } from '../../common/immutable-game'
+import { debugLog } from '../../common//debug-log'
 
 interface IPairringTableBodyProps {
   readonly roundData: Round
@@ -48,7 +49,7 @@ export class PairringTableBody extends React.PureComponent<IPairringTableBodyPro
       )
     }
 
-    console.log('undefined game')
+    debugLog('undefined game')
 
     return null
   }
