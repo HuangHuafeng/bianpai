@@ -32,6 +32,15 @@ export class Round extends RoundRecord {
     return this.set('games', games) as this
   }
 
+  public deletLastGame(): this {
+    if (this.games.size === 0) {
+      throw new Error(`UNEXPECTED! try to delete the last game from a round that does not have any game`)
+    }
+
+    const games = this.games.pop()
+    return this.set('games', games) as this
+  }
+
   public updateGameResult(table: number, result: string): this {
     const index = this.games.findIndex(v => (v ? v.table === table : false))
     if (index === -1) {

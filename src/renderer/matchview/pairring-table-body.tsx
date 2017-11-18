@@ -32,7 +32,7 @@ export class PairringTableBody extends React.PureComponent<IPairringTableBodyPro
   private renderRow(row: Game | undefined) {
     if (row) {
       return (
-        <tr key={row.table.toString() + row.redPlayer.name + row.blackPlayer.name}>
+        <tr key={row.table.toString()}>
           <th>{row.table}</th>
           <th>{row.redPlayer.number}</th>
           <th>{row.redPlayer.organization}</th>

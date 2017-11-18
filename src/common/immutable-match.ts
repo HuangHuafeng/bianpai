@@ -300,45 +300,62 @@ export class ImmutableMatch extends MatchBase {
     return this.pairOpponentsWithMonradSystem(roundNumber, players)
   }
 
-  /**
-   * https://en.wikipedia.org/wiki/Swiss-system_tournament
-   */
-  private pairOpponentsWithMonradSystem(roundNumber: number, players: Immutable.List<Player>): Round {
+  private sortPlayers(players: Immutable.List<Player>): Immutable.List<Player> {
     // sort players by score, if scores are equal, then by number
-    let sortComparator = (playerA: Player, playerB: Player): number => {
+    const sortComparator = (playerA: Player, playerB: Player): number => {
       return (playerB.score - playerA.score) * 1000 + (playerA.number - playerB.number) * 1
     }
-    let playersToPair = players.sort(sortComparator) as Immutable.List<Player>
-    let roundData: Round = new Round(roundNumber)
 
+    return players.sort(sortComparator) as Immutable.List<Player>
+  }
+
+  /**
+   * we would like to have a predictable pairing for the first round for 2n players
+   * 1 vs n+1, 2 vs n+2, ..., n vs 2n
+   * the players should already be sorted!!!
+   */
+  private pairFirstRound(players: Immutable.List<Player>): Round {
+    let roundData: Round = new Round(1)
+    let interval
+    if (players.size % 2) {
+      interval = (players.size + 1) / 2
+    } else {
+      interval = players.size / 2
+    }
+    console.log('interval: ' + interval)
+    for (let index = 0; index < interval; index++) {
+      const table = roundData.games.size + 1
+      const redPlayer = players.get(index)
+      let blackPlayer = players.get(index + interval)
+      if (!blackPlayer) {
+        blackPlayer = new Player(0, '')
+      }
+      const game = new Game(table, redPlayer, blackPlayer)
+      roundData = roundData.addGame(game)
+    }
+
+    return roundData
+  }
+
+  private printPlayers(players: Immutable.List<Player>) {
+    for (let index = 0; index < players.size; index++) {
+      console.log(players.get(index).name)
+    }
+  }
+
+  /**
+   * the players should already be sorted!!!
+   */
+  private pairNotFistRound(roundNumber: number, players: Immutable.List<Player>): Round {
+    let roundData: Round = new Round(roundNumber)
+    let playersToPair = players
+    let repairTimes = 1
     while (playersToPair.size > 0) {
       const playerA = playersToPair.first()
       playersToPair = playersToPair.shift()
 
       let playerB = undefined
       if (playersToPair.size > 0) {
-        /*
-        // we then go through the list reversely to find a opponent, :)
-        // then we select the opponent whose number has biggest difference
-        const smallestGap = playersToPair.size / 2
-        const scoreToFind = playersToPair.first().score
-        let numberOfCandidates = playersToPair.findLastIndex(v => (v ? v.score === scoreToFind : false))
-        let start = 0
-        if (numberOfCandidates > smallestGap) {
-          start = Math.round(smallestGap - 0.5)
-        }
-        let index = start
-        while (index < playersToPair.size) {
-          if (
-            playersToPair.get(index).playedOpponents.findIndex(v => (v ? v.number === playerA.number : false)) === -1
-          ) {
-            playerB = playersToPair.get(index)
-            playersToPair = playersToPair.delete(index)
-            break
-          }
-          index++
-        }
-        */
         let index = 0
         while (index < playersToPair.size) {
           if (
@@ -350,33 +367,73 @@ export class ImmutableMatch extends MatchBase {
           }
           index++
         }
+
+        if (!playerB) {
+          console.log(`${playerA.name}已经和所有剩下的选手下过棋了！`)
+          this.printPlayers(playersToPair)
+          console.log(`重新安排前${repairTimes}桌的选手！`)
+          if (roundData.games.size > 0) {
+            console.log('尝试重新编排！')
+
+            // failed to find a player that have NOT played with playerA
+            // in this case, we undo the last game from roundData and put the players back
+            // to playersToPair with a little different order, then pair again
+            for (let index = 0; index < repairTimes && roundData.games.size > 0; index++) {
+              const lastGame = roundData.games.last()
+              roundData = roundData.deletLastGame()
+              const playersToPrepend = [lastGame.redPlayer, lastGame.blackPlayer]
+              playersToPair = playersToPair.unshift(...playersToPrepend)
+            }
+            playersToPair = playersToPair.unshift(...[playerA])
+            repairTimes++
+            if (repairTimes > players.size) {
+              console.log('failed to pair players!!!!')
+              break
+            }
+            console.log('重排后的选手列表：')
+            this.printPlayers(playersToPair)
+
+            continue
+            // go back and pair again!
+          } else {
+            console.log('重新编排，失败！')
+            // just select the first one
+            playerB = playersToPair.first()
+            playersToPair = playersToPair.shift()
+          }
+        }
+
+        const table = roundData.games.size + 1
+        let game
+        if (this.decideSides(playerA, playerB) === -1) {
+          game = new Game(table, playerA, playerB)
+        } else {
+          game = new Game(table, playerB, playerA)
+        }
+
+        roundData = roundData.addGame(game)
       } else {
         playerB = new Player(0, '')
         const game = new Game(roundData.games.size + 1, playerA, playerB)
         roundData = roundData.addGame(game)
-        continue
+        break
+        // finished pairing all players, the above "break" is optional
       }
-
-      if (!playerB) {
-        // this happens, probably this should be solved by the user to adjust it manually.
-        console.log(`${playerA.name}已经和所有剩下的选手下过棋了！`)
-        // just select the first one
-        playerB = playersToPair.first()
-        playersToPair = playersToPair.shift()
-      }
-
-      const table = roundData.games.size + 1
-      let game
-      if (this.decideSides(playerA, playerB) === -1) {
-        game = new Game(table, playerA, playerB)
-      } else {
-        game = new Game(table, playerB, playerA)
-      }
-
-      roundData = roundData.addGame(game)
     }
 
     return roundData
+  }
+
+  /**
+   * https://en.wikipedia.org/wiki/Swiss-system_tournament
+   */
+  private pairOpponentsWithMonradSystem(roundNumber: number, players: Immutable.List<Player>): Round {
+    let playersToPair = this.sortPlayers(players)
+    if (roundNumber === 1) {
+      return this.pairFirstRound(playersToPair)
+    }
+
+    return this.pairNotFistRound(roundNumber, playersToPair)
   }
 
   /**
