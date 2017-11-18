@@ -5,8 +5,10 @@ let PlayerRecord = Immutable.Record({
   name: '',
   organization: '',
   score: 0,
+  opponentScore: 0,
   playedOpponents: Immutable.List(),
   playedSides: Immutable.List(),
+  playedResults: Immutable.List(),
 })
 
 export class Player extends PlayerRecord {
@@ -14,8 +16,10 @@ export class Player extends PlayerRecord {
   name: string
   organization: string
   score: number
+  opponentScore: number
   playedOpponents: Immutable.List<Player>
   playedSides: Immutable.List<string>
+  playedResults: Immutable.List<string>
 
   constructor(number: number, name: string, organization: string = '', score: number = 0) {
     super({ number, name, organization, score })
@@ -37,13 +41,22 @@ export class Player extends PlayerRecord {
     return this.set('score', score) as this
   }
 
+  public setOpponentScore(opponentScore: number): this {
+    return this.set('opponentScore', opponentScore) as this
+  }
+
   public addPlayedOpponent(opponent: Player): this {
     const playedOpponents = this.playedOpponents.push(opponent)
     return this.set('playedOpponents', playedOpponents) as this
   }
 
-  public addPlayedSides(side: string): this {
+  public addPlayedSide(side: string): this {
     const playedSides = this.playedSides.push(side)
     return this.set('playedSides', playedSides) as this
+  }
+
+  public addPlayedResult(result: string): this {
+    const playedResults = this.playedResults.push(result)
+    return this.set('playedResults', playedResults) as this
   }
 }

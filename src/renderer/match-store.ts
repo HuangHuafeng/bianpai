@@ -10,7 +10,7 @@ export class MatchStore {
     if (__DEV__) {
       this.setName('2017年全国象棋锦标赛(个人)')
       this.setOrganizer('国家体育总局棋牌运动管理中心、中国象棋协会')
-      this.setTotalRounds(7)
+      this.setTotalRounds(5)
       this.generateSomeDevPlayers()
     }
   }
@@ -30,6 +30,15 @@ export class MatchStore {
     this.addPlayer('于幼华', '浙江非奥项目管理中心	')
     this.addPlayer('程宇东', '广东碧桂园')
     this.addPlayer('黎德志', '煤矿体协')
+    this.addPlayer('滕飞', '大连市体育总会	')
+    this.addPlayer('宇兵', '上海金外滩队')
+    this.addPlayer('吴魏', '中国棋院杭州分院')
+    this.addPlayer('王清', '湖南省体育局')
+    this.addPlayer('张申宏', '湖南省体育局')
+    this.addPlayer('谢岿', '山东棋牌运动管理中心')
+    this.addPlayer('金波', '北京威凯建设')
+    this.addPlayer('许文章', '四川成都龙翔通讯队')
+    this.addPlayer('赵玮', '上海金外滩队')
   }
 
   public getMatch() {

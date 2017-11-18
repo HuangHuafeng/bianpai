@@ -301,10 +301,14 @@ export class ImmutableMatch extends MatchBase {
     return this.pairOpponentsWithMonradSystem(roundNumber, players)
   }
 
-  private sortPlayers(players: Immutable.List<Player>): Immutable.List<Player> {
+  public sortPlayers(players: Immutable.List<Player>): Immutable.List<Player> {
     // sort players by score, if scores are equal, then by number
     const sortComparator = (playerA: Player, playerB: Player): number => {
-      return (playerB.score - playerA.score) * 1000 + (playerA.number - playerB.number) * 1
+      return (
+        (playerB.score - playerA.score) * 100000 +
+        (playerB.opponentScore - playerA.opponentScore) * 100 +
+        (playerA.number - playerB.number) * 1
+      )
     }
 
     return players.sort(sortComparator) as Immutable.List<Player>
@@ -323,7 +327,7 @@ export class ImmutableMatch extends MatchBase {
     } else {
       interval = players.size / 2
     }
-    debugLog('interval: ' + interval)
+
     for (let index = 0; index < interval; index++) {
       const table = roundData.games.size + 1
       const redPlayer = players.get(index)
@@ -338,6 +342,36 @@ export class ImmutableMatch extends MatchBase {
     return roundData
   }
 
+  private pairWithSimpleWay(roundNumber: number, players: Immutable.List<Player>): Round {
+    let roundData: Round = new Round(roundNumber)
+    let playersToPair = players
+
+    while (playersToPair.size > 0) {
+      const playerA = playersToPair.first()
+      playersToPair = playersToPair.shift()
+
+      let playerB = undefined
+      if (playersToPair.size > 0) {
+        playerB = playersToPair.first()
+        playersToPair = playersToPair.shift()
+      } else {
+        playerB = new Player(0, '')
+      }
+
+      const side = this.decideSidesV2(playerA, playerB)
+      const table = roundData.games.size + 1
+      let game
+      if (side === -1) {
+        game = new Game(table, playerA, playerB)
+      } else {
+        game = new Game(table, playerB, playerA)
+      }
+      roundData = roundData.addGame(game)
+    }
+
+    return roundData
+  }
+
   /**
    * the players should already be sorted!!!
    * the algorithm is not perfect, so it probably can NOT pair the player so that the
@@ -346,8 +380,7 @@ export class ImmutableMatch extends MatchBase {
    */
   private pairNotFistRoundMonradSystem(roundNumber: number, players: Immutable.List<Player>): Round {
     if (roundNumber > players.size / 2) {
-      let roundData = this.pairFirstRound(players)
-      return roundData.set('number', roundNumber) as Round
+      return this.pairWithSimpleWay(roundNumber, players)
     }
 
     let roundData: Round = new Round(roundNumber)
@@ -372,16 +405,38 @@ export class ImmutableMatch extends MatchBase {
         }
 
         if (playerB) {
-          // we have found playerB as opponent for playerA
-          const table = roundData.games.size + 1
-          let game
-          if (this.decideSides(playerA, playerB) === -1) {
-            game = new Game(table, playerA, playerB)
+          const side = this.decideSidesV2(playerA, playerB)
+          if (side === 0) {
+            // one of the player is going to play red/black 3 times in a row
+            debugLog(`${playerA.name}或${playerB.name}将3次执先或3次执后！`)
+            debugLog(`重新安排前${gamesToRecreate}桌的选手！`)
+            // we have tried our best, make sure that we won't stuck in this process
+            if (gamesToRecreate > players.size / 2) {
+              debugLog('找不到选手避开这个情况的对阵表！')
+              return this.pairWithSimpleWay(roundNumber, players)
+            }
+
+            playersToPair = playersToPair.unshift(...[playerB])
+            for (let index = 0; index < gamesToRecreate && roundData.games.size > 0; index++) {
+              const lastGame = roundData.games.last()
+              roundData = roundData.deletLastGame()
+              const playersToPrepend = [lastGame.redPlayer, lastGame.blackPlayer]
+              playersToPair = playersToPair.unshift(...playersToPrepend)
+            }
+            playersToPair = playersToPair.unshift(...[playerA])
+            gamesToRecreate++
           } else {
-            game = new Game(table, playerB, playerA)
+            // we have found playerB as opponent for playerA
+            const table = roundData.games.size + 1
+            let game
+            if (side === -1) {
+              game = new Game(table, playerA, playerB)
+            } else {
+              game = new Game(table, playerB, playerA)
+            }
+            roundData = roundData.addGame(game)
+            continue
           }
-          roundData = roundData.addGame(game)
-          continue
         } else {
           // we failed to playerB as opponent for playerA
           debugLog(`${playerA.name}已经和所有剩下的选手下过棋了！`)
@@ -389,8 +444,7 @@ export class ImmutableMatch extends MatchBase {
           // we have tried our best, make sure that we won't stuck in this process
           if (gamesToRecreate > players.size / 2) {
             debugLog('找不到选手和没有对战过的选手配对的对阵表！')
-            let roundData = this.pairFirstRound(players)
-            return roundData.set('number', roundNumber) as Round
+            return this.pairWithSimpleWay(roundNumber, players)
           }
 
           // failed to find a player that have NOT played with playerA
@@ -430,51 +484,108 @@ export class ImmutableMatch extends MatchBase {
   }
 
   /**
+   * it is preferred to let playerA plays red
    * -1 if playerA should play red
    * 1 if playerA should play black
-   * 0 doesn't matter
+   * 0 one of the player is going to play red/black 3 time in a row
    */
-  private decideSides(playerA: Player, playerB: Player): number {
-    let ret = 0
 
-    if (playerB.playedSides.size !== 0) {
+  private decideSidesV2(playerA: Player, playerB: Player): number {
+    let ret = -1 // it is preferred to let playerA plays red
+
+    assert.ok(playerA.number !== 0, 'IMPOSSIBLE!')
+    if (playerB.number === 0) {
+      return -1
+    }
+
+    /**
+     * -1 playerA plays red
+     * 1 playerA plays black
+     * 0 cannot decide
+     * 10 red or black is both OK for playerA and playerB, thus need more checks to balance
+     */
+    const sidesMap = [
+      [
+        [
+          [0, 1], //playerA: red, red, playerB: red, ?
+          [1, 1], //playerA: red, red, playerB: black, ?
+        ],
+        [
+          [-1, 10], //playerA: red, black, playerB: red, ?
+          [10, 1], //playerA: red, black, playerB: black, ?
+        ],
+      ],
+      [
+        [
+          [-1, 10], //playerA: black, red, playerB: red, ?
+          [10, 1], //playerA: black, red, playerB: black, ?
+        ],
+        [
+          [-1, -1], //playerA: black, black, playerB: red, ?
+          [-1, 0], //playerA: black, black, playerB: black, ?
+        ],
+      ],
+    ]
+
+    if (playerA.playedSides.size > 1) {
       const playerALast = playerA.playedSides.last()
       const playerBLast = playerB.playedSides.last()
-      if (playerALast === playerBLast) {
-        if (playerA.playedSides.size > 1) {
-          const playerALastLast = playerA.playedSides.get(playerA.size - 2)
-          const playerBLastLast = playerB.playedSides.get(playerA.size - 2)
-          if (playerALastLast === playerBLastLast) {
-            ret = 0 // doesn't matter
-            // we don't check if last===lastlast, because even if it happens, we can't do anything
+      const playerALastLast = playerA.playedSides.get(playerA.playedSides.size - 2)
+      const playerBLastLast = playerB.playedSides.get(playerB.playedSides.size - 2)
+
+      let aLastLastIndex, aLastIndex, bLastLastIndex, bLastIndex
+      if (playerALastLast === 'red') {
+        aLastLastIndex = 0
+      } else {
+        aLastLastIndex = 1
+      }
+      if (playerBLastLast === 'red') {
+        bLastLastIndex = 0
+      } else {
+        bLastLastIndex = 1
+      }
+      if (playerALast === 'red') {
+        aLastIndex = 0
+      } else {
+        aLastIndex = 1
+      }
+      if (playerBLast === 'red') {
+        bLastIndex = 0
+      } else {
+        bLastIndex = 1
+      }
+
+      ret = sidesMap[aLastLastIndex][aLastIndex][bLastLastIndex][bLastIndex]
+      if (ret === 10) {
+        const aNumberOfRed = playerA.playedSides.count(side => side === 'red')
+        const aNumberOfBlack = playerA.playedSides.count(side => side === 'black')
+        const aPlayedFakePlayer = playerA.playedOpponents.count(opponent => (opponent ? opponent.number === 0 : false))
+        const bNumberOfRed = playerB.playedSides.count(side => side === 'red')
+        const bNumberOfBlack = playerB.playedSides.count(side => side === 'black')
+        const bPlayedFakePlayer = playerB.playedOpponents.count(opponent => (opponent ? opponent.number === 0 : false))
+        if (
+          Math.abs(aNumberOfRed - aPlayedFakePlayer - aNumberOfBlack) >=
+          Math.abs(bNumberOfRed - bPlayedFakePlayer - bNumberOfBlack)
+        ) {
+          if (aNumberOfRed - aPlayedFakePlayer <= aNumberOfBlack) {
+            ret = -1
           } else {
-            if (playerALast === playerALastLast) {
-              if (playerALast === 'red') {
-                ret = 1 // player A should play black, so he won't play red 3 times in a row
-              } else {
-                ret = -1 // player A should play red, so he won't play black 3 times in a row
-              }
-            } else {
-              // playerBLast === playerBLastLast
-              if (playerBLast === 'red') {
-                ret = -1 // player A should play red, so playerB won't play red 3 times in a row
-              } else {
-                ret = 1 // player A should play black, so playerB won't play black 3 times in a row
-              }
-            }
+            ret = 1
           }
         } else {
-          ret = 0 // doesn't matter
-        }
-      } else {
-        if (playerALast === 'red') {
-          ret = 1 // player A should play black
-        } else {
-          ret = -1 // player A should play red
+          if (bNumberOfRed - bPlayedFakePlayer <= bNumberOfBlack) {
+            ret = 1
+          } else {
+            ret = -1
+          }
         }
       }
-    } else {
-      ret = -1 // doesn't matter, but in case playerB is a fake player, we want the fake player to play black
+    } else if (playerB.playedSides.size !== 0) {
+      // in this case, no need to check what playerB played in previous round
+      const playerALast = playerA.playedSides.last()
+      if (playerALast === 'red') {
+        ret = 1
+      }
     }
 
     return ret
@@ -483,6 +594,7 @@ export class ImmutableMatch extends MatchBase {
   /**
    * the simplest pairing: 1&2, 3&4, ...
    */
+  /*
   private pairOpponentsV1(roundNumber: number, players: Immutable.List<Player>): Round {
     let playersToPair = players
     if (playersToPair.size % 2) {
@@ -496,14 +608,17 @@ export class ImmutableMatch extends MatchBase {
 
     return roundData
   }
+  */
 
   /**
- * pairs the players who has close score
- */
+    * pairs the players who has close score
+    */
+  /*
   private pairOpponentsV2(roundNumber: number, players: Immutable.List<Player>): Round {
     const playersToPair = players.sort((playerA, playerB) => playerB.score - playerA.score) as Immutable.List<Player>
     return this.pairOpponentsV1(roundNumber, playersToPair)
   }
+  */
 
   public endCurrentRound(currentRound: number): this {
     if (
@@ -543,44 +658,80 @@ export class ImmutableMatch extends MatchBase {
     let tempPlayers = this.players
     roundData.games.forEach(game => {
       if (game) {
-        let redDiff, blackDiff
+        let redDiff, blackDiff, redResult, blackResult
         switch (game.result) {
           case '+':
             redDiff = this.winScore
             blackDiff = this.loseScore
+            redResult = '+'
+            blackResult = '-'
             break
 
           case '-':
             redDiff = this.loseScore
             blackDiff = this.winScore
+            redResult = '-'
+            blackResult = '+'
             break
 
           case '=':
             redDiff = this.drawScore
             blackDiff = this.drawScore
+            redResult = '='
+            blackResult = '='
             break
 
           default:
             throw new Error('IMPOSSIBLE! game is not finished!')
         }
 
+        let updatedRedPlayer: Player = game.redPlayer
+        let updatedBlackPlayer: Player = game.blackPlayer
         // update the red player if not a fake player
-        if (game.redPlayer.number !== 0) {
-          let updatedRedPlayer = game.redPlayer.setScore(game.redPlayer.score + redDiff)
+        if (updatedRedPlayer.number !== 0) {
+          updatedRedPlayer = updatedRedPlayer.setScore(updatedRedPlayer.score + redDiff)
           updatedRedPlayer = updatedRedPlayer.addPlayedOpponent(game.blackPlayer)
-          updatedRedPlayer = updatedRedPlayer.addPlayedSides('red')
+          updatedRedPlayer = updatedRedPlayer.addPlayedSide('red')
+          updatedRedPlayer = updatedRedPlayer.addPlayedResult(redResult)
+        }
+
+        // update the black player if not a fake player
+        if (updatedBlackPlayer.number !== 0) {
+          updatedBlackPlayer = updatedBlackPlayer.setScore(game.blackPlayer.score + blackDiff)
+          updatedBlackPlayer = updatedBlackPlayer.addPlayedOpponent(game.redPlayer) // we should use game.redPlayer here!!!
+          updatedBlackPlayer = updatedBlackPlayer.addPlayedSide('black')
+          updatedBlackPlayer = updatedBlackPlayer.addPlayedResult(blackResult)
+        }
+
+        // now the scores of the two players have been updated, update the opponent score of the two players
+        // update the red player if not a fake player
+        if (updatedRedPlayer.number !== 0) {
+          if (updatedBlackPlayer.number !== 0) {
+            // if the opponent is not a fake player
+            updatedRedPlayer = updatedRedPlayer.setOpponentScore(
+              updatedRedPlayer.opponentScore + updatedBlackPlayer.score
+            )
+          }
+        }
+        // update the black player if not a fake player
+        if (updatedBlackPlayer.number !== 0) {
+          if (updatedRedPlayer.number !== 0) {
+            // if the opponent is not a fake player
+            updatedBlackPlayer = updatedBlackPlayer.setOpponentScore(
+              updatedBlackPlayer.opponentScore + updatedRedPlayer.score
+            )
+          }
+        }
+
+        // update the players to the player list
+        if (updatedRedPlayer.number !== 0) {
           const redPlayerIndex = tempPlayers.findIndex(v => (v ? v.number === updatedRedPlayer.number : false))
           if (redPlayerIndex === -1) {
             throw new Error(`IMPOSSIBLE! failed to find the player with number "${updatedRedPlayer.number}"`)
           }
           tempPlayers = tempPlayers.set(redPlayerIndex, updatedRedPlayer)
         }
-
-        // update the black player if not a fake player
-        if (game.blackPlayer.number !== 0) {
-          let updatedBlackPlayer = game.blackPlayer.setScore(game.blackPlayer.score + blackDiff)
-          updatedBlackPlayer = updatedBlackPlayer.addPlayedOpponent(game.redPlayer)
-          updatedBlackPlayer = updatedBlackPlayer.addPlayedSides('black')
+        if (updatedBlackPlayer.number !== 0) {
           const blackPlayerIndex = tempPlayers.findIndex(v => (v ? v.number === updatedBlackPlayer.number : false))
           if (blackPlayerIndex === -1) {
             throw new Error(`IMPOSSIBLE! failed to find the player with number "${updatedBlackPlayer.number}"`)

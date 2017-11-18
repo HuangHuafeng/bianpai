@@ -3,6 +3,7 @@ import { Manager } from '../manager'
 import { ImmutableMatch } from '../../common/immutable-match'
 import { PlayerTable } from './player-table'
 import { MatchRounds } from './match-rounds'
+import { MatchResult } from './match-result'
 import { Tabs, Tab } from 'react-bootstrap'
 import { Test } from '../test'
 
@@ -43,6 +44,9 @@ export class MatchContent extends React.PureComponent<IMatchContentProps, IMatch
         </Tab>
         <Tab eventKey={3} title="轮次管理">
           <MatchRounds manager={this.props.manager} match={this.props.match} />
+        </Tab>
+        <Tab eventKey={4} title="比赛排名">
+          <MatchResult manager={this.props.manager} match={this.props.match} />
         </Tab>
       </Tabs>
     )
