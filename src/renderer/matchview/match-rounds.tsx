@@ -22,6 +22,12 @@ export class MatchRounds extends React.PureComponent<IMatchRoundsProps, IMatchRo
     this.state = { selectedIndex: 0, activeTab: 1 }
   }
 
+  /*
+  public componentWillReceiveProps?(nextProps: IMatchRoundsProps) {
+    this.handleSelect(nextProps.match.currentRound)
+  }
+  */
+
   private renderTabs() {
     let tabs = []
     for (let index = 0; index < this.props.match.totalRounds; index++) {

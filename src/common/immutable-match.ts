@@ -224,6 +224,8 @@ export class ImmutableMatch extends MatchBase {
   }
 
   private updateOpponentsPairting(): this {
+    // we should add a fake player if we have odd number of players
+
     const roundData = this.pairOpponents(this.currentRound, this.players)
     const matchData = this.matchData.set(this.currentRound - 1, roundData)
     return this.set('matchData', matchData) as this
@@ -298,17 +300,31 @@ export class ImmutableMatch extends MatchBase {
       'IMPOSSIBLE! something wrong when pairing!'
     )
 
-    return this.pairOpponentsWithMonradSystem(roundNumber, players)
+    let playersToPair = players
+    if (playersToPair.size % 2) {
+      playersToPair = playersToPair.push(new Player(0, ''))
+    }
+
+    return this.pairOpponentsWithMonradSystem(roundNumber, playersToPair)
   }
 
   public sortPlayers(players: Immutable.List<Player>): Immutable.List<Player> {
     // sort players by score, if scores are equal, then by number
     const sortComparator = (playerA: Player, playerB: Player): number => {
-      return (
+      let value =
         (playerB.score - playerA.score) * 100000 +
         (playerB.opponentScore - playerA.opponentScore) * 100 +
         (playerA.number - playerB.number) * 1
-      )
+
+      const fakePlayerValue = value ? Math.abs(value) * 100 : 10000
+      if (playerA.number === 0) {
+        value += fakePlayerValue
+      }
+      if (playerB.number === 0) {
+        value -= fakePlayerValue
+      }
+
+      return value
     }
 
     return players.sort(sortComparator) as Immutable.List<Player>
@@ -318,15 +334,15 @@ export class ImmutableMatch extends MatchBase {
    * we would like to have a predictable pairing for the first round for 2n players
    * 1 vs n+1, 2 vs n+2, ..., n vs 2n
    * the players should already be sorted!!!
+   * the list must have even number of players!!!
    */
   private pairFirstRound(players: Immutable.List<Player>): Round {
-    let roundData: Round = new Round(1)
-    let interval
     if (players.size % 2) {
-      interval = (players.size + 1) / 2
-    } else {
-      interval = players.size / 2
+      throw new Error('UNEXPECTED! The list have odd number of players.')
     }
+
+    let roundData: Round = new Round(1)
+    const interval = players.size / 2
 
     for (let index = 0; index < interval; index++) {
       const table = roundData.games.size + 1
@@ -370,6 +386,81 @@ export class ImmutableMatch extends MatchBase {
     }
 
     return roundData
+  }
+
+  /**
+   * selects THE FIRST player that meets the criteria as opponent for "player"
+   * returns the index of selected player, -1 if failed to find an opponent
+   * @param player who need an opponent
+   * @param candiates candidate opponent for the player
+   */
+  private selectOpponent(player: Player, candiates: Immutable.List<Player>): number {
+    if (player.number === 0) {
+      throw new Error('UNEXPECTED! Try to select an opponent for a fake player!')
+    }
+
+    if (candiates.size === 0) {
+      throw new Error('UNEXPECTED! Candidate list is empty!')
+    }
+
+    const roundsPlayed = player.playedOpponents.size
+    let opponentIndex = -1
+    if (roundsPlayed === 0) {
+      // we should select the first player in the candidate list
+      opponentIndex = 0
+    } else if (roundsPlayed === 1) {
+      const oppoentCriteriaForTheSecondRound = (candidatePlayer: Player): boolean => {
+        if (
+          player.playedOpponents.findIndex(
+            playedOpponent => (playedOpponent ? playedOpponent.number === candidatePlayer.number : false)
+          ) !== -1
+        ) {
+          // if player have played with candidatePlayer, we should not select it
+          return false
+        }
+
+        return true
+      }
+
+      opponentIndex = candiates.findIndex(oppoentCriteriaForTheSecondRound)
+    } else {
+      const opponentCriteriaAfterTwoRounds = (candidatePlayer: Player): boolean => {
+        if (
+          player.playedOpponents.findIndex(
+            playedOpponent => (playedOpponent ? playedOpponent.number === candidatePlayer.number : false)
+          ) !== -1
+        ) {
+          // if player have played with candidatePlayer, we should not select it
+          return false
+        }
+
+        const playerLastSide = player.playedSides.last()
+        const playerLastLastSide = player.playedSides.get(player.playedSides.size - 2)
+        if (playerLastSide === playerLastLastSide) {
+          // we need to check if candidatePlayer is a fake player
+          if (candidatePlayer.number === 0) {
+            return false
+          }
+
+          // we then check what sides candidatePlayer played in the last two rounds
+          const candidatePlayerLastSide = candidatePlayer.playedSides.last()
+          const candidatePlayerLastLastSide = candidatePlayer.playedSides.get(candidatePlayer.playedSides.size - 2)
+          if (candidatePlayerLastSide === candidatePlayerLastLastSide) {
+            if (playerLastSide === candidatePlayerLastSide) {
+              // in this case, candidatePlayer should NOT be selected as opponent
+              // since if selected, one of player and candidatePlayer have to play red/black 3 times in a row!!!
+              return false
+            }
+          }
+        }
+
+        return true
+      }
+
+      opponentIndex = candiates.findIndex(opponentCriteriaAfterTwoRounds)
+    }
+
+    return opponentIndex
   }
 
   /**
@@ -474,6 +565,85 @@ export class ImmutableMatch extends MatchBase {
     return roundData
   }
 
+  private pairNotFistRoundMonradSystemV2(roundNumber: number, players: Immutable.List<Player>): Round {
+    if (players.size % 2) {
+      throw new Error('UNEXPECTED! The list have odd number of players.')
+    }
+
+    let roundData: Round = new Round(roundNumber)
+    let playersToPair = players
+    let gamesToRecreate = 1
+    const retryMaximum = players.size
+    while (playersToPair.size > 0) {
+      const playerA = playersToPair.first()
+      playersToPair = playersToPair.shift()
+
+      let playerB: Player | undefined = undefined
+      if (playersToPair.size > 0) {
+        const opponentIndex = this.selectOpponent(playerA, playersToPair)
+        if (opponentIndex !== -1) {
+          // we found an opponent
+          playerB = playersToPair.get(opponentIndex)
+          playersToPair = playersToPair.delete(opponentIndex)
+
+          const side = this.decideSidesV2(playerA, playerB)
+          const table = roundData.games.size + 1
+          let game
+          switch (side) {
+            case -1:
+              game = new Game(table, playerA, playerB)
+              break
+
+            case 1:
+              game = new Game(table, playerB, playerA)
+              break
+
+            case 0:
+            default:
+              throw new Error('IMPOSSIBLE! We have already avoided this to happen.')
+          }
+
+          roundData = roundData.addGame(game)
+          continue
+        } else {
+          // we failed to an opponent for playerA
+          debugLog(`Cannot find an opponent for ${playerA.name}!`)
+          debugLog(`gamesToRecreate is ${gamesToRecreate}！`)
+          // we have tried our best, make sure that we won't stuck in this process
+          if (gamesToRecreate > retryMaximum) {
+            debugLog('找不到选手和没有对战过的选手配对的对阵表！')
+            return this.pairWithSimpleWay(roundNumber, players)
+          }
+
+          // failed to find a player that have NOT played with playerA
+          // in this case, we delete gamesToRecreate games from roundData
+          // and put the players back to playersToPair with a little different
+          // order, then pair again
+          for (let index = 0; index < gamesToRecreate && roundData.games.size > 0; index++) {
+            const lastGame = roundData.games.last()
+            roundData = roundData.deletLastGame()
+            assert.ok(lastGame.redPlayer.number !== 0, 'IMPOSSIBLE! A fake player never has chance to play red!')
+            playersToPair = playersToPair.unshift(...[lastGame.redPlayer])
+            if (lastGame.blackPlayer.number !== 0) {
+              playersToPair = playersToPair.unshift(...[lastGame.blackPlayer])
+            } else {
+              // if blackPlayer is a fake player, add it to the end of the list
+              playersToPair = playersToPair.push(lastGame.blackPlayer)
+            }
+          }
+          playersToPair = playersToPair.unshift(...[playerA])
+          gamesToRecreate++
+        }
+      } else {
+        throw new Error('IMPOSSIBLE! We should not reach here.')
+      }
+    }
+
+    // we should sort the games so players with high scores are in the begining tables
+    roundData = roundData.sortGames()
+    return roundData
+  }
+
   /**
    * https://en.wikipedia.org/wiki/Swiss-system_tournament
    */
@@ -483,7 +653,7 @@ export class ImmutableMatch extends MatchBase {
       return this.pairFirstRound(playersToPair)
     }
 
-    return this.pairNotFistRoundMonradSystem(roundNumber, playersToPair)
+    return this.pairNotFistRoundMonradSystemV2(roundNumber, playersToPair)
   }
 
   /**
@@ -570,24 +740,26 @@ export class ImmutableMatch extends MatchBase {
           Math.abs(aNumberOfRed - aPlayedFakePlayer - aNumberOfBlack) >=
           Math.abs(bNumberOfRed - bPlayedFakePlayer - bNumberOfBlack)
         ) {
-          if (aNumberOfRed - aPlayedFakePlayer <= aNumberOfBlack) {
+          if (aNumberOfRed < aNumberOfBlack) {
             ret = -1
           } else {
             ret = 1
           }
         } else {
-          if (bNumberOfRed - bPlayedFakePlayer <= bNumberOfBlack) {
+          if (bNumberOfRed < bNumberOfBlack) {
             ret = 1
           } else {
             ret = -1
           }
         }
       }
-    } else if (playerB.playedSides.size !== 0) {
+    } else if (playerB.playedSides.size === 1) {
       // in this case, no need to check what playerB played in previous round
       const playerALast = playerA.playedSides.last()
       if (playerALast === 'red') {
         ret = 1
+      } else {
+        ret = -1
       }
     }
 

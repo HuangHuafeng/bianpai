@@ -62,6 +62,15 @@ export class Round extends RoundRecord {
     // if equal, then by the score of the other player
     // if equal, then by the opponent score that the two playes have
     const sortComparator = (gameA: Game, gameB: Game): number => {
+      // check if one of the game has a fake player
+      if (gameA.redPlayer.number * gameA.blackPlayer.number === 0) {
+        return 1
+      }
+
+      if (gameB.redPlayer.number * gameB.blackPlayer.number === 0) {
+        return -1
+      }
+
       const aMaxScore = Math.max(gameA.redPlayer.score, gameA.blackPlayer.score)
       const bMaxScore = Math.max(gameB.redPlayer.score, gameB.blackPlayer.score)
       if (aMaxScore !== bMaxScore) {
