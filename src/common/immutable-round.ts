@@ -56,4 +56,39 @@ export class Round extends RoundRecord {
   public canEnd(): boolean {
     return this.games.findIndex(v => (v ? v.result !== '+' && v.result !== '=' && v.result !== '-' : false)) === -1
   }
+
+  public sortGames(): Round {
+    // sort game by the score of the player with higher score
+    // if equal, then by the score of the other player
+    // if equal, then by the opponent score that the two playes have
+    const sortComparator = (gameA: Game, gameB: Game): number => {
+      const aMaxScore = Math.max(gameA.redPlayer.score, gameA.blackPlayer.score)
+      const bMaxScore = Math.max(gameB.redPlayer.score, gameB.blackPlayer.score)
+      if (aMaxScore !== bMaxScore) {
+        // player with higher score should be in tables ahead
+        return bMaxScore - aMaxScore
+      }
+
+      const aTotalScore = gameA.redPlayer.score + gameA.blackPlayer.score
+      const bTotalScore = gameB.redPlayer.score + gameB.blackPlayer.score
+      if (aTotalScore !== bTotalScore) {
+        // then, the higher score the two players in a game have, the game should move ahead
+        // this actually same as comparing the score of the other player
+        return bTotalScore - aTotalScore
+      }
+
+      const aTotalOpponentScore = gameA.redPlayer.opponentScore + gameA.blackPlayer.opponentScore
+      const bTotalOpponentScore = gameB.redPlayer.opponentScore + gameB.blackPlayer.opponentScore
+      return bTotalOpponentScore - aTotalOpponentScore
+    }
+
+    let games = this.games.sort(sortComparator) as Immutable.List<Game>
+    for (let index = 0; index < games.size; index++) {
+      let game = games.get(index) as Game
+      game = game.updateTable(index + 1)
+      games = games.set(index, game)
+    }
+
+    return this.set('games', games) as this
+  }
 }

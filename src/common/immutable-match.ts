@@ -386,6 +386,7 @@ export class ImmutableMatch extends MatchBase {
     let roundData: Round = new Round(roundNumber)
     let playersToPair = players
     let gamesToRecreate = 1
+    const retryMaximum = players.size * 30
     while (playersToPair.size > 0) {
       const playerA = playersToPair.first()
       playersToPair = playersToPair.shift()
@@ -409,9 +410,9 @@ export class ImmutableMatch extends MatchBase {
           if (side === 0) {
             // one of the player is going to play red/black 3 times in a row
             debugLog(`${playerA.name}或${playerB.name}将3次执先或3次执后！`)
-            debugLog(`重新安排前${gamesToRecreate}桌的选手！`)
+            debugLog(`gamesToRecreate值为${gamesToRecreate}！`)
             // we have tried our best, make sure that we won't stuck in this process
-            if (gamesToRecreate > players.size / 2) {
+            if (gamesToRecreate > retryMaximum) {
               debugLog('找不到选手避开这个情况的对阵表！')
               return this.pairWithSimpleWay(roundNumber, players)
             }
@@ -440,9 +441,9 @@ export class ImmutableMatch extends MatchBase {
         } else {
           // we failed to playerB as opponent for playerA
           debugLog(`${playerA.name}已经和所有剩下的选手下过棋了！`)
-          debugLog(`重新安排前${gamesToRecreate}桌的选手！`)
+          debugLog(`gamesToRecreate值为${gamesToRecreate}！`)
           // we have tried our best, make sure that we won't stuck in this process
-          if (gamesToRecreate > players.size / 2) {
+          if (gamesToRecreate > retryMaximum) {
             debugLog('找不到选手和没有对战过的选手配对的对阵表！')
             return this.pairWithSimpleWay(roundNumber, players)
           }
@@ -468,6 +469,8 @@ export class ImmutableMatch extends MatchBase {
       }
     }
 
+    // we should sort the games so players with high scores are in the begining tables
+    roundData = roundData.sortGames()
     return roundData
   }
 
@@ -638,7 +641,10 @@ export class ImmutableMatch extends MatchBase {
 
     // then update the scores, sides of the players according to the round result
     let tempPlayers = this.updatePlayersAccordingToRoundResult(roundData)
-    const tempMatch = this.set('players', tempPlayers) as this
+    let tempMatch = this.set('players', tempPlayers) as this
+    // update the opponent scores of the players
+    tempPlayers = tempMatch.updateOpponentScoreOfPlayers(tempPlayers)
+    tempMatch = this.set('players', tempPlayers) as this
 
     // go to next round
     return tempMatch.gotoNextRound()
@@ -649,6 +655,7 @@ export class ImmutableMatch extends MatchBase {
    * 1. update the score of the players
    * 2. update the "played opponents" of the players
    * 3. update the "played side" (black, red) of the players
+   * 4. update the opponentScore of the players
    */
   /**
    * CAUSION: updatePlayersAccordingToRoundResult() uses the information previously written, so any update
@@ -703,26 +710,6 @@ export class ImmutableMatch extends MatchBase {
           updatedBlackPlayer = updatedBlackPlayer.addPlayedResult(blackResult)
         }
 
-        // now the scores of the two players have been updated, update the opponent score of the two players
-        // update the red player if not a fake player
-        if (updatedRedPlayer.number !== 0) {
-          if (updatedBlackPlayer.number !== 0) {
-            // if the opponent is not a fake player
-            updatedRedPlayer = updatedRedPlayer.setOpponentScore(
-              updatedRedPlayer.opponentScore + updatedBlackPlayer.score
-            )
-          }
-        }
-        // update the black player if not a fake player
-        if (updatedBlackPlayer.number !== 0) {
-          if (updatedRedPlayer.number !== 0) {
-            // if the opponent is not a fake player
-            updatedBlackPlayer = updatedBlackPlayer.setOpponentScore(
-              updatedBlackPlayer.opponentScore + updatedRedPlayer.score
-            )
-          }
-        }
-
         // update the players to the player list
         if (updatedRedPlayer.number !== 0) {
           const redPlayerIndex = tempPlayers.findIndex(v => (v ? v.number === updatedRedPlayer.number : false))
@@ -742,6 +729,28 @@ export class ImmutableMatch extends MatchBase {
         throw new Error('IMPOSSIBLE! game is undefined!')
       }
     })
+
+    return tempPlayers
+  }
+
+  private updateOpponentScoreOfPlayers(players: Immutable.List<Player>): Immutable.List<Player> {
+    let tempPlayers = players
+    for (let index = 0; index < players.size; index++) {
+      let player = players.get(index)
+      if (player && player.number !== 0) {
+        let score = 0
+        player.playedOpponents.forEach(opponent => {
+          if (opponent && opponent.number !== 0) {
+            // this opponent has been updated, and his/her latest information need to be fechted
+            const uptodatePlayer = this.getPlayerByNumber(opponent.number) as Player
+            score += uptodatePlayer.score
+          }
+        })
+
+        player = player.setOpponentScore(score)
+        tempPlayers = tempPlayers.set(index, player)
+      }
+    }
 
     return tempPlayers
   }

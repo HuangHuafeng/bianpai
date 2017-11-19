@@ -17,4 +17,12 @@ export class Game extends GameRecord {
   constructor(table: number, redPlayer: Player, blackPlayer: Player, result: string = '?') {
     super({ table, redPlayer, blackPlayer, result })
   }
+
+  public updateTable(table: number): this {
+    if (table <= 0) {
+      throw new Error('UNEXPECTED! cannot set a table number to 0 or less!')
+    }
+
+    return this.set('table', table) as this
+  }
 }
