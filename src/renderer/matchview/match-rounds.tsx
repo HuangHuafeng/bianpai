@@ -15,7 +15,7 @@ interface IMatchRoundsState {
   readonly activeTab: number
 }
 
-export class MatchRounds extends React.PureComponent<IMatchRoundsProps, IMatchRoundsState> {
+export class MatchRounds extends React.Component<IMatchRoundsProps, IMatchRoundsState> {
   constructor(props: IMatchRoundsProps) {
     super(props)
 

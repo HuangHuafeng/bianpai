@@ -16,7 +16,7 @@ interface IMatchContentState {
   readonly activeTab: number
 }
 
-export class MatchContent extends React.PureComponent<IMatchContentProps, IMatchContentState> {
+export class MatchContent extends React.Component<IMatchContentProps, IMatchContentState> {
   constructor(props: IMatchContentProps) {
     super(props)
 

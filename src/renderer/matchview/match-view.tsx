@@ -14,7 +14,7 @@ interface IMatchViewProps {
 
 interface IMatchViewState {}
 
-export class MatchView extends React.PureComponent<IMatchViewProps, IMatchViewState> {
+export class MatchView extends React.Component<IMatchViewProps, IMatchViewState> {
   constructor(props: IMatchViewProps) {
     super(props)
   }

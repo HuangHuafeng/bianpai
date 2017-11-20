@@ -14,23 +14,43 @@ interface IRoundViewProps {
   readonly round: number
 }
 
-interface IRoundViewState {}
+interface IRoundViewState {
+  roundData: Round
+}
 
-export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewState> {
-  private pairingData: Round | undefined
-
+export class RoundView extends React.Component<IRoundViewProps, IRoundViewState> {
   constructor(props: IRoundViewProps) {
     super(props)
 
-    this.pairingData = undefined
+    const roundDataInMatch: Round = this.props.match.getRoundData(this.props.round)
+    this.state = { roundData: roundDataInMatch }
   }
 
-  public componentWillReceiveProps?(nextProps: IRoundViewProps) {
+  public componentWillReceiveProps(nextProps: IRoundViewProps) {
     if (this.props.match.equals(nextProps.match) === false) {
-      const roundDataInMatch: Round = this.props.match.getRoundData(this.props.round)
+      const roundDataInMatch: Round = nextProps.match.getRoundData(this.props.round)
       this.setState({ roundData: roundDataInMatch })
     }
   }
+
+  /*
+  public shouldComponentUpdate(nextProps: IRoundViewProps, nextState: IRoundViewState, nextContext: any): boolean {
+    if (
+      nextProps.match !== this.props.match ||
+      nextProps.round !== this.props.round ||
+      nextProps.manager !== this.props.manager
+    ) {
+      return true
+    }
+
+    console.log(nextState.roundData)
+    if (nextState.roundData !== undefined) {
+      return true
+    }
+
+    return false
+  }
+  */
 
   public render() {
     const matchStatus = this.props.match.status
@@ -99,28 +119,41 @@ export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewSt
   }
 
   private renderPairing() {
-    const roundData: Round = this.props.match.getRoundData(this.props.round)
+    //const roundData: Round = this.props.match.getRoundData(this.props.round)
+    let pairingTable = null
+    if (this.state.roundData !== undefined) {
+      pairingTable = <PairringTable roundData={this.state.roundData} onPairingChanged={this.onUserModifiedPairing} />
+    }
 
     return (
       <div id="round-view">
         <Button bsStyle="primary" onClick={this.startRound}>
           对阵安排完成，开始本轮比赛
         </Button>
-        <PairringTable roundData={roundData} onPairingChanged={this.onUserModifiedPairing} />
+        <Button bsStyle="primary" onClick={this.restorePairing}>
+          恢复为软件安排的对阵
+        </Button>
+        {pairingTable}
       </div>
     )
   }
 
   private onUserModifiedPairing = (roundData: Round) => {
-    this.pairingData = roundData
+    //this.pairingData = roundData
+    this.setState({ roundData: roundData })
+  }
+
+  private restorePairing = () => {
+    const roundDataInMatch: Round = this.props.match.getRoundData(this.props.round)
+    this.setState({ roundData: roundDataInMatch })
+    console.log('setState() called in restorePairing()')
   }
 
   private startRound = () => {
-    if (this.pairingData) {
-      const roundDataInMatch = this.props.match.getRoundData(this.props.round)
-      if (roundDataInMatch.equals(this.pairingData) === false) {
-        this.props.manager.setCurrentRoundPairring(this.pairingData)
-      }
+    console.log(this.state.roundData)
+    const roundDataInMatch = this.props.match.getRoundData(this.props.round)
+    if (roundDataInMatch.equals(this.state.roundData) === false) {
+      this.props.manager.setCurrentRoundPairring(this.state.roundData)
     }
 
     this.props.manager.startCurrentRound(this.props.round)

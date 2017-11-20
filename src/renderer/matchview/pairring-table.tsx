@@ -26,6 +26,13 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
     this.state = { roundData: this.props.roundData }
   }
 
+  public componentWillReceiveProps(nextProps: IPairringTableProps) {
+    console.log('componentWillReceiveProps() in PairringTable called.')
+    if (this.state.roundData !== undefined && this.state.roundData.equals(nextProps.roundData) === false) {
+      this.setState({ roundData: nextProps.roundData })
+    }
+  }
+
   private findPlayersCanPlaySide(side: string): Immutable.List<Player> {
     let players: Immutable.List<Player> = Immutable.List()
     this.props.roundData.games.forEach(game => {
