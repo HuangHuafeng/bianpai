@@ -19,7 +19,7 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
   }
 
   public render() {
-    const numberOfPlayers = this.props.match.players.size
+    const numberOfPlayers = this.props.match.playerList.size
 
     return (
       <div id="players">

@@ -21,9 +21,18 @@ export class PlayerTableBody extends React.PureComponent<IPlayerTableBodyProps, 
   }
 
   private renderPlayerTableBody() {
-    const players = this.props.match.players.toArray()
+    /*
+    const players = this.props.match.playerList.toArray()
     let ret: any[] = []
     for (let player of players) {
+      ret.push(this.renderAPlayer(player))
+    }
+    */
+
+    const players = this.props.match.playerList
+    let ret: any[] = []
+    for (let index = 0; index < players.size; index++) {
+      const player = players.get(index)
       ret.push(this.renderAPlayer(player))
     }
     return ret

@@ -10,6 +10,7 @@
 import { App } from './app'
 import * as assert from 'assert'
 import { Player } from '../common/immutable-player'
+import { Round } from '../common/immutable-round'
 import { MatchStore } from './match-store'
 import { ImmutableMatch, MAXIMUM_TOTAL_ROUNDS } from '../common/immutable-match'
 
@@ -223,6 +224,11 @@ export class Manager {
 
   public startCurrentRound(currentRound: number) {
     this.matchStore.startCurrentRound(currentRound)
+    this.updateAppState()
+  }
+
+  public setCurrentRoundPairring(roundData: Round) {
+    this.matchStore.setCurrentRoundPairring(roundData)
     this.updateAppState()
   }
 

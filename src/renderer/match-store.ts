@@ -1,5 +1,6 @@
 import { ImmutableMatch } from '../common/immutable-match'
 import { Player } from '../common/immutable-player'
+import { Round } from '../common/immutable-round'
 
 export class MatchStore {
   match: ImmutableMatch
@@ -90,6 +91,10 @@ export class MatchStore {
 
   public startCurrentRound(currentRound: number) {
     this.match = this.match.startCurrentRound(currentRound)
+  }
+
+  public setCurrentRoundPairring(roundData: Round) {
+    this.match = this.match.setCurrentRoundPairring(roundData)
   }
 
   public start() {

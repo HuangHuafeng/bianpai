@@ -20,7 +20,7 @@ export class MatchResultBody extends React.PureComponent<IMatchResultBodyProps, 
   }
 
   private renderMatchResultBody() {
-    const players = this.props.match.sortPlayers(this.props.match.players)
+    const players = this.props.match.sortPlayers(this.props.match.playerList)
     let ret: any[] = []
     for (let index = 0; index < players.size; index++) {
       const player = players.get(index)
