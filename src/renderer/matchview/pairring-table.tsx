@@ -7,6 +7,7 @@ import { Player } from '../../common/immutable-player'
 
 interface IPairringTableProps {
   readonly roundData: Round
+  readonly playerList: Immutable.List<Player>
   readonly onPairingChanged: (roundData: Round) => void
 }
 
@@ -15,24 +16,24 @@ interface IPairringTableState {
 }
 
 export class PairringTable extends React.Component<IPairringTableProps, IPairringTableState> {
-  private playersCanPlayRed: Immutable.List<Player>
-  private playersCanPlayBlack: Immutable.List<Player>
-
   constructor(props: IPairringTableProps) {
     super(props)
 
-    this.playersCanPlayRed = this.findPlayersCanPlaySide('red')
-    this.playersCanPlayBlack = this.findPlayersCanPlaySide('black')
     this.state = { roundData: this.props.roundData }
   }
 
   public componentWillReceiveProps(nextProps: IPairringTableProps) {
-    console.log('componentWillReceiveProps() in PairringTable called.')
-    if (this.state.roundData !== undefined && this.state.roundData.equals(nextProps.roundData) === false) {
+    if (this.state.roundData === undefined || this.state.roundData.equals(nextProps.roundData) === false) {
       this.setState({ roundData: nextProps.roundData })
     }
   }
 
+  /**
+   * no need to do the following filterring, no very helpful because:
+   * 1. this only filters a few players
+   * 2. this cannot prevent a player to play a color 3 times in a row
+   */
+  /*
   private findPlayersCanPlaySide(side: string): Immutable.List<Player> {
     let players: Immutable.List<Player> = Immutable.List()
     this.props.roundData.games.forEach(game => {
@@ -68,6 +69,7 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
 
     return players
   }
+  */
 
   public render() {
     return (
@@ -148,7 +150,7 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
         <OverlayTrigger
           trigger="focus"
           placement="left"
-          overlay={this.buildMenuItemsFromPlayerListAsButtons(row.table, row.redPlayer, this.playersCanPlayRed)}
+          overlay={this.buildMenuItemsFromPlayerListAsButtons(row.table, row.redPlayer, this.props.playerList)}
         >
           <Button bsSize="xsmall" bsStyle="warning">
             指定红方
@@ -157,7 +159,7 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
         <OverlayTrigger
           trigger="focus"
           placement="left"
-          overlay={this.buildMenuItemsFromPlayerListAsButtons(row.table, row.blackPlayer, this.playersCanPlayBlack)}
+          overlay={this.buildMenuItemsFromPlayerListAsButtons(row.table, row.blackPlayer, this.props.playerList)}
         >
           <Button bsSize="xsmall" bsStyle="warning">
             指定黑方
@@ -177,6 +179,10 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
     let ret = []
     for (let index = 0; index < playerList.size; index++) {
       const player = playerList.get(index)
+      if (player === currentPlayer) {
+        // don't add himself
+        continue
+      }
       ret.push(
         <ListGroupItem
           bsStyle="success"
@@ -195,7 +201,11 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
   }
 
   private exchangePlayerInGame(table: number, currentPlayer: Player, withPlayer: Player) {
-    console.log(`第${table}桌的${currentPlayer.name}和${withPlayer.name}交换`)
+    if (currentPlayer === withPlayer) {
+      // nothing to do if exchanging with himself
+      throw new Error('IMPOSSIBLE!')
+    }
+
     let roundData = this.state.roundData
     const gameIndex = table - 1
     let game: Game = roundData.games.get(gameIndex)
@@ -210,28 +220,44 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
     let otherGame = roundData.games.get(otherGameIndex)
 
     let redPlayerForCurrentTable, blackPlayerForCurrentTable, redPlayerForOtherTable, blackPlayerForOtherTable
-    if (currentPlayer === game.redPlayer) {
-      redPlayerForCurrentTable = withPlayer
-      blackPlayerForCurrentTable = game.blackPlayer
-    } else {
-      redPlayerForCurrentTable = game.redPlayer
-      blackPlayerForCurrentTable = withPlayer
-    }
-    if (withPlayer === otherGame.redPlayer) {
-      redPlayerForOtherTable = currentPlayer
-      blackPlayerForOtherTable = otherGame.blackPlayer
-    } else {
-      blackPlayerForOtherTable = currentPlayer
-      redPlayerForOtherTable = otherGame.redPlayer
-    }
 
-    const newGame = new Game(game.table, redPlayerForCurrentTable, blackPlayerForCurrentTable)
-    let games = roundData.games.set(gameIndex, newGame)
-    roundData = roundData.set('games', games) as Round
+    if (otherGameIndex !== gameIndex) {
+      // we are exchanging two players from different tables
+      if (currentPlayer === game.redPlayer) {
+        redPlayerForCurrentTable = withPlayer
+        blackPlayerForCurrentTable = game.blackPlayer
+      } else {
+        redPlayerForCurrentTable = game.redPlayer
+        blackPlayerForCurrentTable = withPlayer
+      }
+      if (withPlayer === otherGame.redPlayer) {
+        redPlayerForOtherTable = currentPlayer
+        blackPlayerForOtherTable = otherGame.blackPlayer
+      } else {
+        blackPlayerForOtherTable = currentPlayer
+        redPlayerForOtherTable = otherGame.redPlayer
+      }
 
-    const newOtherGame = new Game(otherGame.table, redPlayerForOtherTable, blackPlayerForOtherTable)
-    games = roundData.games.set(otherGameIndex, newOtherGame)
-    roundData = roundData.set('games', games) as Round
+      const newGame = new Game(game.table, redPlayerForCurrentTable, blackPlayerForCurrentTable)
+      let games = roundData.games.set(gameIndex, newGame)
+      roundData = roundData.set('games', games) as Round
+
+      const newOtherGame = new Game(otherGame.table, redPlayerForOtherTable, blackPlayerForOtherTable)
+      games = roundData.games.set(otherGameIndex, newOtherGame)
+      roundData = roundData.set('games', games) as Round
+    } else {
+      // we are exchanging the two players in the same table
+      if (currentPlayer === game.redPlayer) {
+        redPlayerForCurrentTable = withPlayer
+        blackPlayerForCurrentTable = currentPlayer
+      } else {
+        redPlayerForCurrentTable = currentPlayer
+        blackPlayerForCurrentTable = withPlayer
+      }
+      const newGame = new Game(game.table, redPlayerForCurrentTable, blackPlayerForCurrentTable)
+      let games = roundData.games.set(gameIndex, newGame)
+      roundData = roundData.set('games', games) as Round
+    }
 
     this.setState({ roundData: roundData })
     this.props.onPairingChanged(roundData)

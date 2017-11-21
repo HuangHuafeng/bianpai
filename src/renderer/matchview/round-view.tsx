@@ -119,21 +119,25 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
   }
 
   private renderPairing() {
-    //const roundData: Round = this.props.match.getRoundData(this.props.round)
-    let pairingTable = null
-    if (this.state.roundData !== undefined) {
-      pairingTable = <PairringTable roundData={this.state.roundData} onPairingChanged={this.onUserModifiedPairing} />
+    if (this.state.roundData === undefined) {
+      throw new Error('IMPOSSIBLE!')
     }
+    const roundData: Round = this.props.match.getRoundData(this.props.round)
+    const disabled = this.state.roundData.equals(roundData)
 
     return (
       <div id="round-view">
         <Button bsStyle="primary" onClick={this.startRound}>
           对阵安排完成，开始本轮比赛
         </Button>
-        <Button bsStyle="primary" onClick={this.restorePairing}>
+        <Button bsStyle="primary" onClick={this.restorePairing} disabled={disabled}>
           恢复为软件安排的对阵
         </Button>
-        {pairingTable}
+        <PairringTable
+          roundData={this.state.roundData}
+          playerList={this.props.match.playerList}
+          onPairingChanged={this.onUserModifiedPairing}
+        />
       </div>
     )
   }
