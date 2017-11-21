@@ -421,7 +421,7 @@ export class ImmutableMatch extends MatchBase {
       opponentIndex = 0
     } else if (roundsPlayed === 1) {
       const oppoentCriteriaForTheSecondRound = (candidatePlayer: Player): boolean => {
-        if (player.havePlayedWith(candidatePlayer)) {
+        if (player.hasPlayedWith(candidatePlayer)) {
           // if player have played with candidatePlayer, we should not select it
           return false
         }
@@ -432,7 +432,7 @@ export class ImmutableMatch extends MatchBase {
       opponentIndex = candiates.findIndex(oppoentCriteriaForTheSecondRound)
     } else {
       const opponentCriteriaAfterTwoRounds = (candidatePlayer: Player): boolean => {
-        if (player.havePlayedWith(candidatePlayer)) {
+        if (player.hasPlayedWith(candidatePlayer)) {
           // if player have played with candidatePlayer, we should not select it
           return false
         }

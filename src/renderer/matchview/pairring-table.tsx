@@ -202,7 +202,7 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
       throw new Error('UNEXPECTED! Try to generate style for a player not in the game.')
     }
 
-    if (player.havePlayedWith(otherPlayer)) {
+    if (player.hasPlayedWith(otherPlayer)) {
       return 2
     }
 
