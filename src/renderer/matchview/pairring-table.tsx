@@ -115,9 +115,9 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
           <th>{row.redPlayer.number}</th>
           <th>{row.redPlayer.organization}</th>
           <th>{row.redPlayer.score}</th>
-          <th>{row.redPlayer.name}</th>
+          {this.renderName(row.redPlayer, row)}
           {this.renderResult(row)}
-          <th>{row.blackPlayer.name}</th>
+          {this.renderName(row.blackPlayer, row)}
           <th>{row.blackPlayer.score}</th>
           <th>{row.blackPlayer.organization}</th>
           <th>{row.blackPlayer.number}</th>
@@ -127,6 +127,93 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
     } else {
       throw new Error('UNEXPECTED!')
     }
+  }
+
+  private renderName(player: Player, game: Game) {
+    const situation = this.playerSituationInGame(player, game)
+    const style = situation === 0 ? 'success' : 'playerinvalidingame'
+    const placement = player === game.redPlayer ? 'left' : 'right'
+    const title = `${player.name}：${player.score}分`
+    let body = ''
+    if (player.playedSides.size > 2) {
+      body = '上2轮：'
+      if (player.playedSides.get(-2) === 'red') {
+        body += '红'
+      } else {
+        body += '黑'
+      }
+      body += player.playedResults.get(-2) + '，'
+      if (player.playedSides.last() === 'red') {
+        body += '红'
+      } else {
+        body += '黑'
+      }
+      body += player.playedResults.last()
+    } else if (player.playedSides.size === 1) {
+      body = '上1轮：'
+      if (player.playedSides.last() === 'red') {
+        body += '红'
+      } else {
+        body += '黑'
+      }
+      body += player.playedResults.last()
+    } else {
+    }
+
+    let message = ''
+    if (situation === 2) {
+      const otherPlayer = player === game.redPlayer ? game.blackPlayer : game.redPlayer
+      message = `已经和${otherPlayer.name}交过手了！`
+    } else if (situation === 1) {
+      message = `将连续3次执` + (player.playedSides.last() === 'red' ? '红' : '黑') + '！'
+    }
+
+    const playerMatchInfo = (
+      <Popover id={'player' + player.number} title={title}>
+        {body}
+        <div className={style}>{message}</div>
+      </Popover>
+    )
+
+    return (
+      <OverlayTrigger trigger={['hover', 'focus']} placement={placement} overlay={playerMatchInfo}>
+        <th className={style}>{player.name}</th>
+      </OverlayTrigger>
+    )
+  }
+
+  /**
+   * check the situation of the player in this game
+   * 0  OK
+   * 1  is going to play red/black 3 times in a row
+   * 2  has played with opponent
+   * @param player
+   * @param game
+   */
+  private playerSituationInGame(player: Player, game: Game): number {
+    let sideToPlay, otherPlayer
+    if (player === game.redPlayer) {
+      sideToPlay = 'red'
+      otherPlayer = game.blackPlayer
+    } else if (player === game.blackPlayer) {
+      sideToPlay = 'black'
+      otherPlayer = game.redPlayer
+    } else {
+      throw new Error('UNEXPECTED! Try to generate style for a player not in the game.')
+    }
+
+    if (player.havePlayedWith(otherPlayer)) {
+      return 2
+    }
+
+    if (player.playedSides.last() === sideToPlay) {
+      const lastLastSide = player.playedSides.get(-2, 'outofboundary')
+      if (lastLastSide == sideToPlay) {
+        return 1
+      }
+    }
+
+    return 0
   }
 
   private renderResult(row: Game) {
@@ -150,7 +237,7 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
         <OverlayTrigger
           trigger="focus"
           placement="left"
-          overlay={this.buildMenuItemsFromPlayerListAsButtons(row.table, row.redPlayer, this.props.playerList)}
+          overlay={this.buildPlayerListPopover(row.table, row.redPlayer, this.props.playerList)}
         >
           <Button bsSize="xsmall" bsStyle="warning">
             指定红方
@@ -159,7 +246,7 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
         <OverlayTrigger
           trigger="focus"
           placement="left"
-          overlay={this.buildMenuItemsFromPlayerListAsButtons(row.table, row.blackPlayer, this.props.playerList)}
+          overlay={this.buildPlayerListPopover(row.table, row.blackPlayer, this.props.playerList)}
         >
           <Button bsSize="xsmall" bsStyle="warning">
             指定黑方
@@ -171,11 +258,7 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
     return actions
   }
 
-  private buildMenuItemsFromPlayerListAsButtons(
-    currentGameIndex: number,
-    currentPlayer: Player,
-    playerList: Immutable.List<Player>
-  ) {
+  private buildPlayerListPopover(currentGameIndex: number, currentPlayer: Player, playerList: Immutable.List<Player>) {
     let ret = []
     for (let index = 0; index < playerList.size; index++) {
       const player = playerList.get(index)
@@ -194,7 +277,7 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
       )
     }
     return (
-      <Popover id="players-to-select" title="可以交换的选手" width="200" height="400">
+      <Popover id="players-to-select" title="选择交换位置的选手" width="200" height="400">
         <ListGroup id="playerlist">{ret}</ListGroup>
       </Popover>
     )

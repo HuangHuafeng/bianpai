@@ -59,4 +59,8 @@ export class Player extends PlayerRecord {
     const playedResults = this.playedResults.push(result)
     return this.set('playedResults', playedResults) as this
   }
+
+  public havePlayedWith(player: Player): boolean {
+    return this.playedOpponents.findIndex(v => (v ? v.number === player.number : false)) !== -1
+  }
 }

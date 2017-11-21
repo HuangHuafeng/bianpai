@@ -55,3 +55,8 @@ div#playerlist button {
   width: 100%;
   height: 10%;
 }
+
+.playerinvalidingame {
+  color: red;
+  font-weight: bold;
+}
