@@ -7,9 +7,11 @@
 import * as React from 'react'
 import { Button } from 'react-bootstrap'
 import { Manager } from './manager'
-import { MatchStore } from './match-store'
 import { ImmutableMatch } from '../common/immutable-match'
 import { debugLog } from '../common/debug-log'
+import * as X from 'xlsx'
+import * as Electron from 'electron'
+import { findSheet, findTable, readTable, convertExcelDate } from '../common/xlsx-helper'
 
 export enum PopupType {
   About = 1,
@@ -33,44 +35,57 @@ export class Test extends React.Component<ITestProps, ITestState> {
     super(props)
   }
 
-  private printMatch(match: ImmutableMatch) {
-    debugLog(match)
-    debugLog(match.toJS())
+  private testCode = () => {
+    /* from app code, require('electron').remote calls back to main process */
+    var dialog = Electron.remote.dialog
+
+    /* show a file-open dialog and read the first selected file */
+    var o = dialog.showOpenDialog(Electron.remote.getCurrentWindow(), { properties: ['openFile'] })
+    var workbook = X.readFile(o[0])
+    const sheetName = workbook.SheetNames[0]
+    //const worksheet = workbook.Sheets[sheetName]
+    //debugLog(worksheet['C2'], sheetName)
+
+    this.doSomething(workbook, sheetName)
+
+    /* show a file-save dialog and write the workbook */
+    //var o = dialog.showSaveDialog()
+    //XLSX.writeFile(workbook, o)
   }
 
-  private testCode = () => {
-    let matchStroe: MatchStore = new MatchStore()
-    matchStroe.setName('abc')
-    matchStroe.addPlayer('player1', 'google')
+  private doSomething(workbook: any, sheetName: string) {
+    let { sheet, range } = findSheet(workbook, sheetName)
 
-    const match1 = matchStroe.getMatch()
-    this.printMatch(match1)
+    if (sheet === null) {
+      return null
+    }
 
-    matchStroe.setName('match2')
-    matchStroe.setTotalRounds(10)
-    matchStroe.setOrganizer('Google')
-    matchStroe.addPlayer('alpha', 'google')
-    matchStroe.setTotalRounds(20)
-    matchStroe.addPlayer('Xiaona', 'Microsoft')
+    let { columns, firstRow } = findTable(sheet, range, {
+      number: '编号',
+      name: '姓名',
+      organization: '单位',
+      note: '备注',
+    })
 
-    const match2 = matchStroe.getMatch()
-    this.printMatch(match1)
-    this.printMatch(match2)
-    matchStroe.addPlayer('taxi', 'Uber')
+    if (firstRow === null) {
+      return null
+    }
+    debugLog(columns)
+    debugLog(firstRow)
 
-    const match3 = matchStroe.getMatch()
-    this.printMatch(match3)
-    const match4 = match3.start()
-    this.printMatch(match4)
-    let player = match4.getPlayerByName('taxi')
-    debugLog(player)
-    /*
-    debugLog('match1: ' + match1.name)
-    debugLog('match1: ' + match1.organizer)
-    debugLog('match1: ' + match1.totalRounds)
-    debugLog('match2: ' + match2.name)
-    debugLog('match2: ' + match2.organizer)
-    debugLog('match2: ' + match2.totalRounds)*/
+    const data = readTable(sheet, range, columns, firstRow)
+
+    data.forEach((record, index) => {
+      // to domsething with `record`, which will have keys `name`, `company`, `date` and `amount`
+      debugLog(record.number)
+      debugLog(record.name)
+      debugLog(record.organization)
+      debugLog(record.note)
+
+      // to get a real date...
+      //let date = convertExcelDate(record.date)
+      //debugLog(date)
+    })
   }
 
   public render() {
