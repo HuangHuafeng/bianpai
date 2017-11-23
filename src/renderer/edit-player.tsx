@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Manager } from './manager'
 import { Player } from '../common/immutable-player'
 import { Alert, Modal, Button, FormGroup, FormControl, ControlLabel } from 'react-bootstrap'
-import { removingHeadingTrailingSpaces } from '../common/helper-functions'
+import { removingHeadingTrailingSpaces, toZeorOrPositiveIntegerString } from '../common/helper-functions'
 
 interface IEditPlayerProps {
   readonly manager: Manager
@@ -48,28 +48,22 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
     }
 
     const name = removingHeadingTrailingSpaces(this.state.name)
-    let updatedPlayer = this.player.setName(name)
-    updatedPlayer = updatedPlayer.setNumber(Number(this.state.number))
-    updatedPlayer = updatedPlayer.setOrganization(this.state.organization)
-    updatedPlayer = updatedPlayer.setNote(this.state.note)
+    const number = Number(this.state.number)
+    const organization = removingHeadingTrailingSpaces(this.state.organization)
+    const note = removingHeadingTrailingSpaces(this.state.note)
 
     if (this.addOrEdit === 'edit') {
-      this.props.manager.updatePlayer(this.player.number, updatedPlayer)
+      this.props.manager.updatePlayer(this.player.number, number, name, organization, note)
     } else {
-      this.props.manager.addPlayer(
-        updatedPlayer.name,
-        updatedPlayer.organization,
-        updatedPlayer.note,
-        updatedPlayer.number
-      )
+      this.props.manager.addPlayer(name, organization, note, number)
     }
     this.props.onDismissed()
   }
 
   private onNumberChanged = (event: any) => {
-    const number = Number(event.target.value)
-    if (!Number.isNaN(number)) {
-      this.setState({ number: number !== 0 ? event.target.value : '' })
+    const numberInString = toZeorOrPositiveIntegerString(event.target.value)
+    if (numberInString !== undefined) {
+      this.setState({ number: Number(numberInString) !== 0 ? numberInString : '' })
     }
   }
 
@@ -120,43 +114,6 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
 
     return undefined
   }
-
-  /*
-  private doesNumberExist(): Player | undefined {
-    const number = Number(this.state.number)
-    if (number === 0) {
-      return undefined
-    }
-
-    const match = this.props.manager.getMatch()
-    const player = match.getPlayerByNumber(number)
-    if (player === undefined) {
-      return undefined
-    }
-
-    // if the same as the player under editting
-    if (player.number === this.player.number && player.name == this.player.name) {
-      return undefined
-    }
-
-    return player
-  }
-
-  private doesNameExist(): Player | undefined {
-    const match = this.props.manager.getMatch()
-    const player = match.getPlayerByName(this.state.name)
-    if (player === undefined) {
-      return undefined
-    }
-
-    // if the same as the player under editting
-    if (player.number === this.player.number && player.name == this.player.name) {
-      return undefined
-    }
-
-    return player
-  }
-  */
 
   private conflictsWithPlayer(): Player | undefined {
     const match = this.props.manager.getMatch()

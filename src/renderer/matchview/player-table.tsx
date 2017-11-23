@@ -83,11 +83,11 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
   }
 
   private importPlayersFromFile = (): void => {
-    /* from app code, require('electron').remote calls back to main process */
-    var dialog = Electron.remote.dialog
-
     /* show a file-open dialog and read the first selected file */
-    var fileNames = dialog.showOpenDialog(Electron.remote.getCurrentWindow(), { properties: ['openFile'] })
+    var fileNames = Electron.remote.dialog.showOpenDialog(Electron.remote.getCurrentWindow(), {
+      properties: ['openFile'],
+      filters: [{ name: '选手.xls', extensions: ['xls', 'xlsx', 'csv'] }],
+    })
     if (fileNames) {
       this.parseFileAndImportPlayers(fileNames[0])
     }
@@ -135,13 +135,11 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
   }
 
   private exportPlayersToFile = (): void => {
-    /* from app code, require('electron').remote calls back to main process */
-    var dialog = Electron.remote.dialog
     const options = {
       filters: [{ name: 'Excel files', extensions: ['xlsx', 'xls', 'csv'] }],
     }
     /* show a file-open dialog and read the first selected file */
-    var fileName = dialog.showSaveDialog(Electron.remote.getCurrentWindow(), options)
+    var fileName = Electron.remote.dialog.showSaveDialog(Electron.remote.getCurrentWindow(), options)
     if (fileName) {
       this.savePlayersToFile(fileName)
     }

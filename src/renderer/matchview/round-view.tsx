@@ -136,15 +136,14 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
         <PairringTable
           roundData={this.state.roundData}
           playerList={this.props.match.playerList}
-          onPairingChanged={this.onUserModifiedPairing}
+          changePlayerCallback={this.onExchangePlayerInGame}
         />
       </div>
     )
   }
 
-  private onUserModifiedPairing = (roundData: Round) => {
-    //this.pairingData = roundData
-    this.setState({ roundData: roundData })
+  private onExchangePlayerInGame = (table: number, currentPlayerNumber: number, withPlayerNumber: number) => {
+    this.props.manager.changePlayerInGame(table, currentPlayerNumber, withPlayerNumber)
   }
 
   private restorePairing = () => {
@@ -154,12 +153,6 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
   }
 
   private startRound = () => {
-    console.log(this.state.roundData)
-    const roundDataInMatch = this.props.match.getRoundData(this.props.round)
-    if (roundDataInMatch.equals(this.state.roundData) === false) {
-      this.props.manager.setCurrentRoundPairring(this.state.roundData)
-    }
-
     this.props.manager.startCurrentRound(this.props.round)
   }
 

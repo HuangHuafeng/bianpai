@@ -8,7 +8,7 @@ import { Player } from '../../common/immutable-player'
 interface IPairringTableProps {
   readonly roundData: Round
   readonly playerList: Immutable.List<Player>
-  readonly onPairingChanged: (roundData: Round) => void
+  readonly changePlayerCallback: (table: number, currentPlayerNumber: number, withPlayerNumber: number) => void
 }
 
 interface IPairringTableState {
@@ -27,49 +27,6 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
       this.setState({ roundData: nextProps.roundData })
     }
   }
-
-  /**
-   * no need to do the following filterring, no very helpful because:
-   * 1. this only filters a few players
-   * 2. this cannot prevent a player to play a color 3 times in a row
-   */
-  /*
-  private findPlayersCanPlaySide(side: string): Immutable.List<Player> {
-    let players: Immutable.List<Player> = Immutable.List()
-    this.props.roundData.games.forEach(game => {
-      if (game) {
-        if (game.redPlayer.number !== 0) {
-          if (game.redPlayer.playedSides.size < 2) {
-            players = players.push(game.redPlayer)
-          } else {
-            const last = game.redPlayer.playedSides.last()
-            const lastLast = game.redPlayer.playedSides.get(game.redPlayer.playedSides.size - 2)
-            if (last !== side || lastLast !== side) {
-              players = players.push(game.redPlayer)
-            }
-          }
-        } else {
-          throw new Error('IMPOSSIBLE! a fake player takes red.')
-        }
-        if (game.blackPlayer.number !== 0) {
-          if (game.blackPlayer.playedSides.size < 2) {
-            players = players.push(game.blackPlayer)
-          } else {
-            const last = game.blackPlayer.playedSides.last()
-            const lastLast = game.blackPlayer.playedSides.get(game.blackPlayer.playedSides.size - 2)
-            if (last !== side || lastLast !== side) {
-              players = players.push(game.blackPlayer)
-            }
-          }
-        } else {
-          // do nothing
-        }
-      }
-    })
-
-    return players
-  }
-  */
 
   public render() {
     return (
@@ -290,6 +247,21 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
       throw new Error('IMPOSSIBLE!')
     }
 
+    this.props.changePlayerCallback(table, currentPlayer.number, withPlayer.number)
+  }
+  /**
+   * Changing a player in a game/table should not be done here, instead it should send an actioin
+   * to the match via the match store to exchange the player.
+   * Because doing it here means this PairringTable class knows the details of the data structure
+   * of pairring in the match, which is a bad thing and not necessary!!!
+   */
+  /*
+  private exchangePlayerInGame(table: number, currentPlayer: Player, withPlayer: Player) {
+    if (currentPlayer === withPlayer) {
+      // nothing to do if exchanging with himself
+      throw new Error('IMPOSSIBLE!')
+    }
+
     let roundData = this.state.roundData
     const gameIndex = table - 1
     let game: Game = roundData.games.get(gameIndex)
@@ -346,4 +318,48 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
     this.setState({ roundData: roundData })
     this.props.onPairingChanged(roundData)
   }
+  */
+
+  /**
+   * no need to do the following filterring, no very helpful because:
+   * 1. this only filters a few players
+   * 2. this cannot prevent a player to play a color 3 times in a row
+   */
+  /*
+  private findPlayersCanPlaySide(side: string): Immutable.List<Player> {
+    let players: Immutable.List<Player> = Immutable.List()
+    this.props.roundData.games.forEach(game => {
+      if (game) {
+        if (game.redPlayer.number !== 0) {
+          if (game.redPlayer.playedSides.size < 2) {
+            players = players.push(game.redPlayer)
+          } else {
+            const last = game.redPlayer.playedSides.last()
+            const lastLast = game.redPlayer.playedSides.get(game.redPlayer.playedSides.size - 2)
+            if (last !== side || lastLast !== side) {
+              players = players.push(game.redPlayer)
+            }
+          }
+        } else {
+          throw new Error('IMPOSSIBLE! a fake player takes red.')
+        }
+        if (game.blackPlayer.number !== 0) {
+          if (game.blackPlayer.playedSides.size < 2) {
+            players = players.push(game.blackPlayer)
+          } else {
+            const last = game.blackPlayer.playedSides.last()
+            const lastLast = game.blackPlayer.playedSides.get(game.blackPlayer.playedSides.size - 2)
+            if (last !== side || lastLast !== side) {
+              players = players.push(game.blackPlayer)
+            }
+          }
+        } else {
+          // do nothing
+        }
+      }
+    })
+
+    return players
+  }
+  */
 }

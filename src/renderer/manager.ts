@@ -10,7 +10,6 @@
 import { App } from './app'
 import * as assert from 'assert'
 import { Player } from '../common/immutable-player'
-import { Round } from '../common/immutable-round'
 import { MatchStore } from './match-store'
 import { ImmutableMatch, MAXIMUM_TOTAL_ROUNDS } from '../common/immutable-match'
 
@@ -67,11 +66,17 @@ export class Manager {
    * @param number
    * @param player
    */
-  public updatePlayer(number: number, player: Player) {
-    if (number !== this.playerToDeleteOrEdit) {
+  public updatePlayer(
+    currentNumber: number,
+    newNumber: number,
+    name: string,
+    organization: string = '',
+    note: string = ''
+  ) {
+    if (currentNumber !== this.playerToDeleteOrEdit) {
       throw new Error('UNEXPECTED! playerToDeleteOrEdit is undefined')
     }
-    this.matchStore.updatePlayer(number, player)
+    this.matchStore.updatePlayer(currentNumber, newNumber, name, organization, note)
   }
 
   /**
@@ -230,10 +235,12 @@ export class Manager {
     this.updateAppState()
   }
 
+  /*
   public setCurrentRoundPairring(roundData: Round) {
     this.matchStore.setCurrentRoundPairring(roundData)
     this.updateAppState()
   }
+  */
 
   public updateTableResult(round: number, table: number, result: string) {
     this.matchStore.updateTableResult(round, table, result)
@@ -248,6 +255,20 @@ export class Manager {
   public endCurrentRound() {
     const currentRound = this.matchStore.getMatch().currentRound
     this.matchStore.endCurrentRound(currentRound)
+    this.updateAppState()
+  }
+
+  public saveMatch(fileName: string): void {
+    this.matchStore.saveMatch(fileName)
+  }
+
+  public loadMatch(fileName: string): void {
+    this.matchStore.loadMatch(fileName)
+    this.updateAppState()
+  }
+
+  public changePlayerInGame(table: number, currentPlayerNumber: number, withPlayerNumber: number) {
+    this.matchStore.changePlayerInGame(table, currentPlayerNumber, withPlayerNumber)
     this.updateAppState()
   }
 }

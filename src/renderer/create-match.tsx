@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Manager } from './manager'
 import { Alert, Modal, Button, FormGroup, FormControl, ControlLabel } from 'react-bootstrap'
+import { toZeorOrPositiveIntegerString } from '../common/helper-functions'
 
 interface ICreateMatchProps {
   readonly manager: Manager
@@ -17,10 +18,12 @@ export class CreateMatch extends React.Component<ICreateMatchProps, ICreateMatch
   constructor(props: ICreateMatchProps) {
     super(props)
 
-    this.state = {
-      name: '2017年全国象棋锦标赛(个人)',
-      organizer: '国家体育总局棋牌运动管理中心、中国象棋协会',
-      totalRounds: '7',
+    if (__DEV__) {
+      this.state = {
+        name: '2017年全国象棋锦标赛(个人)',
+        organizer: '国家体育总局棋牌运动管理中心、中国象棋协会',
+        totalRounds: '7',
+      }
     }
   }
 
@@ -39,9 +42,9 @@ export class CreateMatch extends React.Component<ICreateMatchProps, ICreateMatch
   }
 
   private onTotalRoundsChanged = (event: any) => {
-    const number = Number(event.target.value)
-    if (!Number.isNaN(number)) {
-      this.setState({ totalRounds: number !== 0 ? event.target.value : '' })
+    const numberInString = toZeorOrPositiveIntegerString(event.target.value)
+    if (numberInString !== undefined) {
+      this.setState({ totalRounds: Number(numberInString) !== 0 ? numberInString : '' })
     }
   }
 

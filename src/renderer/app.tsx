@@ -61,8 +61,37 @@ export class App extends React.Component<IAppProps, IAppState> {
       case 'remove-all-players':
         return this.props.manager.showPopup(PopupType.RemoveAllPlayers)
 
+      case 'file-save':
+        return this.saveMatch()
+
+      case 'file-open':
+        return this.loadMatch()
+
       default:
         return notImplemented(event)
+    }
+  }
+
+  private loadMatch() {
+    /* show a file-open dialog and read the first selected file */
+    var fileNames = Electron.remote.dialog.showOpenDialog(Electron.remote.getCurrentWindow(), {
+      properties: ['openFile'],
+      filters: [{ name: '', extensions: ['json'] }],
+    })
+
+    if (fileNames) {
+      this.props.manager.loadMatch(fileNames[0])
+    }
+  }
+
+  private saveMatch() {
+    const options = {
+      filters: [{ name: '', extensions: ['json'] }],
+    }
+    /* show a file-open dialog and read the first selected file */
+    var fileName = Electron.remote.dialog.showSaveDialog(Electron.remote.getCurrentWindow(), options)
+    if (fileName) {
+      this.props.manager.saveMatch(fileName)
     }
   }
 

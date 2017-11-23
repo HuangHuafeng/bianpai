@@ -20,7 +20,8 @@ export class MatchView extends React.Component<IMatchViewProps, IMatchViewState>
   }
 
   public render() {
-    if (this.props.match === undefined) {
+    if (this.props.match.name === '') {
+      // a match with empty name is a fake match object
       return this.renderNewMatch()
     }
 

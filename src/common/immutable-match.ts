@@ -189,6 +189,7 @@ export class ImmutableMatch extends MatchBase {
      * @param number
      * @param player
      */
+  /*
   public updatePlayer(number: number, player: Player): this {
     if (this.disallowUpdatePlayers()) {
       return this
@@ -199,6 +200,32 @@ export class ImmutableMatch extends MatchBase {
       throw new Error(`UNEXPECTED! failed to find the player with number "${number}"`)
     }
 
+    const playerList = this.playerList.set(index, player)
+    const tempMatch = this.set('playerList', playerList) as this
+    return tempMatch.playersUpdated()
+  }
+  */
+  public updatePlayer(
+    currentNumber: number,
+    newNumber: number,
+    name: string,
+    organization: string = '',
+    note: string = ''
+  ): this {
+    if (this.disallowUpdatePlayers()) {
+      return this
+    }
+
+    let player = this.getPlayerByNumber(currentNumber)
+    if (player === undefined) {
+      throw new Error(`UNEXPECTED! failed to find the player with number "${currentNumber}"`)
+    }
+    player = player.setNumber(newNumber)
+    player = player.setName(name)
+    player = player.setOrganization(organization)
+    player = player.setNote(note)
+
+    const index = this.playerList.findIndex(v => (v ? v.number === currentNumber : false))
     const playerList = this.playerList.set(index, player)
     const tempMatch = this.set('playerList', playerList) as this
     return tempMatch.playersUpdated()
@@ -960,5 +987,23 @@ export class ImmutableMatch extends MatchBase {
     })
 
     return opponentScore
+  }
+
+  public setLoseScore(loseScore: number): this {
+    return this.set('loseScore', loseScore) as this
+  }
+
+  public setWinScore(winScore: number): this {
+    return this.set('winScore', winScore) as this
+  }
+
+  public setDrawScore(drawScore: number): this {
+    return this.set('drawScore', drawScore) as this
+  }
+
+  public changePlayerInGame(table: number, currentPlayerNumber: number, withPlayerNumber: number): this {
+    console.log(table, currentPlayerNumber, withPlayerNumber)
+
+    return this
   }
 }

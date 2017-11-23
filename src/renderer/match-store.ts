@@ -1,46 +1,105 @@
+import * as fs from 'fs'
 import { ImmutableMatch } from '../common/immutable-match'
-import { Player } from '../common/immutable-player'
-import { Round } from '../common/immutable-round'
+
+export enum MatchActionType {
+  SetName = 1,
+  SetOrganizer,
+  SetTotalRounds,
+  AddPlayer,
+  UpdatePlayer,
+  RemovePlayer,
+  RemoveAllPlayer,
+  UpdateTableResult,
+  StartCurrentRound,
+  StartMatch,
+  EndCurrentRound,
+  ChangePlayerInGame,
+}
+
+export interface MatchAction {
+  type: MatchActionType
+  actionPara: any
+}
 
 export class MatchStore {
   match: ImmutableMatch
 
   constructor() {
     this.match = new ImmutableMatch()
-
-    if (__DEV__) {
-      this.setName('2017年全国象棋锦标赛(个人)')
-      this.setOrganizer('国家体育总局棋牌运动管理中心、中国象棋协会')
-      this.setTotalRounds(5)
-      this.generateSomeDevPlayers()
-    }
   }
 
-  private generateSomeDevPlayers() {
-    this.addPlayer('赵子雨', '湖北棋牌运动管理中心')
-    this.addPlayer('赵鑫鑫', '杭州环境集团', '2007年全国个人赛冠军', 100)
-    this.addPlayer('崔革', '黑龙江省棋牌管理中心')
-    this.addPlayer('鲁天', '江苏棋院')
-    this.addPlayer('赵金成', '中国棋院杭州分院')
-    this.addPlayer('孙昕昊', '浙江非奥项目管理中心')
-    this.addPlayer('李冠男', '辽宁队')
-    this.addPlayer('黄学谦', '香港')
-    this.addPlayer('孙勇征', '上海金外滩队')
-    this.addPlayer('何文哲', '中国棋院杭州分院')
-    this.addPlayer('李炳贤', '中国棋院杭州分院')
-    this.addPlayer('武俊强', '四川成都龙翔通讯队')
-    this.addPlayer('于幼华', '浙江非奥项目管理中心	')
-    this.addPlayer('程宇东', '广东碧桂园')
-    this.addPlayer('黎德志', '煤矿体协')
-    this.addPlayer('滕飞', '大连市体育总会	')
-    this.addPlayer('宇兵', '上海金外滩队')
-    this.addPlayer('吴魏', '中国棋院杭州分院')
-    this.addPlayer('王清', '湖南省体育局')
-    this.addPlayer('张申宏', '湖南省体育局')
-    this.addPlayer('谢岿', '山东棋牌运动管理中心')
-    this.addPlayer('金波', '北京威凯建设')
-    this.addPlayer('许文章', '四川成都龙翔通讯队')
-    this.addPlayer('赵玮', '上海金外滩队')
+  private doMatchAction(action: MatchAction): void {
+    switch (action.type) {
+      case MatchActionType.SetName:
+        this.match = this.match.setName(action.actionPara)
+        break
+
+      case MatchActionType.SetOrganizer:
+        this.match = this.match.setOrganizer(action.actionPara)
+        break
+
+      case MatchActionType.SetTotalRounds:
+        this.match = this.match.setTotalRounds(action.actionPara)
+        break
+
+      case MatchActionType.AddPlayer:
+        this.match = this.match.addPlayer(
+          action.actionPara.name,
+          action.actionPara.organization,
+          action.actionPara.note,
+          action.actionPara.preferredNumber
+        )
+        break
+
+      case MatchActionType.UpdatePlayer:
+        this.match = this.match.updatePlayer(
+          action.actionPara.currentNumber,
+          action.actionPara.newNumber,
+          action.actionPara.name,
+          action.actionPara.organization,
+          action.actionPara.note
+        )
+        break
+
+      case MatchActionType.RemovePlayer:
+        this.match = this.match.removePlayer(action.actionPara)
+        break
+
+      case MatchActionType.RemoveAllPlayer:
+        this.match = this.match.removeAllPlayers()
+        break
+
+      case MatchActionType.UpdateTableResult:
+        this.match = this.match.updateTableResult(
+          action.actionPara.round,
+          action.actionPara.table,
+          action.actionPara.result
+        )
+        break
+
+      case MatchActionType.StartCurrentRound:
+        this.match = this.match.startCurrentRound(action.actionPara)
+        break
+
+      case MatchActionType.EndCurrentRound:
+        this.match = this.match.endCurrentRound(action.actionPara)
+        break
+
+      case MatchActionType.StartMatch:
+        this.match = this.match.start()
+        break
+
+      case MatchActionType.ChangePlayerInGame:
+        this.match = this.match.changePlayerInGame(
+          action.actionPara.table,
+          action.actionPara.currentPlayerNumber,
+          action.actionPara.withPlayerNumber
+        )
+        break
+
+      default:
+        throw new Error('IMPOSSIBLE! unknown action!')
+    }
   }
 
   public getMatch() {
@@ -52,57 +111,77 @@ export class MatchStore {
     this.setName(name)
     this.setTotalRounds(totalRounds)
     this.setOrganizer(organizer)
-
-    if (__DEV__) {
-      this.generateSomeDevPlayers()
-    }
   }
 
   public setName(name: string) {
-    this.match = this.match.setName(name)
+    this.doMatchAction({ type: MatchActionType.SetName, actionPara: name })
   }
 
   public setOrganizer(organizer: string) {
-    this.match = this.match.setOrganizer(organizer)
+    this.doMatchAction({ type: MatchActionType.SetOrganizer, actionPara: organizer })
   }
 
   public setTotalRounds(totalRounds: number) {
-    this.match = this.match.setTotalRounds(totalRounds)
+    this.doMatchAction({ type: MatchActionType.SetTotalRounds, actionPara: totalRounds })
   }
 
   public addPlayer(name: string, organization: string = '', note: string = '', preferredNumber?: number) {
-    this.match = this.match.addPlayer(name, organization, note, preferredNumber)
+    this.doMatchAction({ type: MatchActionType.AddPlayer, actionPara: { name, organization, note, preferredNumber } })
   }
 
-  public updatePlayer(number: number, player: Player) {
-    this.match = this.match.updatePlayer(number, player)
+  public updatePlayer(
+    currentNumber: number,
+    newNumber: number,
+    name: string,
+    organization: string = '',
+    note: string = ''
+  ) {
+    this.doMatchAction({
+      type: MatchActionType.UpdatePlayer,
+      actionPara: { currentNumber, newNumber, name, organization, note },
+    })
   }
 
   public removePlayer(number: number) {
-    this.match = this.match.removePlayer(number)
+    this.doMatchAction({ type: MatchActionType.RemovePlayer, actionPara: number })
   }
 
   public removeAllPlayers() {
-    this.match = this.match.removeAllPlayers()
+    this.doMatchAction({ type: MatchActionType.RemoveAllPlayer, actionPara: undefined })
   }
 
   public updateTableResult(round: number, table: number, result: string) {
-    this.match = this.match.updateTableResult(round, table, result)
+    this.doMatchAction({ type: MatchActionType.UpdateTableResult, actionPara: { round, table, result } })
   }
 
   public startCurrentRound(currentRound: number) {
-    this.match = this.match.startCurrentRound(currentRound)
-  }
-
-  public setCurrentRoundPairring(roundData: Round) {
-    this.match = this.match.setCurrentRoundPairring(roundData)
+    this.doMatchAction({ type: MatchActionType.StartCurrentRound, actionPara: currentRound })
   }
 
   public start() {
-    this.match = this.match.start()
+    this.doMatchAction({ type: MatchActionType.StartMatch, actionPara: undefined })
   }
 
   public endCurrentRound(currentRound: number) {
-    this.match = this.match.endCurrentRound(currentRound)
+    this.doMatchAction({ type: MatchActionType.EndCurrentRound, actionPara: currentRound })
+  }
+
+  public changePlayerInGame(table: number, currentPlayerNumber: number, withPlayerNumber: number) {
+    this.doMatchAction({
+      type: MatchActionType.ChangePlayerInGame,
+      actionPara: { table, currentPlayerNumber, withPlayerNumber },
+    })
+  }
+
+  public saveMatch(fileName: string): void {
+    const matchObject = this.match.toJS()
+    fs.writeFileSync(fileName, JSON.stringify(matchObject))
+    console.log('not implemented yet, sorry, :)')
+  }
+
+  public loadMatch(fileName: string): void {
+    const matchObject = JSON.parse(fs.readFileSync(fileName, 'utf8'))
+    console.log(matchObject)
+    console.log('not implemented yet, sorry, :)')
   }
 }
