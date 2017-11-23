@@ -3,7 +3,7 @@ import * as assert from 'assert'
 import { Player } from './immutable-player'
 import { Game } from './immutable-game'
 import { Round } from './immutable-round'
-import { debugLog } from './debug-log'
+import { debugLog } from './helper-functions'
 
 export enum MatchStatus {
   NotStarted,
@@ -101,6 +101,10 @@ export class ImmutableMatch extends MatchBase {
     return this.playerList.find(player => (player ? player.name === name : false))
   }
 
+  public getQualifiedNumber(): number {
+    return this.generatePlayerNumber()
+  }
+
   public getRoundStatus(round: number): RoundStatus {
     if (round <= 0 || round > this.totalRounds) {
       throw new Error('UNEXPECTED! try to get the status of an invalid round')
@@ -162,12 +166,18 @@ export class ImmutableMatch extends MatchBase {
     return this.set('totalRounds', totalRounds) as this
   }
 
-  public addPlayer(name: string, organization: string = ''): this {
+  public addPlayer(name: string, organization: string = '', note: string = '', preferredNumber?: number): this {
     if (this.disallowUpdatePlayers()) {
       return this
     }
 
-    const newPlayer = new Player(this.generatePlayerNumber(), name, organization)
+    let number
+    if (preferredNumber && preferredNumber !== 0 && this.getPlayerByNumber(preferredNumber) === undefined) {
+      number = preferredNumber
+    } else {
+      number = this.generatePlayerNumber()
+    }
+    const newPlayer = new Player(number, name, organization, note)
 
     let playerList = this.playerList.push(newPlayer)
     const tempMatch = this.set('playerList', playerList) as this
@@ -208,8 +218,8 @@ export class ImmutableMatch extends MatchBase {
       throw new Error(`UNEXPECTED! failed to find the player with number "${number}"`)
     }
 
-    let playerList = this.playerList.remove(index)
-    const tempMatch = this.set('playerList', playerList) as this
+    const updatedPlayerList = this.playerList.remove(index)
+    const tempMatch = this.set('playerList', updatedPlayerList) as this
     return tempMatch.playersUpdated()
   }
 
@@ -217,14 +227,18 @@ export class ImmutableMatch extends MatchBase {
     // it's not allowed to add/remove/modify player when the players are fighting
     assert.ok(this.disallowUpdatePlayers() === false, 'IMPOSSIBLE!')
 
+    // sort the players
+    const updatedPlayerList = this.sortPlayers(this.playerList)
+    const tempMatch = this.set('playerList', updatedPlayerList) as this
+
     // if match is not started or already finished, nothing to do
     if (this.status === MatchStatus.NotStarted || this.status === MatchStatus.Finished) {
-      return this
+      return tempMatch
     }
 
     assert.ok(this.status === MatchStatus.OnGoingPairing, 'IMPOSSIBLE!')
     // re-pairing the opponents
-    return this.updateOpponentsPairting()
+    return tempMatch.updateOpponentsPairting()
   }
 
   private updateOpponentsPairting(): this {

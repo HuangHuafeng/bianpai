@@ -6,7 +6,6 @@ import { About } from './about'
 import { Manager, PopupType } from './manager'
 import { CreateMatch } from './create-match'
 import { MatchView } from './matchview/match-view'
-import { AddPlayer } from './add-player'
 import { RemovePlayer } from './remove-player'
 import { EditPlayer } from './edit-player'
 import { EditMatch } from './edit-match'
@@ -100,18 +99,6 @@ export class App extends React.Component<IAppProps, IAppState> {
     }
   }
 
-  private renderEditPlayerDialog() {
-    return (
-      <EditPlayer
-        key="editplayer"
-        onDismissed={() => {
-          this.onPopupDismissed(PopupType.EditPlayer)
-        }}
-        manager={this.props.manager}
-      />
-    )
-  }
-
   private renderRemovePlayerDialog() {
     return (
       <RemovePlayer
@@ -166,11 +153,15 @@ export class App extends React.Component<IAppProps, IAppState> {
   }
 
   private renderAddPlayerDialog() {
+    return this.renderEditPlayerDialog()
+  }
+
+  private renderEditPlayerDialog() {
     return (
-      <AddPlayer
-        key="addplayer"
+      <EditPlayer
+        key="editplayer"
         onDismissed={() => {
-          this.onPopupDismissed(PopupType.AddPlayer)
+          this.onPopupDismissed(PopupType.EditPlayer)
         }}
         manager={this.props.manager}
       />

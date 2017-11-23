@@ -132,7 +132,10 @@ export class Manager {
   private closeTopDialog(dialog?: PopupType) {
     if (dialog) {
       if (dialog !== this.openDialogs[this.openDialogs.length - 1]) {
-        assert.ok(false, `"${dialog}" is NOT same as last one: "${this.openDialogs[this.openDialogs.length - 1]}"`)
+        if (dialog !== PopupType.EditPlayer && this.openDialogs[this.openDialogs.length - 1] === PopupType.AddPlayer) {
+          // we used the edit player when adding new player
+          assert.ok(false, `"${dialog}" is NOT same as last one: "${this.openDialogs[this.openDialogs.length - 1]}"`)
+        }
       }
     }
     this.openDialogs.pop()
@@ -175,8 +178,8 @@ export class Manager {
    * create a new match and then work on the new match
    * @param match the new ImmutableMatch
    */
-  public addPlayer(name: string, organization: string = '') {
-    this.matchStore.addPlayer(name, organization)
+  public addPlayer(name: string, organization: string = '', note: string = '', preferredNumber?: number) {
+    this.matchStore.addPlayer(name, organization, note, preferredNumber)
 
     this.updateAppState()
   }

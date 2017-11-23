@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Manager } from './manager'
 import { Player } from '../common/immutable-player'
 import { Alert, Modal, Button, FormGroup, FormControl, ControlLabel } from 'react-bootstrap'
+import { removingHeadingTrailingSpaces } from '../common/helper-functions'
 
 interface IEditPlayerProps {
   readonly manager: Manager
@@ -12,17 +13,24 @@ interface IEditPlayerState {
   readonly number: string
   readonly name: string
   readonly organization: string
+  readonly note: string
 }
 
 export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerState> {
   private player: Player
+  private addOrEdit: string
 
   constructor(props: IEditPlayerProps) {
     super(props)
 
+    this.addOrEdit = 'edit'
     let player = this.props.manager.getPlayerToDeleteOrEdit()
     if (player === undefined) {
-      throw new Error('UNEXPECTED! there is no player to be edited!')
+      // in this case, the user is adding a new player
+      this.addOrEdit = 'add'
+      const match = this.props.manager.getMatch()
+      const number = match.getQualifiedNumber()
+      player = new Player(number, '')
     }
     this.player = player
 
@@ -30,17 +38,90 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
       number: this.player.number.toString(),
       name: this.player.name,
       organization: this.player.organization,
+      note: this.player.note,
     }
   }
 
   private onOK = () => {
-    let updatedPlayer = this.player.setName(this.state.name)
+    if (this.validateName() !== 'success' || this.validateNumber() !== 'success') {
+      throw new Error('IMPOSSIBLE!')
+    }
+
+    const name = removingHeadingTrailingSpaces(this.state.name)
+    let updatedPlayer = this.player.setName(name)
     updatedPlayer = updatedPlayer.setNumber(Number(this.state.number))
     updatedPlayer = updatedPlayer.setOrganization(this.state.organization)
-    this.props.manager.updatePlayer(this.player.number, updatedPlayer)
+    updatedPlayer = updatedPlayer.setNote(this.state.note)
+
+    if (this.addOrEdit === 'edit') {
+      this.props.manager.updatePlayer(this.player.number, updatedPlayer)
+    } else {
+      this.props.manager.addPlayer(
+        updatedPlayer.name,
+        updatedPlayer.organization,
+        updatedPlayer.note,
+        updatedPlayer.number
+      )
+    }
     this.props.onDismissed()
   }
 
+  private onNumberChanged = (event: any) => {
+    const number = Number(event.target.value)
+    if (!Number.isNaN(number)) {
+      this.setState({ number: number !== 0 ? event.target.value : '' })
+    }
+  }
+
+  private onNameChanged = (event: any) => {
+    this.setState({ name: event.target.value })
+  }
+
+  private onOrganizationChanged = (event: any) => {
+    this.setState({ organization: event.target.value })
+  }
+
+  private onNoteChanged = (event: any) => {
+    this.setState({ note: event.target.value })
+  }
+
+  private validateNumber(): 'success' | 'warning' | 'error' | undefined {
+    if (this.state.number.length !== 0) {
+      const number = Number(this.state.number)
+      const match = this.props.manager.getMatch()
+      const player = match.getPlayerByNumber(number)
+      if (player !== undefined) {
+        // if the same as the player under editting
+        if (player.equals(this.player) === false) {
+          return 'error'
+        }
+      }
+
+      return 'success'
+    }
+
+    return undefined
+  }
+
+  private validateName(): 'success' | 'warning' | 'error' | undefined {
+    const match = this.props.manager.getMatch()
+    const name = removingHeadingTrailingSpaces(this.state.name)
+    if (name.length !== 0) {
+      const player = match.getPlayerByName(name)
+      if (player !== undefined) {
+        // if the same as the player under editting
+        if (player.equals(this.player) === false) {
+          return 'error'
+        }
+      }
+
+      return 'success'
+    }
+
+    return undefined
+  }
+
+  /*
   private doesNumberExist(): Player | undefined {
     const number = Number(this.state.number)
     if (number === 0) {
@@ -63,9 +144,6 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
 
   private doesNameExist(): Player | undefined {
     const match = this.props.manager.getMatch()
-    if (match === undefined) {
-      throw new Error('UNEXPECTED! match is undefined')
-    }
     const player = match.getPlayerByName(this.state.name)
     if (player === undefined) {
       return undefined
@@ -78,81 +156,51 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
 
     return player
   }
+  */
 
-  private onNumberChanged = (event: any) => {
-    const number = Number(event.target.value)
-    if (!Number.isNaN(number)) {
-      this.setState({ number: number !== 0 ? event.target.value : '' })
+  private conflictsWithPlayer(): Player | undefined {
+    const match = this.props.manager.getMatch()
+    const name = removingHeadingTrailingSpaces(this.state.name)
+
+    const playerWithSameName: Player | undefined = match.getPlayerByName(name)
+    if (playerWithSameName && playerWithSameName.equals(this.player) === false) {
+      return playerWithSameName
     }
-  }
 
-  private onNameChanged = (event: any) => {
-    this.setState({ name: event.target.value })
-  }
-
-  private onOrganizationChanged = (event: any) => {
-    this.setState({ organization: event.target.value })
-  }
-
-  private validateNumber() {
-    if (this.state.number.length !== 0) {
-      if (this.doesNumberExist()) {
-        return 'error'
-      }
-
-      return 'success'
+    const playerWithSameNumber: Player | undefined = match.getPlayerByNumber(Number(this.state.number))
+    if (playerWithSameNumber && playerWithSameNumber.equals(this.player) === false) {
+      return playerWithSameNumber
     }
 
     return undefined
   }
 
-  private validateName() {
-    if (this.state.name.length !== 0) {
-      if (this.doesNameExist()) {
-        return 'error'
-      }
-
-      return 'success'
+  private renderDuplicateWarning() {
+    const conflictedPlayer = this.conflictsWithPlayer()
+    if (conflictedPlayer) {
+      return (
+        <Alert bsStyle="warning">
+          姓名有冲突：已存在编号为"{conflictedPlayer.number}"，姓名为"{conflictedPlayer.name}"的选手
+        </Alert>
+      )
     }
 
-    return undefined
-  }
-
-  private renderDuplicateWarning(player: Player | undefined) {
-    if (player === undefined) {
-      return null
-    }
-
-    return (
-      <Alert bsStyle="warning">
-        编号或姓名有冲突：已存在编号为"{player.number}"，姓名为"{player.name}"的选手
-      </Alert>
-    )
-  }
-
-  private isChanged(): boolean {
-    return (
-      this.state.name !== this.player.name ||
-      this.state.organization !== this.player.organization ||
-      this.state.number !== this.player.number.toString()
-    )
+    return null
   }
 
   public render() {
-    const player = this.doesNumberExist() || this.doesNameExist()
-    const disabled =
-      this.state.name.length === 0 ||
-      this.state.number.length === 0 ||
-      player !== undefined ||
-      this.isChanged() === false
+    const nameIsInvalid = this.validateName() !== 'success'
+    const numberIsInvalid = this.validateNumber() !== 'success'
+    const conflictedPlayer = this.conflictsWithPlayer()
+    const disabled = nameIsInvalid || numberIsInvalid || conflictedPlayer !== undefined
 
     return (
       <Modal show={true} onHide={this.props.onDismissed} backdrop="static">
         <Modal.Header>
-          <Modal.Title>编辑选手</Modal.Title>
+          <Modal.Title>{this.addOrEdit == 'edit' ? '编辑选手' : '增加选手'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {this.renderDuplicateWarning(player)}
+          {this.renderDuplicateWarning()}
           <form>
             <FormGroup controlId="number" validationState={this.validateNumber()}>
               <ControlLabel>编号</ControlLabel>
@@ -167,6 +215,10 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
             <FormGroup controlId="organization">
               <ControlLabel>单位</ControlLabel>
               <FormControl type="text" value={this.state.organization} onChange={this.onOrganizationChanged} />
+            </FormGroup>
+            <FormGroup controlId="note">
+              <ControlLabel>备注</ControlLabel>
+              <FormControl type="text" value={this.state.note} onChange={this.onNoteChanged} />
             </FormGroup>
           </form>
         </Modal.Body>

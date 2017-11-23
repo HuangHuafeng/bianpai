@@ -134,8 +134,8 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
     const style = situation === 0 ? 'success' : 'playerinvalidingame'
     const placement = player === game.redPlayer ? 'left' : 'right'
     const title = `${player.name}：${player.score}分`
-    let body = ''
-    if (player.playedSides.size > 2) {
+    let body
+    if (player.playedSides.size >= 2) {
       body = '上2轮：'
       if (player.playedSides.get(-2) === 'red') {
         body += '红'
@@ -158,6 +158,7 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
       }
       body += player.playedResults.last()
     } else {
+      body = ''
     }
 
     let message = ''

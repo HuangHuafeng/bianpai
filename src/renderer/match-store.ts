@@ -18,6 +18,7 @@ export class MatchStore {
 
   private generateSomeDevPlayers() {
     this.addPlayer('赵子雨', '湖北棋牌运动管理中心')
+    this.addPlayer('赵鑫鑫', '杭州环境集团', '2007年全国个人赛冠军', 100)
     this.addPlayer('崔革', '黑龙江省棋牌管理中心')
     this.addPlayer('鲁天', '江苏棋院')
     this.addPlayer('赵金成', '中国棋院杭州分院')
@@ -69,8 +70,8 @@ export class MatchStore {
     this.match = this.match.setTotalRounds(totalRounds)
   }
 
-  public addPlayer(name: string, organization: string = '') {
-    this.match = this.match.addPlayer(name, organization)
+  public addPlayer(name: string, organization: string = '', note: string = '', preferredNumber?: number) {
+    this.match = this.match.addPlayer(name, organization, note, preferredNumber)
   }
 
   public updatePlayer(number: number, player: Player) {

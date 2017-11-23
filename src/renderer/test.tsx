@@ -8,10 +8,9 @@ import * as React from 'react'
 import { Button } from 'react-bootstrap'
 import { Manager } from './manager'
 import { ImmutableMatch } from '../common/immutable-match'
-import { debugLog } from '../common/debug-log'
+//import { debugLog } from '../common/debug-log'
 import * as X from 'xlsx'
 import * as Electron from 'electron'
-import { findSheet, findTable, readTable, convertExcelDate } from '../common/xlsx-helper'
 
 export enum PopupType {
   About = 1,
@@ -53,40 +52,7 @@ export class Test extends React.Component<ITestProps, ITestState> {
     //XLSX.writeFile(workbook, o)
   }
 
-  private doSomething(workbook: any, sheetName: string) {
-    let { sheet, range } = findSheet(workbook, sheetName)
-
-    if (sheet === null) {
-      return null
-    }
-
-    let { columns, firstRow } = findTable(sheet, range, {
-      number: '编号',
-      name: '姓名',
-      organization: '单位',
-      note: '备注',
-    })
-
-    if (firstRow === null) {
-      return null
-    }
-    debugLog(columns)
-    debugLog(firstRow)
-
-    const data = readTable(sheet, range, columns, firstRow)
-
-    data.forEach((record, index) => {
-      // to domsething with `record`, which will have keys `name`, `company`, `date` and `amount`
-      debugLog(record.number)
-      debugLog(record.name)
-      debugLog(record.organization)
-      debugLog(record.note)
-
-      // to get a real date...
-      //let date = convertExcelDate(record.date)
-      //debugLog(date)
-    })
-  }
+  private doSomething(workbook: any, sheetName: string): void {}
 
   public render() {
     return (
