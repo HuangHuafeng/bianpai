@@ -11,21 +11,11 @@ interface IPairringTableProps {
   readonly changePlayerCallback: (table: number, currentPlayerNumber: number, withPlayerNumber: number) => void
 }
 
-interface IPairringTableState {
-  readonly roundData: Round
-}
+interface IPairringTableState {}
 
-export class PairringTable extends React.Component<IPairringTableProps, IPairringTableState> {
+export class PairringTable extends React.PureComponent<IPairringTableProps, IPairringTableState> {
   constructor(props: IPairringTableProps) {
     super(props)
-
-    this.state = { roundData: this.props.roundData }
-  }
-
-  public componentWillReceiveProps(nextProps: IPairringTableProps) {
-    if (this.state.roundData === undefined || this.state.roundData.equals(nextProps.roundData) === false) {
-      this.setState({ roundData: nextProps.roundData })
-    }
   }
 
   public render() {
@@ -57,7 +47,7 @@ export class PairringTable extends React.Component<IPairringTableProps, IPairrin
 
   private renderTableBody() {
     let ret: any[] = []
-    this.state.roundData.games.forEach(game => {
+    this.props.roundData.games.forEach(game => {
       ret.push(this.renderRow(game))
     })
 

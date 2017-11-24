@@ -14,6 +14,7 @@ export enum MatchActionType {
   StartMatch,
   EndCurrentRound,
   ChangePlayerInGame,
+  ResetPairing,
 }
 
 export interface MatchAction {
@@ -23,12 +24,16 @@ export interface MatchAction {
 
 export class MatchStore {
   match: ImmutableMatch
+  actionHistory: MatchAction[]
 
   constructor() {
     this.match = new ImmutableMatch()
+    this.actionHistory = []
   }
 
   private doMatchAction(action: MatchAction): void {
+    this.actionHistory.push(action)
+
     switch (action.type) {
       case MatchActionType.SetName:
         this.match = this.match.setName(action.actionPara)
@@ -89,6 +94,10 @@ export class MatchStore {
         this.match = this.match.start()
         break
 
+      case MatchActionType.ResetPairing:
+        this.match = this.match.resetPairing()
+        break
+
       case MatchActionType.ChangePlayerInGame:
         this.match = this.match.changePlayerInGame(
           action.actionPara.table,
@@ -108,6 +117,7 @@ export class MatchStore {
 
   public newMatch(name: string, totalRounds: number, organizer: string = '') {
     this.match = new ImmutableMatch()
+    this.actionHistory = []
     this.setName(name)
     this.setTotalRounds(totalRounds)
     this.setOrganizer(organizer)
@@ -174,14 +184,25 @@ export class MatchStore {
   }
 
   public saveMatch(fileName: string): void {
-    const matchObject = this.match.toJS()
-    fs.writeFileSync(fileName, JSON.stringify(matchObject))
-    console.log('not implemented yet, sorry, :)')
+    fs.writeFileSync(fileName, JSON.stringify(this.actionHistory))
   }
 
   public loadMatch(fileName: string): void {
-    const matchObject = JSON.parse(fs.readFileSync(fileName, 'utf8'))
-    console.log(matchObject)
-    console.log('not implemented yet, sorry, :)')
+    // we should do something like ask user to save the current match
+
+    // move a new match
+    this.match = new ImmutableMatch()
+    this.actionHistory = []
+    const actionHistory: MatchAction[] = JSON.parse(fs.readFileSync(fileName, 'utf8'))
+    for (let index = 0; index < actionHistory.length; index++) {
+      this.doMatchAction(actionHistory[index])
+    }
+  }
+
+  public resetPairing() {
+    this.doMatchAction({
+      type: MatchActionType.ResetPairing,
+      actionPara: undefined,
+    })
   }
 }

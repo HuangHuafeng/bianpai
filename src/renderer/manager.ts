@@ -271,4 +271,9 @@ export class Manager {
     this.matchStore.changePlayerInGame(table, currentPlayerNumber, withPlayerNumber)
     this.updateAppState()
   }
+
+  public resetPairing() {
+    this.matchStore.resetPairing()
+    this.updateAppState()
+  }
 }

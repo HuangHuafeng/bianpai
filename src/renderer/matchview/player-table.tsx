@@ -117,7 +117,6 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
     const data = readTable(sheet, range, columns, firstRow)
 
     data.forEach((player, index) => {
-      // to domsething with `record`, which will have keys `name`, `company`, `date` and `amount`
       if (player.name !== null) {
         const name = player.name
         const number = player.number !== null ? player.number : 0

@@ -1002,8 +1002,75 @@ export class ImmutableMatch extends MatchBase {
   }
 
   public changePlayerInGame(table: number, currentPlayerNumber: number, withPlayerNumber: number): this {
-    console.log(table, currentPlayerNumber, withPlayerNumber)
+    if (currentPlayerNumber === withPlayerNumber) {
+      return this
+    }
 
-    return this
+    let roundData = this.getRoundData(this.currentRound)
+    const gameIndex = table - 1
+    let game: Game = roundData.games.get(gameIndex)
+
+    if (game === undefined) {
+      throw new Error(`UNEXPECTED! Cannot find the table ${table}`)
+    }
+
+    const otherGameIndex = roundData.games.findIndex(
+      (game: Game) => game.redPlayer.number === withPlayerNumber || game.blackPlayer.number === withPlayerNumber
+    )
+    if (otherGameIndex === -1) {
+      throw new Error(`UNEXPECTED! Cannot find the table which has the player with number ${withPlayerNumber}`)
+    }
+
+    let otherGame = roundData.games.get(otherGameIndex)
+
+    let redPlayerForCurrentTable, blackPlayerForCurrentTable, redPlayerForOtherTable, blackPlayerForOtherTable
+
+    if (otherGameIndex !== gameIndex) {
+      // we are exchanging two players from different tables
+      if (currentPlayerNumber === game.redPlayer.number) {
+        blackPlayerForCurrentTable = game.blackPlayer
+        if (withPlayerNumber === otherGame.redPlayer.number) {
+          redPlayerForCurrentTable = otherGame.redPlayer
+          redPlayerForOtherTable = game.redPlayer
+          blackPlayerForOtherTable = otherGame.blackPlayer
+        } else {
+          redPlayerForOtherTable = otherGame.redPlayer
+          redPlayerForCurrentTable = otherGame.blackPlayer
+          blackPlayerForOtherTable = game.redPlayer
+        }
+      } else {
+        redPlayerForCurrentTable = game.redPlayer
+        if (withPlayerNumber === otherGame.redPlayer.number) {
+          blackPlayerForCurrentTable = otherGame.redPlayer
+          redPlayerForOtherTable = game.blackPlayer
+          blackPlayerForOtherTable = otherGame.blackPlayer
+        } else {
+          redPlayerForOtherTable = otherGame.redPlayer
+          blackPlayerForCurrentTable = otherGame.blackPlayer
+          blackPlayerForOtherTable = game.blackPlayer
+        }
+      }
+
+      const newGame = new Game(game.table, redPlayerForCurrentTable, blackPlayerForCurrentTable)
+      let games = roundData.games.set(gameIndex, newGame)
+      roundData = roundData.set('games', games) as Round
+
+      const newOtherGame = new Game(otherGame.table, redPlayerForOtherTable, blackPlayerForOtherTable)
+      games = roundData.games.set(otherGameIndex, newOtherGame)
+      roundData = roundData.set('games', games) as Round
+    } else {
+      // we are exchanging the two players in the same table
+      redPlayerForCurrentTable = game.blackPlayer
+      blackPlayerForCurrentTable = game.redPlayer
+      const newGame = new Game(game.table, redPlayerForCurrentTable, blackPlayerForCurrentTable)
+      let games = roundData.games.set(gameIndex, newGame)
+      roundData = roundData.set('games', games) as Round
+    }
+
+    return this.setCurrentRoundPairring(roundData)
+  }
+
+  public resetPairing(): this {
+    return this.updateOpponentsPairting()
   }
 }

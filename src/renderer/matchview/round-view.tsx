@@ -18,14 +18,12 @@ interface IRoundViewState {
   roundData: Round
 }
 
-export class RoundView extends React.Component<IRoundViewProps, IRoundViewState> {
+export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewState> {
   constructor(props: IRoundViewProps) {
     super(props)
-
-    const roundDataInMatch: Round = this.props.match.getRoundData(this.props.round)
-    this.state = { roundData: roundDataInMatch }
   }
 
+  /*
   public componentWillReceiveProps(nextProps: IRoundViewProps) {
     if (this.props.match.equals(nextProps.match) === false) {
       const roundDataInMatch: Round = nextProps.match.getRoundData(this.props.round)
@@ -33,7 +31,6 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
     }
   }
 
-  /*
   public shouldComponentUpdate(nextProps: IRoundViewProps, nextState: IRoundViewState, nextContext: any): boolean {
     if (
       nextProps.match !== this.props.match ||
@@ -43,7 +40,6 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
       return true
     }
 
-    console.log(nextState.roundData)
     if (nextState.roundData !== undefined) {
       return true
     }
@@ -119,22 +115,18 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
   }
 
   private renderPairing() {
-    if (this.state.roundData === undefined) {
-      throw new Error('IMPOSSIBLE!')
-    }
     const roundData: Round = this.props.match.getRoundData(this.props.round)
-    const disabled = this.state.roundData.equals(roundData)
 
     return (
       <div id="round-view">
         <Button bsStyle="primary" onClick={this.startRound}>
           对阵安排完成，开始本轮比赛
         </Button>
-        <Button bsStyle="primary" onClick={this.restorePairing} disabled={disabled}>
+        <Button bsStyle="primary" onClick={this.restorePairing}>
           恢复为软件安排的对阵
         </Button>
         <PairringTable
-          roundData={this.state.roundData}
+          roundData={roundData}
           playerList={this.props.match.playerList}
           changePlayerCallback={this.onExchangePlayerInGame}
         />
@@ -147,9 +139,7 @@ export class RoundView extends React.Component<IRoundViewProps, IRoundViewState>
   }
 
   private restorePairing = () => {
-    const roundDataInMatch: Round = this.props.match.getRoundData(this.props.round)
-    this.setState({ roundData: roundDataInMatch })
-    console.log('setState() called in restorePairing()')
+    this.props.manager.resetPairing()
   }
 
   private startRound = () => {
