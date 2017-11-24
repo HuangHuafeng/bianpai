@@ -1,4 +1,5 @@
 import * as fs from 'fs'
+import * as crypto from 'crypto'
 import { ImmutableMatch } from '../common/immutable-match'
 
 export enum MatchActionType {
@@ -19,7 +20,7 @@ export enum MatchActionType {
 
 export interface MatchAction {
   type: MatchActionType
-  actionPara: any
+  parameter: any
 }
 
 export class MatchStore {
@@ -36,38 +37,38 @@ export class MatchStore {
 
     switch (action.type) {
       case MatchActionType.SetName:
-        this.match = this.match.setName(action.actionPara)
+        this.match = this.match.setName(action.parameter)
         break
 
       case MatchActionType.SetOrganizer:
-        this.match = this.match.setOrganizer(action.actionPara)
+        this.match = this.match.setOrganizer(action.parameter)
         break
 
       case MatchActionType.SetTotalRounds:
-        this.match = this.match.setTotalRounds(action.actionPara)
+        this.match = this.match.setTotalRounds(action.parameter)
         break
 
       case MatchActionType.AddPlayer:
         this.match = this.match.addPlayer(
-          action.actionPara.name,
-          action.actionPara.organization,
-          action.actionPara.note,
-          action.actionPara.preferredNumber
+          action.parameter.name,
+          action.parameter.organization,
+          action.parameter.note,
+          action.parameter.preferredNumber
         )
         break
 
       case MatchActionType.UpdatePlayer:
         this.match = this.match.updatePlayer(
-          action.actionPara.currentNumber,
-          action.actionPara.newNumber,
-          action.actionPara.name,
-          action.actionPara.organization,
-          action.actionPara.note
+          action.parameter.currentNumber,
+          action.parameter.newNumber,
+          action.parameter.name,
+          action.parameter.organization,
+          action.parameter.note
         )
         break
 
       case MatchActionType.RemovePlayer:
-        this.match = this.match.removePlayer(action.actionPara)
+        this.match = this.match.removePlayer(action.parameter)
         break
 
       case MatchActionType.RemoveAllPlayer:
@@ -76,18 +77,18 @@ export class MatchStore {
 
       case MatchActionType.UpdateTableResult:
         this.match = this.match.updateTableResult(
-          action.actionPara.round,
-          action.actionPara.table,
-          action.actionPara.result
+          action.parameter.round,
+          action.parameter.table,
+          action.parameter.result
         )
         break
 
       case MatchActionType.StartCurrentRound:
-        this.match = this.match.startCurrentRound(action.actionPara)
+        this.match = this.match.startCurrentRound(action.parameter)
         break
 
       case MatchActionType.EndCurrentRound:
-        this.match = this.match.endCurrentRound(action.actionPara)
+        this.match = this.match.endCurrentRound(action.parameter)
         break
 
       case MatchActionType.StartMatch:
@@ -100,9 +101,9 @@ export class MatchStore {
 
       case MatchActionType.ChangePlayerInGame:
         this.match = this.match.changePlayerInGame(
-          action.actionPara.table,
-          action.actionPara.currentPlayerNumber,
-          action.actionPara.withPlayerNumber
+          action.parameter.table,
+          action.parameter.currentPlayerNumber,
+          action.parameter.withPlayerNumber
         )
         break
 
@@ -124,19 +125,19 @@ export class MatchStore {
   }
 
   public setName(name: string) {
-    this.doMatchAction({ type: MatchActionType.SetName, actionPara: name })
+    this.doMatchAction({ type: MatchActionType.SetName, parameter: name })
   }
 
   public setOrganizer(organizer: string) {
-    this.doMatchAction({ type: MatchActionType.SetOrganizer, actionPara: organizer })
+    this.doMatchAction({ type: MatchActionType.SetOrganizer, parameter: organizer })
   }
 
   public setTotalRounds(totalRounds: number) {
-    this.doMatchAction({ type: MatchActionType.SetTotalRounds, actionPara: totalRounds })
+    this.doMatchAction({ type: MatchActionType.SetTotalRounds, parameter: totalRounds })
   }
 
   public addPlayer(name: string, organization: string = '', note: string = '', preferredNumber?: number) {
-    this.doMatchAction({ type: MatchActionType.AddPlayer, actionPara: { name, organization, note, preferredNumber } })
+    this.doMatchAction({ type: MatchActionType.AddPlayer, parameter: { name, organization, note, preferredNumber } })
   }
 
   public updatePlayer(
@@ -148,61 +149,96 @@ export class MatchStore {
   ) {
     this.doMatchAction({
       type: MatchActionType.UpdatePlayer,
-      actionPara: { currentNumber, newNumber, name, organization, note },
+      parameter: { currentNumber, newNumber, name, organization, note },
     })
   }
 
   public removePlayer(number: number) {
-    this.doMatchAction({ type: MatchActionType.RemovePlayer, actionPara: number })
+    this.doMatchAction({ type: MatchActionType.RemovePlayer, parameter: number })
   }
 
   public removeAllPlayers() {
-    this.doMatchAction({ type: MatchActionType.RemoveAllPlayer, actionPara: undefined })
+    this.doMatchAction({ type: MatchActionType.RemoveAllPlayer, parameter: undefined })
   }
 
   public updateTableResult(round: number, table: number, result: string) {
-    this.doMatchAction({ type: MatchActionType.UpdateTableResult, actionPara: { round, table, result } })
+    this.doMatchAction({ type: MatchActionType.UpdateTableResult, parameter: { round, table, result } })
   }
 
   public startCurrentRound(currentRound: number) {
-    this.doMatchAction({ type: MatchActionType.StartCurrentRound, actionPara: currentRound })
+    this.doMatchAction({ type: MatchActionType.StartCurrentRound, parameter: currentRound })
   }
 
   public start() {
-    this.doMatchAction({ type: MatchActionType.StartMatch, actionPara: undefined })
+    this.doMatchAction({ type: MatchActionType.StartMatch, parameter: undefined })
   }
 
   public endCurrentRound(currentRound: number) {
-    this.doMatchAction({ type: MatchActionType.EndCurrentRound, actionPara: currentRound })
+    this.doMatchAction({ type: MatchActionType.EndCurrentRound, parameter: currentRound })
   }
 
   public changePlayerInGame(table: number, currentPlayerNumber: number, withPlayerNumber: number) {
     this.doMatchAction({
       type: MatchActionType.ChangePlayerInGame,
-      actionPara: { table, currentPlayerNumber, withPlayerNumber },
+      parameter: { table, currentPlayerNumber, withPlayerNumber },
     })
   }
 
   public saveMatch(fileName: string): void {
-    fs.writeFileSync(fileName, JSON.stringify(this.actionHistory))
+    const conetentToSave = this.generateSaveContent(this.actionHistory)
+    fs.writeFileSync(fileName, JSON.stringify(conetentToSave))
   }
 
-  public loadMatch(fileName: string): void {
+  /**
+   * 0  successfully load a match from the file
+   * !0 failed to load the file
+   * @param fileName
+   */
+  public loadMatch(fileName: string): number {
+    const contentFromFile = JSON.parse(fs.readFileSync(fileName, 'utf8'))
+    if (this.isValidSaveContent(contentFromFile) === false) {
+      console.log('file content is not valid')
+      return 1
+    }
+
     // we should do something like ask user to save the current match
 
     // move a new match
     this.match = new ImmutableMatch()
     this.actionHistory = []
-    const actionHistory: MatchAction[] = JSON.parse(fs.readFileSync(fileName, 'utf8'))
+    const actionHistory: MatchAction[] = contentFromFile.content
     for (let index = 0; index < actionHistory.length; index++) {
       this.doMatchAction(actionHistory[index])
     }
+
+    return 0
+  }
+
+  private generateSaveContent(contentToSave: any) {
+    const hashSha256OfContent = crypto.createHash('sha256').update(JSON.stringify(contentToSave))
+
+    return {
+      content: contentToSave,
+      digest: hashSha256OfContent.digest('hex'),
+    }
+  }
+
+  public isValidSaveContent(saveContent: any): boolean {
+    if (saveContent.digest === undefined || saveContent.content === undefined) {
+      return false
+    }
+    const tempSaveContent = this.generateSaveContent(saveContent.content)
+    if (saveContent.digest !== tempSaveContent.digest) {
+      return false
+    }
+
+    return true
   }
 
   public resetPairing() {
     this.doMatchAction({
       type: MatchActionType.ResetPairing,
-      actionPara: undefined,
+      parameter: undefined,
     })
   }
 }
