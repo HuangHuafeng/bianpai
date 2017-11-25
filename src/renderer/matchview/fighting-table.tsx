@@ -82,7 +82,7 @@ export class FightingTable extends React.PureComponent<IFightingTableProps, IFig
     } else if (row.result === '=') {
       gameResult = '和'
     } else {
-      gameResult = '*'
+      gameResult = ''
     }
 
     return <th>{gameResult}</th>

@@ -10,6 +10,7 @@ import { RemovePlayer } from './remove-player'
 import { EditPlayer } from './edit-player'
 import { EditMatch } from './edit-match'
 import { RemoveAllPlayers } from './remove-all-players'
+import { PrintView } from './print-view'
 
 const notImplemented = (name: string) => {
   const options = {
@@ -220,6 +221,15 @@ export class App extends React.Component<IAppProps, IAppState> {
   }
 
   public render() {
+    const printContent = this.props.manager.getPrintContent()
+    if (printContent !== undefined) {
+      return (
+        <div id="xiaogangpao">
+          <PrintView manager={this.props.manager} conetent={printContent} />
+        </div>
+      )
+    }
+
     return (
       <div id="xiaogangpao">
         <MatchView manager={this.props.manager} match={this.props.manager.getMatch()} />

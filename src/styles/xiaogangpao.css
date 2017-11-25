@@ -1,10 +1,10 @@
 @import '~bootstrap/dist/css/bootstrap.min.css';
 
-div#match {
+div#xiaogangpao {
   text-align: center;
 }
 
-div#match h1 {
+div#xiaogangpao h1 {
   color: royalblue;
 }
 

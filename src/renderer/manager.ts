@@ -24,12 +24,14 @@ export enum PopupType {
 }
 
 export class Manager {
+  private contentToPrint: any
   private openDialogs: PopupType[]
   private app?: App
   private matchStore: MatchStore
   private playerToDeleteOrEdit: number | undefined
 
   constructor() {
+    this.contentToPrint = undefined
     this.openDialogs = []
     this.matchStore = new MatchStore()
   }
@@ -40,6 +42,15 @@ export class Manager {
 
   public updateMatch(match: ImmutableMatch) {
     // TODO
+  }
+
+  public print(contentToPrint: any) {
+    this.contentToPrint = contentToPrint
+    this.updateAppState()
+  }
+
+  public getPrintContent() {
+    return this.contentToPrint
   }
 
   public getOpenDialogs() {

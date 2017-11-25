@@ -16,6 +16,7 @@ interface IPairringTableState {}
 export class PairringTable extends React.PureComponent<IPairringTableProps, IPairringTableState> {
   constructor(props: IPairringTableProps) {
     super(props)
+    console.log('PairringTable constructed')
   }
 
   public render() {
@@ -173,7 +174,7 @@ export class PairringTable extends React.PureComponent<IPairringTableProps, IPai
     } else if (row.result === '=') {
       gameResult = '和'
     } else {
-      gameResult = '*'
+      gameResult = ''
     }
 
     return <th>{gameResult}</th>

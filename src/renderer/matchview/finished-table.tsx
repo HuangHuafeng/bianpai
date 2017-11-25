@@ -79,7 +79,7 @@ export class FinishedTable extends React.PureComponent<IFinishedTableProps, IFin
     } else if (row.result === '=') {
       gameResult = '和'
     } else {
-      gameResult = '*'
+      gameResult = ''
     }
 
     return <th>{gameResult}</th>

@@ -15,11 +15,12 @@ interface IMatchRoundsState {
   readonly activeTab: number
 }
 
-export class MatchRounds extends React.Component<IMatchRoundsProps, IMatchRoundsState> {
+export class MatchRounds extends React.PureComponent<IMatchRoundsProps, IMatchRoundsState> {
   constructor(props: IMatchRoundsProps) {
     super(props)
 
     this.state = { selectedIndex: 0, activeTab: 1 }
+    console.log('MatchRounds constructed')
   }
 
   public componentWillReceiveProps?(nextProps: IMatchRoundsProps) {

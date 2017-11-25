@@ -1,12 +1,12 @@
 import * as React from 'react'
+import { Button } from 'react-bootstrap'
+import * as assert from 'assert'
 import { Manager } from '../manager'
 import { ImmutableMatch, MatchStatus, RoundStatus } from '../../common/immutable-match'
 import { Round } from '../../common/immutable-round'
 import { PairringTable } from './pairring-table'
 import { FightingTable } from './fighting-table'
 import { FinishedTable } from './finished-table'
-import { Button } from 'react-bootstrap'
-import * as assert from 'assert'
 
 interface IRoundViewProps {
   readonly manager: Manager
@@ -125,6 +125,9 @@ export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewSt
         <Button bsStyle="primary" onClick={this.restorePairing}>
           恢复为软件安排的对阵
         </Button>
+        <Button bsStyle="primary" onClick={this.printPairingToPDF}>
+          打印对阵表
+        </Button>
         <PairringTable
           roundData={roundData}
           playerList={this.props.match.playerList}
@@ -136,6 +139,25 @@ export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewSt
 
   private onExchangePlayerInGame = (table: number, currentPlayerNumber: number, withPlayerNumber: number) => {
     this.props.manager.changePlayerInGame(table, currentPlayerNumber, withPlayerNumber)
+  }
+
+  private printPairingToPDF = () => {
+    this.props.manager.print({ type: 'pairing-table', round: this.props.round })
+    /*
+    let win: Electron.BrowserWindow | null = new Electron.remote.BrowserWindow({ width: 400, height: 320 })
+    win.on('close', function() {
+      win = null
+    })
+    const html = ['<body>', '<h1>It works</h1>', '</body>'].join('')
+    win.loadURL('data:text/html;charset=utf-8,' + encodeURI(html))
+    win.show()
+    win.on('ready-to-show', () => {
+      win = win as Electron.BrowserWindow
+      win.webContents.printToPDF({}, (error, buffer) => {
+        fs.writeFileSync('wc.pdf', buffer)
+      })
+    })
+    */
   }
 
   private restorePairing = () => {
