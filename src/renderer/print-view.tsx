@@ -56,9 +56,9 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
   public render() {
     return (
       <div id="printing">
+        {this.renderButtons()}
         {this.renderPairingTable()}
         {this.renderMatchResult()}
-        {this.renderButtons()}
       </div>
     )
   }
@@ -70,8 +70,12 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
 
     return (
       <div id="printing-buttons">
-        <Button onClick={this.saveToPDF}>保存到PDF文件</Button>
-        <Button onClick={this.finishPrint}>返回</Button>
+        <Button bsStyle="primary" onClick={this.saveToPDF}>
+          保存到PDF文件
+        </Button>
+        <Button bsStyle="primary" onClick={this.finishPrint}>
+          返回
+        </Button>
       </div>
     )
   }
@@ -106,7 +110,7 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
       <div id="printing-pairing-table">
         <h1>{match.name}</h1>
         <h3>{match.organizer}</h3>
-        <MatchResult manager={this.props.manager} match={match} />
+        <MatchResult manager={this.props.manager} match={match} printing />
       </div>
     )
   }

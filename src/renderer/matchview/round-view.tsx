@@ -129,6 +129,7 @@ export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewSt
           打印对阵表
         </Button>
         <PairringTable
+          manager={this.props.manager}
           roundData={roundData}
           playerList={this.props.match.playerList}
           changePlayerCallback={this.onExchangePlayerInGame}

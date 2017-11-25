@@ -29,16 +29,16 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
       <div id="players">
         <div id="players-modify">
           <p className="summary">选手总数：{numberOfPlayers}</p>
-          <Button onClick={() => sendMenuEvent('add-player')} disabled={disabled}>
+          <Button bsStyle="primary" onClick={() => sendMenuEvent('add-player')} disabled={disabled}>
             增加选手
           </Button>
           <Button bsStyle="danger" onClick={() => sendMenuEvent('remove-all-players')} disabled={disabled}>
             全部删除
           </Button>
-          <Button onClick={this.importPlayersFromFile} disabled={disabled}>
+          <Button bsStyle="primary" onClick={this.importPlayersFromFile} disabled={disabled}>
             从文件导入选手
           </Button>
-          <Button onClick={this.exportPlayersToFile} disabled={disabled}>
+          <Button bsStyle="primary" onClick={this.exportPlayersToFile} disabled={disabled}>
             导出选手到文件
           </Button>
         </div>
@@ -175,7 +175,7 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
         <th>{player.organization}</th>
         <th>{player.note}</th>
         <th>
-          <Button bsSize="xsmall" onClick={() => this.editPlayer(player.number)} disabled={disabled}>
+          <Button bsStyle="primary" bsSize="xsmall" onClick={() => this.editPlayer(player.number)} disabled={disabled}>
             编辑
           </Button>
           <Button bsSize="xsmall" bsStyle="danger" onClick={() => this.removePlayer(player.number)} disabled={disabled}>

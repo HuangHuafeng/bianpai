@@ -28,7 +28,9 @@ export class About extends React.Component<IAboutProps, IAboutState> {
           <p>{version}</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={this.props.onDismissed}>确定</Button>
+          <Button bsStyle="primary" onClick={this.props.onDismissed}>
+            确定
+          </Button>
         </Modal.Footer>
       </Modal>
     )

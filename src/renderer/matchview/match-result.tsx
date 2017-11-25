@@ -7,6 +7,7 @@ import { Button, Table } from 'react-bootstrap'
 interface IMatchResultProps {
   readonly manager: Manager
   readonly match: ImmutableMatch
+  readonly printing?: boolean
 }
 
 interface IMatchResultState {}
@@ -23,14 +24,24 @@ export class MatchResult extends React.PureComponent<IMatchResultProps, IMatchRe
     return (
       <div id="match-result">
         {this.renderMessage()}
-        <Button bsStyle="primary" onClick={this.printPairingToPDF}>
-          打印对阵表
-        </Button>
+        {this.renderActions()}
         <Table striped bordered condensed hover responsive>
           <thead>{this.renderTableHead()}</thead>
           <tbody>{this.renderTableBody()}</tbody>
         </Table>
       </div>
+    )
+  }
+
+  private renderActions() {
+    if (this.props.printing) {
+      return null
+    }
+
+    return (
+      <Button bsStyle="primary" onClick={this.printPairingToPDF}>
+        打印
+      </Button>
     )
   }
 
@@ -90,8 +101,10 @@ export class MatchResult extends React.PureComponent<IMatchResultProps, IMatchRe
     let message
     if (this.props.match.status === MatchStatus.Finished) {
       message = '比赛结束，最终排名如下'
+    } else if (this.props.match.status === MatchStatus.NotStarted) {
+      message = '比赛还没有开始，参加比赛的选手如下'
     } else {
-      message = '比赛还没有结束，即时排名如下'
+      message = `正在进行第${this.props.match.currentRound}轮，即时排名如下`
     }
 
     return <p className="summary">{message}</p>

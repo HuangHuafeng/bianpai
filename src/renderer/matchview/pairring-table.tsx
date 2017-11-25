@@ -4,8 +4,11 @@ import { Table, Button, OverlayTrigger, Popover, ListGroup, ListGroupItem } from
 import { Round } from '../../common/immutable-round'
 import { Game } from '../../common/immutable-game'
 import { Player } from '../../common/immutable-player'
+import * as hf from '../../common/helper-functions'
+import { Manager } from '../manager'
 
 interface IPairringTableProps {
+  readonly manager: Manager
   readonly roundData: Round
   readonly playerList: Immutable.List<Player>
   readonly changePlayerCallback: (table: number, currentPlayerNumber: number, withPlayerNumber: number) => void
@@ -16,7 +19,7 @@ interface IPairringTableState {}
 export class PairringTable extends React.PureComponent<IPairringTableProps, IPairringTableState> {
   constructor(props: IPairringTableProps) {
     super(props)
-    console.log('PairringTable constructed')
+    hf.debugLog('PairringTable constructed')
   }
 
   public render() {
@@ -208,9 +211,13 @@ export class PairringTable extends React.PureComponent<IPairringTableProps, IPai
   }
 
   private buildPlayerListPopover(currentGameIndex: number, currentPlayer: Player, playerList: Immutable.List<Player>) {
+    // sort the players, so it would be easier for the user to find the player to switch
+    const match = this.props.manager.getMatch()
+    const sortedPlayerList = match.sortPlayers(playerList)
+
     let ret = []
-    for (let index = 0; index < playerList.size; index++) {
-      const player = playerList.get(index)
+    for (let index = 0; index < sortedPlayerList.size; index++) {
+      const player = sortedPlayerList.get(index)
       if (player === currentPlayer) {
         // don't add himself
         continue

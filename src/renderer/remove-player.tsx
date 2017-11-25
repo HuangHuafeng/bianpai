@@ -45,7 +45,9 @@ export class RemovePlayer extends React.Component<IRemovePlayerProps, IRemovePla
           <Button bsStyle="danger" onClick={this.onOK}>
             确定
           </Button>
-          <Button onClick={this.props.onDismissed}>取消</Button>
+          <Button bsStyle="primary" onClick={this.props.onDismissed}>
+            取消
+          </Button>
         </Modal.Footer>
       </Modal>
     )

@@ -100,10 +100,12 @@ export class CreateMatch extends React.Component<ICreateMatchProps, ICreateMatch
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <Button type="submit" disabled={disabled} onClick={this.onOK}>
+          <Button bsStyle="primary" type="submit" disabled={disabled} onClick={this.onOK}>
             确定
           </Button>
-          <Button onClick={this.props.onDismissed}>取消</Button>
+          <Button bsStyle="primary" onClick={this.props.onDismissed}>
+            取消
+          </Button>
         </Modal.Footer>
       </Modal>
     )

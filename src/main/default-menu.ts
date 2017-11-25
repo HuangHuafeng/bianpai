@@ -4,19 +4,19 @@ import { emit } from '../common/menu-event'
 export function buildDefaultMenu(): Electron.Menu {
   let template: Array<Electron.MenuItemConstructorOptions> = [
     {
-      label: 'File',
+      label: '文件',
       submenu: [
         {
-          label: 'New',
+          label: '新建',
           accelerator: 'CmdOrCtrl+N',
           click: emit('file-new'),
         },
         {
-          label: 'Open',
+          label: '打开',
           click: emit('file-open'),
         },
         {
-          label: 'Save',
+          label: '保存',
           click: emit('file-save'),
         },
       ],
@@ -56,7 +56,7 @@ export function buildDefaultMenu(): Electron.Menu {
       label: name,
       submenu: [
         {
-          label: `About ${name}`,
+          label: `关于${name}`,
           click: emit('show-about'),
         },
         {
@@ -100,7 +100,7 @@ export function buildDefaultMenu(): Electron.Menu {
     // add the About menu item
     let submenu = template[template.length - 1].submenu as Electron.MenuItemConstructorOptions[]
     submenu.unshift({
-      label: `About ${name}`,
+      label: `关于${name}`,
       click: emit('show-about'),
     })
   }
