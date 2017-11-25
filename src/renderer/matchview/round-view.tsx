@@ -49,116 +49,101 @@ export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewSt
   */
 
   public render() {
-    const matchStatus = this.props.match.status
-    if (matchStatus !== MatchStatus.NotStarted) {
-      switch (this.props.match.getRoundStatus(this.props.round)) {
-        case RoundStatus.NotStarted:
-          return this.renderNotStarted()
+    const roundStatus = this.props.match.getRoundStatus(this.props.round)
+    const roundData: Round = this.props.match.getRoundData(this.props.round)
+    let status: string
+    let actions = []
+    let data
+    switch (roundStatus) {
+      case RoundStatus.NotStarted:
+        status = '本轮比赛还没有开始'
+        break
 
-        case RoundStatus.OnGoingPairing:
-          return this.renderPairing()
+      case RoundStatus.OnGoingPairing:
+        status = '本轮比赛正在安排对阵表'
+        actions.push(
+          <Button bsStyle="primary" onClick={this.startRound} key="end-pairing">
+            对阵安排完成，开始本轮比赛
+          </Button>
+        )
+        actions.push(
+          <Button bsStyle="primary" onClick={this.restorePairing} key="restore-pairing">
+            恢复为软件安排的对阵
+          </Button>
+        )
+        data = (
+          <PairringTable
+            manager={this.props.manager}
+            roundData={roundData}
+            playerList={this.props.match.playerList}
+            changePlayerCallback={this.onExchangePlayerInGame}
+          />
+        )
+        break
 
-        case RoundStatus.OnGoingFighting:
-          return this.renderOngoing()
+      case RoundStatus.OnGoingFighting:
+        status = '本轮比赛正在进行，请在下方录入每一台的结果'
+        const disabled = roundData.canEnd() === false
+        actions.push(
+          <Button bsStyle="primary" onClick={this.printPairingToPDF} key="pairing">
+            打印对阵表
+          </Button>
+        )
+        actions.push(
+          <Button bsStyle="primary" onClick={this.endCurrentRound} disabled={disabled} key="end-fighting">
+            结束本轮比赛
+          </Button>
+        )
+        data = <FightingTable roundData={roundData} updateCallback={this.updateTableResult} />
+        break
 
-        case RoundStatus.Finished:
-          return this.renderFinished()
+      case RoundStatus.Finished:
+        status = '本轮比赛已经结束'
+        actions.push(
+          <Button bsStyle="primary" onClick={this.printPairingToPDF} key="pairing">
+            打印对阵表
+          </Button>
+        )
+        actions.push(
+          <Button bsStyle="primary" onClick={this.printResultToPDF} key="result">
+            打印结果
+          </Button>
+        )
+        data = <FinishedTable roundData={roundData} />
+        break
 
-        default:
-          assert.ok(false, 'IMPOSSIBLE!')
-          return null
-      }
-    } else {
-      return this.renderMatchNotStarted()
+      default:
+        throw new Error('IMPOSSIBLE! unknown round status.')
     }
-  }
 
-  private renderMatchNotStarted() {
     return (
       <div id="round-view">
-        <p className="summary">比赛还没有开始</p>
+        <div id="round-status-and-actions">
+          <p>
+            {status}
+            <br />
+            {actions}
+          </p>
+        </div>
+        {data}
       </div>
     )
-  }
-
-  private renderNotStarted() {
-    return <p className="summary">本轮比赛还没有开始</p>
   }
 
   private updateTableResult = (table: number, result: string) => {
     this.props.manager.updateTableResult(this.props.match.currentRound, table, result)
   }
 
-  private renderFinished() {
-    const roundData: Round = this.props.match.getRoundData(this.props.round)
-
-    return (
-      <div id="round-view">
-        <p className="summary">本轮比赛已经结束</p>
-        <FinishedTable roundData={roundData} />
-      </div>
-    )
-  }
-
-  private renderOngoing() {
-    const roundData: Round = this.props.match.getRoundData(this.props.round)
-    const disabled = roundData.canEnd() === false
-
-    return (
-      <div id="round-view">
-        <Button bsStyle="primary" onClick={this.endCurrentRound} disabled={disabled}>
-          结束本轮比赛
-        </Button>
-        <FightingTable roundData={roundData} updateCallback={this.updateTableResult} />
-      </div>
-    )
-  }
-
-  private renderPairing() {
-    const roundData: Round = this.props.match.getRoundData(this.props.round)
-
-    return (
-      <div id="round-view">
-        <Button bsStyle="primary" onClick={this.startRound}>
-          对阵安排完成，开始本轮比赛
-        </Button>
-        <Button bsStyle="primary" onClick={this.restorePairing}>
-          恢复为软件安排的对阵
-        </Button>
-        <Button bsStyle="primary" onClick={this.printPairingToPDF}>
-          打印对阵表
-        </Button>
-        <PairringTable
-          manager={this.props.manager}
-          roundData={roundData}
-          playerList={this.props.match.playerList}
-          changePlayerCallback={this.onExchangePlayerInGame}
-        />
-      </div>
-    )
-  }
-
   private onExchangePlayerInGame = (table: number, currentPlayerNumber: number, withPlayerNumber: number) => {
     this.props.manager.changePlayerInGame(table, currentPlayerNumber, withPlayerNumber)
   }
 
+  private printResultToPDF = () => {
+    this.props.manager.print({ type: 'round-result', round: this.props.round })
+  }
+
   private printPairingToPDF = () => {
-    this.props.manager.print({ type: 'pairing-table', round: this.props.round })
-    /*
-    let win: Electron.BrowserWindow | null = new Electron.remote.BrowserWindow({ width: 400, height: 320 })
-    win.on('close', function() {
-      win = null
-    })
-    const html = ['<body>', '<h1>It works</h1>', '</body>'].join('')
-    win.loadURL('data:text/html;charset=utf-8,' + encodeURI(html))
-    win.show()
-    win.on('ready-to-show', () => {
-      win = win as Electron.BrowserWindow
-      win.webContents.printToPDF({}, (error, buffer) => {
-        fs.writeFileSync('wc.pdf', buffer)
-      })
-    })
-    */
+    this.props.manager.print({ type: 'round-pairing', round: this.props.round })
   }
 
   private restorePairing = () => {

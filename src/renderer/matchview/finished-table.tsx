@@ -5,6 +5,7 @@ import { Game } from '../../common/immutable-game'
 
 interface IFinishedTableProps {
   readonly roundData: Round
+  readonly dontShowResult?: boolean
 }
 
 interface IFinishedTableState {}
@@ -71,6 +72,10 @@ export class FinishedTable extends React.PureComponent<IFinishedTableProps, IFin
   }
 
   private renderResult(row: Game) {
+    if (this.props.dontShowResult) {
+      return <th />
+    }
+
     let gameResult
     if (row.result === '+') {
       gameResult = '胜'

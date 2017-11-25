@@ -50,6 +50,21 @@ export class Test extends React.Component<ITestProps, ITestState> {
     })
     win.loadURL(modalPath)
     win.show()
+    /*
+    let win: Electron.BrowserWindow | null = new Electron.remote.BrowserWindow({ width: 400, height: 320 })
+    win.on('close', function() {
+      win = null
+    })
+    const html = ['<body>', '<h1>It works</h1>', '</body>'].join('')
+    win.loadURL('data:text/html;charset=utf-8,' + encodeURI(html))
+    win.show()
+    win.on('ready-to-show', () => {
+      win = win as Electron.BrowserWindow
+      win.webContents.printToPDF({}, (error, buffer) => {
+        fs.writeFileSync('wc.pdf', buffer)
+      })
+    })
+    */
   }
 
   public render() {

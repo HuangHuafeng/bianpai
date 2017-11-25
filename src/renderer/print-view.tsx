@@ -57,7 +57,8 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
     return (
       <div id="printing">
         {this.renderButtons()}
-        {this.renderPairingTable()}
+        {this.renderRoundPairing()}
+        {this.renderRoundResult()}
         {this.renderMatchResult()}
       </div>
     )
@@ -80,8 +81,8 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
     )
   }
 
-  private renderPairingTable() {
-    if (this.props.conetent.type === undefined || this.props.conetent.type !== 'pairing-table') {
+  private renderRoundResult() {
+    if (this.props.conetent.type === undefined || this.props.conetent.type !== 'round-result') {
       return null
     }
 
@@ -90,11 +91,28 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
     const roundData = match.getRoundData(round)
 
     return (
-      <div id="printing-pairing-table">
-        <h1>{match.name}</h1>
-        <h3>{match.organizer}</h3>
-        <p>{'第' + round + '轮对阵表'}</p>
+      <div id="printing-round-result">
+        <h3>{match.name}</h3>
+        <p>{'第' + round + '轮结果'}</p>
         <FinishedTable roundData={roundData} />
+      </div>
+    )
+  }
+
+  private renderRoundPairing() {
+    if (this.props.conetent.type === undefined || this.props.conetent.type !== 'round-pairing') {
+      return null
+    }
+
+    const round: number = this.props.conetent.round
+    const match = this.props.manager.getMatch()
+    const roundData = match.getRoundData(round)
+
+    return (
+      <div id="printing-round-pairing">
+        <h3>{match.name}</h3>
+        <p>{'第' + round + '轮对阵表'}</p>
+        <FinishedTable roundData={roundData} dontShowResult />
       </div>
     )
   }
