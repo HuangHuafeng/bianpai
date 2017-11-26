@@ -11,7 +11,6 @@ interface IMatchRoundsProps {
 }
 
 interface IMatchRoundsState {
-  readonly selectedIndex: number
   readonly activeTab: number
 }
 
@@ -19,7 +18,14 @@ export class MatchRounds extends React.PureComponent<IMatchRoundsProps, IMatchRo
   constructor(props: IMatchRoundsProps) {
     super(props)
 
-    this.state = { selectedIndex: 0, activeTab: 1 }
+    const lastPrintContent = props.manager.getLastPrintContent()
+    let activeTab: number = 1
+    if (lastPrintContent) {
+      if (lastPrintContent.type === 'round-result' || lastPrintContent.type === 'round-pairing') {
+        activeTab = lastPrintContent.round
+      }
+    }
+    this.state = { activeTab }
     console.log('MatchRounds constructed')
   }
 

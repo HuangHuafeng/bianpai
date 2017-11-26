@@ -23,8 +23,13 @@ export class MatchResult extends React.PureComponent<IMatchResultProps, IMatchRe
   public render() {
     return (
       <div id="match-result">
-        {this.renderMessage()}
-        {this.renderActions()}
+        <div id="match-result-status-and-actions">
+          <p>
+            {this.renderMessage()}
+            <br />
+            {this.renderActions()}
+          </p>
+        </div>
         <Table striped bordered condensed hover responsive>
           <thead>{this.renderTableHead()}</thead>
           <tbody>{this.renderTableBody()}</tbody>
@@ -107,6 +112,6 @@ export class MatchResult extends React.PureComponent<IMatchResultProps, IMatchRe
       message = `正在进行第${this.props.match.currentRound}轮，即时排名如下`
     }
 
-    return <p className="summary">{message}</p>
+    return message
   }
 }

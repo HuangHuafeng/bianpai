@@ -62,7 +62,7 @@ export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewSt
       case RoundStatus.OnGoingPairing:
         status = '本轮比赛正在安排对阵表'
         actions.push(
-          <Button bsStyle="primary" onClick={this.startRound} key="end-pairing">
+          <Button bsStyle="danger" onClick={this.startRound} key="end-pairing">
             对阵安排完成，开始本轮比赛
           </Button>
         )
@@ -90,7 +90,7 @@ export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewSt
           </Button>
         )
         actions.push(
-          <Button bsStyle="primary" onClick={this.endCurrentRound} disabled={disabled} key="end-fighting">
+          <Button bsStyle="danger" onClick={this.endCurrentRound} disabled={disabled} key="end-fighting">
             结束本轮比赛
           </Button>
         )

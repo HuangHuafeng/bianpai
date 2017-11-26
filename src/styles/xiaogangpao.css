@@ -60,3 +60,13 @@ div#playerlist button {
   color: red;
   font-weight: bold;
 }
+
+div#printing-buttons {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+div#match {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}

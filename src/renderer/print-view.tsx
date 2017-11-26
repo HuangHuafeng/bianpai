@@ -93,7 +93,7 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
     return (
       <div id="printing-round-result">
         <h3>{match.name}</h3>
-        <p>{'第' + round + '轮结果'}</p>
+        <h4>{'第' + round + '轮结果'}</h4>
         <FinishedTable roundData={roundData} />
       </div>
     )
@@ -111,7 +111,7 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
     return (
       <div id="printing-round-pairing">
         <h3>{match.name}</h3>
-        <p>{'第' + round + '轮对阵表'}</p>
+        <h4>{'第' + round + '轮对阵表'}</h4>
         <FinishedTable roundData={roundData} dontShowResult />
       </div>
     )

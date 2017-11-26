@@ -37,7 +37,7 @@ export class FightingTable extends React.PureComponent<IFightingTableProps, IFig
         <th>积分</th>
         <th>黑方单位</th>
         <th>编号</th>
-        <th>操作</th>
+        <th>结果</th>
       </tr>
     )
   }
@@ -91,16 +91,16 @@ export class FightingTable extends React.PureComponent<IFightingTableProps, IFig
   private renderActions(row: Game) {
     const actions = (
       <th>
-        <Button bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '+')}>
+        <Button bsSize="xsmall" bsStyle="primary" onClick={() => this.setTableResult(row.table, '+')}>
           红胜
         </Button>
-        <Button bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '=')}>
+        <Button bsSize="xsmall" bsStyle="primary" onClick={() => this.setTableResult(row.table, '=')}>
           和棋
         </Button>
-        <Button bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '-')}>
+        <Button bsSize="xsmall" bsStyle="primary" onClick={() => this.setTableResult(row.table, '-')}>
           黒胜
         </Button>
-        <Button bsSize="xsmall" bsStyle="warning" onClick={() => this.setTableResult(row.table, '?')}>
+        <Button bsSize="xsmall" bsStyle="primary" onClick={() => this.setTableResult(row.table, '?')}>
           未知
         </Button>
       </th>

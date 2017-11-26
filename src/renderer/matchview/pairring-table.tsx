@@ -191,7 +191,7 @@ export class PairringTable extends React.PureComponent<IPairringTableProps, IPai
           placement="left"
           overlay={this.buildPlayerListPopover(row.table, row.redPlayer, this.props.playerList)}
         >
-          <Button bsSize="xsmall" bsStyle="warning">
+          <Button bsSize="xsmall" bsStyle="primary">
             指定红方
           </Button>
         </OverlayTrigger>
@@ -200,7 +200,7 @@ export class PairringTable extends React.PureComponent<IPairringTableProps, IPai
           placement="left"
           overlay={this.buildPlayerListPopover(row.table, row.blackPlayer, this.props.playerList)}
         >
-          <Button bsSize="xsmall" bsStyle="warning">
+          <Button bsSize="xsmall" bsStyle="primary">
             指定黑方
           </Button>
         </OverlayTrigger>

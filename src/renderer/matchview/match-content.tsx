@@ -20,7 +20,16 @@ export class MatchContent extends React.Component<IMatchContentProps, IMatchCont
   constructor(props: IMatchContentProps) {
     super(props)
 
-    this.state = { activeTab: 2 }
+    const lastPrintContent = props.manager.getLastPrintContent()
+    let activeTab: number = 2
+    if (lastPrintContent) {
+      if (lastPrintContent.type === 'pairing-match-result') {
+        activeTab = 4
+      } else if (lastPrintContent.type === 'round-result' || lastPrintContent.type === 'round-pairing') {
+        activeTab = 3
+      }
+    }
+    this.state = { activeTab }
   }
 
   private handleSelect = (key: any) => {
