@@ -6,11 +6,11 @@
  */
 import * as React from 'react'
 import * as Electron from 'electron'
-import * as path from 'path'
 import { Button } from 'react-bootstrap'
 import { Manager } from './manager'
 import { ImmutableMatch } from '../common/immutable-match'
 import { debugLog } from '../common/helper-functions'
+const printHtml = require('./print.html')
 
 export enum PopupType {
   About = 1,
@@ -42,13 +42,13 @@ export class Test extends React.Component<ITestProps, ITestState> {
     debugLog(process.env.NODE_ENV)
     debugLog(process.env)
 
-    const modalPath = path.join('file://', __dirname, '../print.html')
-    debugLog(modalPath)
     let win: any = new Electron.remote.BrowserWindow({ width: 400, height: 320 })
     win.on('close', function() {
       win = null
     })
-    win.loadURL(modalPath)
+    //win.loadURL(printHtml)
+    const html = ['<body>', printHtml, '</body>'].join('')
+    win.loadURL('data:text/html;charset=utf-8,' + encodeURI(html))
     win.show()
     /*
     let win: Electron.BrowserWindow | null = new Electron.remote.BrowserWindow({ width: 400, height: 320 })

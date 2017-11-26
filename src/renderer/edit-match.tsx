@@ -40,6 +40,7 @@ export class EditMatch extends React.Component<IEditMatchProps, IEditMatchState>
     this.match.setTotalRounds(Number(this.state.totalRounds))
     this.props.manager.updateMatch(this.match)
     this.props.onDismissed()
+    console.log('xxxxx')
   }
 
   private onNameChanged = (e: any) => {
@@ -86,37 +87,27 @@ export class EditMatch extends React.Component<IEditMatchProps, IEditMatchState>
       Number(this.state.totalRounds) > this.props.manager.getMaximumTotalRounds()
 
     return (
-      <Modal show={true} onHide={this.props.onDismissed} backdrop="static">
-        <Modal.Header>
-          <Modal.Title>新建比赛</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {this.renderTooBigTotalRoundsWarning()}
-          <form>
-            <FormGroup>
-              <ControlLabel>比赛名称</ControlLabel>
-              <FormControl type="text" value={this.state.name} onChange={this.onNameChanged} />
-            </FormGroup>
-            <FormGroup>
-              <ControlLabel>主办单位</ControlLabel>
-              <FormControl type="text" value={this.state.organizer} onChange={this.onOrganizerChanged} />
-            </FormGroup>
-            <FormGroup controlId="totalrounds" validationState={this.validateTotalRounds()}>
-              <ControlLabel>总轮数</ControlLabel>
-              <FormControl type="text" value={this.state.totalRounds} onChange={this.onTotalRoundsChanged} />
-              <FormControl.Feedback />
-            </FormGroup>
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button bsStyle="primary" type="submit" disabled={disabled} onClick={this.onOK}>
-            确定
-          </Button>
-          <Button bsStyle="primary" onClick={this.props.onDismissed}>
-            取消
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <form>
+        <FormGroup>
+          <ControlLabel>比赛名称</ControlLabel>
+          <FormControl type="text" value={this.state.name} onChange={this.onNameChanged} />
+        </FormGroup>
+        <FormGroup>
+          <ControlLabel>主办单位</ControlLabel>
+          <FormControl type="text" value={this.state.organizer} onChange={this.onOrganizerChanged} />
+        </FormGroup>
+        <FormGroup controlId="totalrounds" validationState={this.validateTotalRounds()}>
+          <ControlLabel>总轮数</ControlLabel>
+          <FormControl type="text" value={this.state.totalRounds} onChange={this.onTotalRoundsChanged} />
+          <FormControl.Feedback />
+        </FormGroup>
+        <Button bsStyle="primary" type="submit" disabled={disabled} onClick={this.onOK}>
+          确定
+        </Button>
+        <Button bsStyle="primary" onClick={this.props.onDismissed}>
+          取消
+        </Button>
+      </form>
     )
   }
 }
