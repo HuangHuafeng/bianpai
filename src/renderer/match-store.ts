@@ -147,6 +147,13 @@ export class MatchStore {
     return this.match
   }
 
+  public newMatch(match: ImmutableMatch) {
+    this.match = new ImmutableMatch()
+    this.actionHistory = []
+
+    this.updateMatch(match)
+  }
+
   public updateMatch(match: ImmutableMatch) {
     // we should not just replace the match!!! Instead we should update the current match
     if (this.match.name !== match.name) {
@@ -177,16 +184,6 @@ export class MatchStore {
       this.setNote(match.note)
     }
   }
-
-  /*
-  public newMatch(name: string, totalRounds: number, organizer: string = '') {
-    this.match = new ImmutableMatch()
-    this.actionHistory = []
-    this.setName(name)
-    this.setTotalRounds(totalRounds)
-    this.setOrganizer(organizer)
-  }
-  */
 
   public setName(name: string) {
     this.doMatchAction({ type: MatchActionType.SetName, parameter: name })

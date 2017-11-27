@@ -45,6 +45,11 @@ export class Manager {
     return this.matchStore.getMatch()
   }
 
+  public newMatch(match: ImmutableMatch) {
+    this.matchStore.newMatch(match)
+    this.updateAppState()
+  }
+
   public updateMatch(match: ImmutableMatch) {
     this.matchStore.updateMatch(match)
     this.updateAppState()

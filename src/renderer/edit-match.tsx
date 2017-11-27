@@ -78,7 +78,7 @@ export class EditMatch extends React.Component<IEditMatchProps, IEditMatchState>
       this.props.manager.updateMatch(this.match)
     } else {
       // new match
-      this.props.manager.updateMatch(this.match)
+      this.props.manager.newMatch(this.match)
       //this.props.manager.newMatch(this.state.name, totalRounds, this.state.organizer)
     }
     this.props.onDismissed()
