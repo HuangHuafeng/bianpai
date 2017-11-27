@@ -1,25 +1,32 @@
 import * as fs from 'fs'
 import * as crypto from 'crypto'
 import { ImmutableMatch } from '../common/immutable-match'
+import { debugLog } from '../common/helper-functions'
 
-export enum MatchActionType {
-  SetName = 1,
-  SetOrganizer,
-  SetTotalRounds,
-  AddPlayer,
-  UpdatePlayer,
-  RemovePlayer,
-  RemoveAllPlayer,
-  UpdateTableResult,
-  StartCurrentRound,
-  StartMatch,
-  EndCurrentRound,
-  ChangePlayerInGame,
-  ResetPairing,
+const MatchActionType = {
+  SetName: 'SET_NAME',
+  SetOrganizer: 'SET_ORGANIZER',
+  SetTotalRounds: 'SET_TOTAL_ROUNDS',
+  SetWinScore: 'SET_WIN_SCORE',
+  SetLoseScore: 'SET_LOSE_SCORE',
+  SetDrawScore: 'SET_DRAW_SCORE',
+  SetJudge: 'SET_JUDGE',
+  SetArranger: 'SET_ARRANGER',
+  SetNote: 'SET_NOTE',
+  AddPlayer: 'ADD_PLAYER',
+  UpdatePlayer: 'UPDATE_PLAYER',
+  RemovePlayer: 'REMOVE_PLAYER',
+  RemoveAllPlayer: 'REMOVE_ALL_PLAYERS',
+  UpdateTableResult: 'UPDATE_TABLE_RESULT',
+  StartCurrentRound: 'START_CURRENT_ROUND',
+  StartMatch: 'START_MATCH',
+  EndCurrentRound: 'END_CURRENT_ROUND',
+  ChangePlayerInGame: 'CHANGE_PLAYER_IN_GAME',
+  ResetPairing: 'RESET_PAIRING',
 }
 
 export interface MatchAction {
-  type: MatchActionType
+  type: string
   parameter: any
 }
 
@@ -44,8 +51,32 @@ export class MatchStore {
         this.match = this.match.setOrganizer(action.parameter)
         break
 
+      case MatchActionType.SetJudge:
+        this.match = this.match.setJudge(action.parameter)
+        break
+
+      case MatchActionType.SetArranger:
+        this.match = this.match.setArranger(action.parameter)
+        break
+
+      case MatchActionType.SetNote:
+        this.match = this.match.setNote(action.parameter)
+        break
+
       case MatchActionType.SetTotalRounds:
         this.match = this.match.setTotalRounds(action.parameter)
+        break
+
+      case MatchActionType.SetWinScore:
+        this.match = this.match.setWinScore(action.parameter)
+        break
+
+      case MatchActionType.SetLoseScore:
+        this.match = this.match.setLoseScore(action.parameter)
+        break
+
+      case MatchActionType.SetDrawScore:
+        this.match = this.match.setDrawScore(action.parameter)
         break
 
       case MatchActionType.AddPlayer:
@@ -116,6 +147,38 @@ export class MatchStore {
     return this.match
   }
 
+  public updateMatch(match: ImmutableMatch) {
+    // we should not just replace the match!!! Instead we should update the current match
+    if (this.match.name !== match.name) {
+      this.setName(match.name)
+    }
+    if (this.match.organizer !== match.organizer) {
+      this.setOrganizer(match.organizer)
+    }
+    if (this.match.totalRounds !== match.totalRounds) {
+      this.setTotalRounds(match.totalRounds)
+    }
+    if (this.match.winScore !== match.winScore) {
+      this.setWinScore(match.winScore)
+    }
+    if (this.match.loseScore !== match.loseScore) {
+      this.setLoseScore(match.loseScore)
+    }
+    if (this.match.drawScore !== match.drawScore) {
+      this.setDrawScore(match.drawScore)
+    }
+    if (this.match.judge !== match.judge) {
+      this.setJudge(match.judge)
+    }
+    if (this.match.arranger !== match.arranger) {
+      this.setArranger(match.arranger)
+    }
+    if (this.match.note !== match.note) {
+      this.setNote(match.note)
+    }
+  }
+
+  /*
   public newMatch(name: string, totalRounds: number, organizer: string = '') {
     this.match = new ImmutableMatch()
     this.actionHistory = []
@@ -123,6 +186,7 @@ export class MatchStore {
     this.setTotalRounds(totalRounds)
     this.setOrganizer(organizer)
   }
+  */
 
   public setName(name: string) {
     this.doMatchAction({ type: MatchActionType.SetName, parameter: name })
@@ -134,6 +198,30 @@ export class MatchStore {
 
   public setTotalRounds(totalRounds: number) {
     this.doMatchAction({ type: MatchActionType.SetTotalRounds, parameter: totalRounds })
+  }
+
+  public setWinScore(winScore: number) {
+    this.doMatchAction({ type: MatchActionType.SetWinScore, parameter: winScore })
+  }
+
+  public setLoseScore(loseScore: number) {
+    this.doMatchAction({ type: MatchActionType.SetLoseScore, parameter: loseScore })
+  }
+
+  public setDrawScore(drawScore: number) {
+    this.doMatchAction({ type: MatchActionType.SetDrawScore, parameter: drawScore })
+  }
+
+  public setJudge(judge: string) {
+    this.doMatchAction({ type: MatchActionType.SetJudge, parameter: judge })
+  }
+
+  public setArranger(arranger: string) {
+    this.doMatchAction({ type: MatchActionType.SetArranger, parameter: arranger })
+  }
+
+  public setNote(note: string) {
+    this.doMatchAction({ type: MatchActionType.SetNote, parameter: note })
   }
 
   public addPlayer(name: string, organization: string = '', note: string = '', preferredNumber?: number) {
@@ -197,7 +285,7 @@ export class MatchStore {
   public loadMatch(fileName: string): number {
     const contentFromFile = JSON.parse(fs.readFileSync(fileName, 'utf8'))
     if (this.isValidSaveContent(contentFromFile) === false) {
-      console.log('file content is not valid')
+      debugLog('file content is not valid')
       return 1
     }
 

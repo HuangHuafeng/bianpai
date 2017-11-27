@@ -46,7 +46,8 @@ export class Manager {
   }
 
   public updateMatch(match: ImmutableMatch) {
-    // TODO
+    this.matchStore.updateMatch(match)
+    this.updateAppState()
   }
 
   public print(contentToPrint: any) {
@@ -170,6 +171,7 @@ export class Manager {
    * create a new match and then work on the new match
    * @param match the new ImmutableMatch
    */
+  /*
   public newMatch(name: string, totalRounds: number, organizer: string = '') {
     if (true) {
       // do somethign with the current match?
@@ -178,6 +180,7 @@ export class Manager {
     this.matchStore.newMatch(name, totalRounds, organizer)
     this.updateAppState()
   }
+  */
 
   /**
    * We can only manage one app and it can NOT be changed

@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { Manager } from '../manager'
+import { Button } from 'react-bootstrap'
 import { ImmutableMatch } from '../../common/immutable-match'
 import { sendMenuEvent } from '../../common/menu-event'
 import { MatchHeader } from './match-header'
 import { MatchFooter } from './match-footer'
 import { MatchContent } from './match-content'
-import { Button } from 'react-bootstrap'
 
 interface IMatchViewProps {
   readonly manager: Manager

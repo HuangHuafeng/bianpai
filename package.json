@@ -28,6 +28,7 @@
     "@types/xlsx": "^0.0.36",
     "babel-preset-react": "^6.24.1",
     "electron": "^1.7.9",
+    "electron-builder": "^19.46.4",
     "electron-webpack": "^1.11.0",
     "electron-webpack-ts": "^1.2.0",
     "node-sass": "^4.6.1",

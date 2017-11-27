@@ -4,11 +4,10 @@ import * as assert from 'assert'
 import { MenuEvent } from '../common/menu-event'
 import { About } from './about'
 import { Manager, PopupType } from './manager'
-import { CreateMatch } from './create-match'
+import { EditMatch } from './edit-match'
 import { MatchView } from './matchview/match-view'
 import { RemovePlayer } from './remove-player'
 import { EditPlayer } from './edit-player'
-import { EditMatch } from './edit-match'
 import { RemoveAllPlayers } from './remove-all-players'
 import { PrintView } from './print-view'
 
@@ -155,7 +154,7 @@ export class App extends React.Component<IAppProps, IAppState> {
 
   private renderNewMatchDialog() {
     return (
-      <CreateMatch
+      <EditMatch
         key="newmatch"
         onDismissed={() => {
           this.onPopupDismissed(PopupType.NewMatch)
@@ -167,9 +166,6 @@ export class App extends React.Component<IAppProps, IAppState> {
 
   private renderEditMatchDialog() {
     const match = this.props.manager.getMatch()
-    if (match === undefined) {
-      throw new Error('UNEXPECTED! match is undefined')
-    }
     return (
       <EditMatch
         key="editmatch"

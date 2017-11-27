@@ -145,7 +145,6 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
   }
 
   private savePlayersToFile(fileName: string) {
-    debugLog(fileName)
     let playersArrayOfArray: any = []
     playersArrayOfArray.push(['编号', '姓名', '单位', '备注'])
     const playerList = this.props.match.playerList

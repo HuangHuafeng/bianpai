@@ -4,7 +4,7 @@ import { Table, Button, OverlayTrigger, Popover, ListGroup, ListGroupItem } from
 import { Round } from '../../common/immutable-round'
 import { Game } from '../../common/immutable-game'
 import { Player } from '../../common/immutable-player'
-import * as hf from '../../common/helper-functions'
+import { debugLog } from '../../common/helper-functions'
 import { Manager } from '../manager'
 
 interface IPairringTableProps {
@@ -19,7 +19,7 @@ interface IPairringTableState {}
 export class PairringTable extends React.PureComponent<IPairringTableProps, IPairringTableState> {
   constructor(props: IPairringTableProps) {
     super(props)
-    hf.debugLog('PairringTable constructed')
+    debugLog('PairringTable constructed')
   }
 
   public render() {

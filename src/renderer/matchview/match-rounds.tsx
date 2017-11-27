@@ -1,9 +1,10 @@
 import * as React from 'react'
+import * as assert from 'assert'
+import { Tabs, Tab, Button } from 'react-bootstrap'
 import { Manager } from '../manager'
 import { ImmutableMatch, MatchStatus } from '../../common/immutable-match'
 import { RoundView } from './round-view'
-import { Tabs, Tab, Button } from 'react-bootstrap'
-import * as assert from 'assert'
+import { debugLog } from '../../common/helper-functions'
 
 interface IMatchRoundsProps {
   readonly manager: Manager
@@ -26,7 +27,7 @@ export class MatchRounds extends React.PureComponent<IMatchRoundsProps, IMatchRo
       }
     }
     this.state = { activeTab }
-    console.log('MatchRounds constructed')
+    debugLog('MatchRounds constructed')
   }
 
   public componentWillReceiveProps?(nextProps: IMatchRoundsProps) {

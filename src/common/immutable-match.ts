@@ -39,6 +39,9 @@ let MatchBase = Immutable.Record({
   status: MatchStatus.NotStarted,
   playerList: Immutable.List(),
   matchData: Immutable.List(),
+  judge: '',
+  arranger: '',
+  note: '',
 })
 
 export class ImmutableMatch extends MatchBase {
@@ -52,6 +55,9 @@ export class ImmutableMatch extends MatchBase {
   status: MatchStatus
   playerList: Immutable.List<Player>
   matchData: Immutable.List<Round>
+  judge: string
+  arranger: string
+  note: string
 
   constructor() {
     super()
@@ -323,8 +329,6 @@ export class ImmutableMatch extends MatchBase {
 
   public start(): this {
     if (this.status !== MatchStatus.NotStarted || this.currentRound !== 0) {
-      debugLog('status: ' + this.status)
-      debugLog('currentRound: ' + this.currentRound)
       throw new Error('UNEXPECTED! match is already started!')
     }
     assert.ok(this.totalRounds > this.currentRound, 'IMPOSSIBLE! match is already started!')
@@ -999,6 +1003,18 @@ export class ImmutableMatch extends MatchBase {
 
   public setDrawScore(drawScore: number): this {
     return this.set('drawScore', drawScore) as this
+  }
+
+  public setJudge(judge: string): this {
+    return this.set('judge', judge) as this
+  }
+
+  public setArranger(arranger: string): this {
+    return this.set('arranger', arranger) as this
+  }
+
+  public setNote(note: string): this {
+    return this.set('note', note) as this
   }
 
   public changePlayerInGame(table: number, currentPlayerNumber: number, withPlayerNumber: number): this {
