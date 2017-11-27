@@ -9,7 +9,7 @@ module.exports = {
       __DEV__: process.env.NODE_ENV !== 'production',
     }),
   ],
-  devtool: 'inline-source-map',
+  devtool: process.env.ELECTRON_WEBPACK_APP_MODE === 'development' ? 'inline-source-map' : false,
   output: {
     devtoolModuleFilenameTemplate: '[absolute-resource-path]',
   },
