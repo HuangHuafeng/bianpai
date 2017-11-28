@@ -5,6 +5,7 @@ import { Manager } from './manager'
 import { Button } from 'react-bootstrap'
 import { FinishedTable } from './matchview/finished-table'
 import { MatchResult } from './matchview/match-result'
+import { MatchFooter } from './matchview/match-footer'
 
 interface IPrintViewProps {
   readonly manager: Manager
@@ -60,6 +61,7 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
         {this.renderRoundPairing()}
         {this.renderRoundResult()}
         {this.renderMatchResult()}
+        <MatchFooter manager={this.props.manager} />
       </div>
     )
   }
@@ -126,8 +128,7 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
 
     return (
       <div id="printing-pairing-table">
-        <h1>{match.name}</h1>
-        <h3>{match.organizer}</h3>
+        <h3>{match.name}</h3>
         <MatchResult manager={this.props.manager} match={match} printing />
       </div>
     )

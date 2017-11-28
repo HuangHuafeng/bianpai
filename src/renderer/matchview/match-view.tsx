@@ -29,7 +29,7 @@ export class MatchView extends React.Component<IMatchViewProps, IMatchViewState>
       <div id="match">
         <MatchHeader manager={this.props.manager} match={this.props.match} />
         <MatchContent manager={this.props.manager} match={this.props.match} />
-        <MatchFooter manager={this.props.manager} match={this.props.match} />
+        <MatchFooter manager={this.props.manager} />
       </div>
     )
   }
