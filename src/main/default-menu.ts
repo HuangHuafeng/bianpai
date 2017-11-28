@@ -24,33 +24,31 @@ export function buildDefaultMenu(): Electron.Menu {
       ],
     },
     {
-      role: 'editMenu',
-    },
-    __DEV__
-      ? {
-          label: 'View',
-          submenu: [
-            {
-              role: 'reload',
-            },
-            {
-              role: 'forcereload',
-            },
-            {
-              role: 'toggledevtools',
-            },
-            {
-              role: 'togglefullscreen',
-            },
-          ],
-        }
-      : {},
-    {
       label: '帮助',
       role: 'help',
       submenu: [],
     },
   ]
+
+  if (__DEV__) {
+    template.splice(1, 0, {
+      label: 'View',
+      submenu: [
+        {
+          role: 'reload',
+        },
+        {
+          role: 'forcereload',
+        },
+        {
+          role: 'toggledevtools',
+        },
+        {
+          role: 'togglefullscreen',
+        },
+      ],
+    })
+  }
 
   if (process.platform === 'darwin') {
     const name = Electron.app.getName()

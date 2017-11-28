@@ -40,6 +40,15 @@ export class App extends React.Component<IAppProps, IAppState> {
     Electron.ipcRenderer.on('menu-event', (event: Electron.IpcMessageEvent, { name }: { name: MenuEvent }) => {
       this.onMenuEvent(name)
     })
+
+    window.addEventListener('beforeunload', ev => {
+      if (this.closeCurrentMatch()) {
+        return undefined
+      } else {
+        ev.returnValue = 'shouldnotclose'
+        return 'shouldnotclose'
+      }
+    })
   }
 
   public componentDidMount() {

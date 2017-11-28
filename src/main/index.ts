@@ -11,7 +11,7 @@ let mainWindow: Electron.BrowserWindow | null = null
 
 function createMainWindow() {
   // Construct new BrowserWindow
-  const window = new BrowserWindow()
+  const window = new BrowserWindow({ width: 900, height: 600 })
 
   // Set url for `win`
   // points to `webpack-dev-server` in development
@@ -36,6 +36,20 @@ function createMainWindow() {
       window.focus()
     })
   })
+
+  /*
+  window.on('close', function(e) {
+    var choice = require('electron').dialog.showMessageBox(this, {
+      type: 'question',
+      buttons: ['Yes', 'No'],
+      title: 'Confirm',
+      message: 'Are you sure you want to quit?',
+    })
+    if (choice == 1) {
+      e.preventDefault()
+    }
+  })
+  */
 
   return window
 }
