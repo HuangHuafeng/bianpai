@@ -1,6 +1,7 @@
 {
   "name": "bianpai",
   "version": "1.0.1",
+  "productName": "编排小钢炮",
   "description": "A program that pairs opponents in chess/xiangqi tournament.",
   "main": "index.js",
   "repository": "https://github.com/HuangHuafeng/bianpai.git",
@@ -45,8 +46,5 @@
     "renderer": {
       "webpackConfig": "webpack.config.js"
     }
-  },
-  "build": {
-    "productName": "编排小钢炮"
   }
 }
