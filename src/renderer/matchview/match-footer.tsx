@@ -1,9 +1,11 @@
 import * as React from 'react'
 import * as Electron from 'electron'
 import { Manager } from '../manager'
+import { ImmutableMatch } from '../../common/immutable-match'
 
 interface IMatchFooterProps {
   readonly manager: Manager
+  readonly match: ImmutableMatch
 }
 
 interface IMatchFooterState {}
@@ -14,7 +16,7 @@ export class MatchFooter extends React.PureComponent<IMatchFooterProps, IMatchFo
   }
 
   public render() {
-    const match = this.props.manager.getMatch()
+    const match = this.props.match
     const appName = Electron.remote.app.getName()
     return (
       <div id="match-footer">

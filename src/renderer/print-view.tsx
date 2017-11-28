@@ -61,7 +61,7 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
         {this.renderRoundPairing()}
         {this.renderRoundResult()}
         {this.renderMatchResult()}
-        <MatchFooter manager={this.props.manager} />
+        <MatchFooter manager={this.props.manager} match={this.props.manager.getMatch()} />
       </div>
     )
   }
