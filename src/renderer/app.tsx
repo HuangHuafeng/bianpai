@@ -49,6 +49,7 @@ export class App extends React.Component<IAppProps, IAppState> {
   public update() {
     // rerender myself
     this.setState({})
+    this.updateWindowTitle()
   }
 
   /**
@@ -61,7 +62,7 @@ export class App extends React.Component<IAppProps, IAppState> {
         return this.props.manager.showPopup(PopupType.About)
 
       case 'file-new':
-        if (this.saveCurrentMatch() === false) {
+        if (this.closeCurrentMatch() === false) {
           return
         }
         return this.props.manager.showPopup(PopupType.NewMatch)
@@ -87,7 +88,7 @@ export class App extends React.Component<IAppProps, IAppState> {
   }
 
   private loadMatch() {
-    if (this.saveCurrentMatch() === false) {
+    if (this.closeCurrentMatch() === false) {
       return
     }
 
@@ -131,7 +132,7 @@ export class App extends React.Component<IAppProps, IAppState> {
    * true: OK to proceed
    * false: NOK, user cancel, so caller should stop current action
    */
-  private saveCurrentMatch(): boolean {
+  private closeCurrentMatch(): boolean {
     // TODO: check if the current match need to be save or not
     const match = this.props.manager.getMatch()
     if (match.name !== '') {
@@ -144,12 +145,16 @@ export class App extends React.Component<IAppProps, IAppState> {
         const response = Electron.remote.dialog.showMessageBox(Electron.remote.getCurrentWindow(), options)
         if (response === 2) {
           return false
-        } else if (response === 0) {
+        }
+
+        if (response === 0) {
           // save current math
           this.saveMatch()
-        } else {
-          // nothing to do
         }
+
+        // close current match
+        this.currentFile = undefined
+        this.lastSavedMatch = undefined
       }
     }
 
@@ -158,15 +163,17 @@ export class App extends React.Component<IAppProps, IAppState> {
 
   private updateWindowTitle() {
     let title: string = Electron.remote.app.getName()
+    /*
     const match = this.props.manager.getMatch()
     if (match.name !== '') {
       title = match.name
     }
-    /*
-    if (this.currentFile) {
-      title += ' - ' + this.currentFile
-    }
     */
+    if (this.currentFile) {
+      title += ' - ' + this.currentFile.split('/').pop()
+    } else {
+      title += ' - ' + '未命名.json'
+    }
     if (title !== Electron.remote.getCurrentWindow().getTitle()) {
       Electron.remote.getCurrentWindow().setTitle(title)
     }
