@@ -170,7 +170,8 @@ export class App extends React.Component<IAppProps, IAppState> {
     }
     */
     if (this.currentFile) {
-      title += ' - ' + this.currentFile.split('/').pop()
+      const separator = __WIN32__ ? '\\' : '/'
+      title += ' - ' + this.currentFile.split(separator).pop()
     } else {
       title += ' - ' + '未命名.json'
     }
