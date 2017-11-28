@@ -28,8 +28,14 @@ export interface IAppProps {
 interface IAppState {}
 
 export class App extends React.Component<IAppProps, IAppState> {
+  private currentFile: string | undefined
+  private lastSavedMatch: any
+
   public constructor(props: IAppProps) {
     super(props)
+
+    this.currentFile = undefined
+    this.lastSavedMatch = undefined
 
     Electron.ipcRenderer.on('menu-event', (event: Electron.IpcMessageEvent, { name }: { name: MenuEvent }) => {
       this.onMenuEvent(name)
@@ -38,6 +44,11 @@ export class App extends React.Component<IAppProps, IAppState> {
 
   public componentDidMount() {
     this.props.manager.registerApp(this)
+  }
+
+  public update() {
+    // rerender myself
+    this.setState({})
   }
 
   /**
@@ -50,6 +61,9 @@ export class App extends React.Component<IAppProps, IAppState> {
         return this.props.manager.showPopup(PopupType.About)
 
       case 'file-new':
+        if (this.saveCurrentMatch() === false) {
+          return
+        }
         return this.props.manager.showPopup(PopupType.NewMatch)
 
       case 'add-player':
@@ -73,25 +87,88 @@ export class App extends React.Component<IAppProps, IAppState> {
   }
 
   private loadMatch() {
+    if (this.saveCurrentMatch() === false) {
+      return
+    }
+
     /* show a file-open dialog and read the first selected file */
     var fileNames = Electron.remote.dialog.showOpenDialog(Electron.remote.getCurrentWindow(), {
       properties: ['openFile'],
       filters: [{ name: '', extensions: ['json'] }],
     })
 
-    if (fileNames) {
-      this.props.manager.loadMatch(fileNames[0])
+    if (fileNames && fileNames[0] !== this.currentFile) {
+      this.currentFile = fileNames[0]
+      this.props.manager.loadMatch(this.currentFile)
+      this.lastSavedMatch = this.props.manager.getMatch()
     }
+
+    this.updateWindowTitle()
   }
 
   private saveMatch() {
-    const options = {
-      filters: [{ name: '', extensions: ['json'] }],
+    if (this.currentFile === undefined) {
+      const options = {
+        filters: [{ name: '', extensions: ['json'] }],
+      }
+      /* show a file-open dialog and read the first selected file */
+      var fileName = Electron.remote.dialog.showSaveDialog(Electron.remote.getCurrentWindow(), options)
+      if (fileName) {
+        this.currentFile = fileName
+        this.updateWindowTitle()
+        this.props.manager.saveMatch(this.currentFile)
+        this.lastSavedMatch = this.props.manager.getMatch()
+      }
+    } else {
+      if (this.lastSavedMatch !== this.props.manager.getMatch()) {
+        this.props.manager.saveMatch(this.currentFile)
+        this.lastSavedMatch = this.props.manager.getMatch()
+      }
     }
-    /* show a file-open dialog and read the first selected file */
-    var fileName = Electron.remote.dialog.showSaveDialog(Electron.remote.getCurrentWindow(), options)
-    if (fileName) {
-      this.props.manager.saveMatch(fileName)
+  }
+
+  /**
+   * true: OK to proceed
+   * false: NOK, user cancel, so caller should stop current action
+   */
+  private saveCurrentMatch(): boolean {
+    // TODO: check if the current match need to be save or not
+    const match = this.props.manager.getMatch()
+    if (match.name !== '') {
+      if (this.currentFile === undefined || this.lastSavedMatch !== match) {
+        const options = {
+          type: 'warning',
+          buttons: ['保存', '不保存', '取消'],
+          message: `要保存当前的比赛"${match.name}"吗？`,
+        }
+        const response = Electron.remote.dialog.showMessageBox(Electron.remote.getCurrentWindow(), options)
+        if (response === 2) {
+          return false
+        } else if (response === 0) {
+          // save current math
+          this.saveMatch()
+        } else {
+          // nothing to do
+        }
+      }
+    }
+
+    return true
+  }
+
+  private updateWindowTitle() {
+    let title: string = Electron.remote.app.getName()
+    const match = this.props.manager.getMatch()
+    if (match.name !== '') {
+      title = match.name
+    }
+    /*
+    if (this.currentFile) {
+      title += ' - ' + this.currentFile
+    }
+    */
+    if (title !== Electron.remote.getCurrentWindow().getTitle()) {
+      Electron.remote.getCurrentWindow().setTitle(title)
     }
   }
 

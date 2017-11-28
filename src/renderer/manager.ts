@@ -201,8 +201,7 @@ export class Manager {
 
   private updateAppState() {
     if (this.app !== undefined) {
-      let state = { match: this.matchStore.getMatch() }
-      this.app.setState(state)
+      this.app.update()
     }
   }
 

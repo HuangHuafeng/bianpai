@@ -13,10 +13,12 @@ export function buildDefaultMenu(): Electron.Menu {
         },
         {
           label: '打开',
+          accelerator: 'CmdOrCtrl+O',
           click: emit('file-open'),
         },
         {
           label: '保存',
+          accelerator: 'CmdOrCtrl+S',
           click: emit('file-save'),
         },
       ],
@@ -24,27 +26,27 @@ export function buildDefaultMenu(): Electron.Menu {
     {
       role: 'editMenu',
     },
+    __DEV__
+      ? {
+          label: 'View',
+          submenu: [
+            {
+              role: 'reload',
+            },
+            {
+              role: 'forcereload',
+            },
+            {
+              role: 'toggledevtools',
+            },
+            {
+              role: 'togglefullscreen',
+            },
+          ],
+        }
+      : {},
     {
-      label: 'View',
-      submenu: [
-        {
-          role: 'reload',
-        },
-        {
-          role: 'forcereload',
-        },
-        {
-          role: 'toggledevtools',
-        },
-        {
-          role: 'togglefullscreen',
-        },
-      ],
-    },
-    {
-      role: 'windowMenu',
-    },
-    {
+      label: '帮助',
       role: 'help',
       submenu: [],
     },
@@ -94,13 +96,15 @@ export function buildDefaultMenu(): Electron.Menu {
     // add the Exit menu item
     let fileSubmenu = template[0].submenu as Electron.MenuItemConstructorOptions[]
     fileSubmenu.push({
+      label: '退出(&X)',
+      accelerator: 'CmdOrCtrl+Q',
       role: 'quit',
     })
 
     // add the About menu item
     let submenu = template[template.length - 1].submenu as Electron.MenuItemConstructorOptions[]
     submenu.unshift({
-      label: `关于${name}`,
+      label: `关于${name}(&A)`,
       click: emit('show-about'),
     })
   }
