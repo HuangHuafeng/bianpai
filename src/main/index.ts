@@ -37,20 +37,6 @@ function createMainWindow() {
     })
   })
 
-  /*
-  window.on('close', function(e) {
-    var choice = require('electron').dialog.showMessageBox(this, {
-      type: 'question',
-      buttons: ['Yes', 'No'],
-      title: 'Confirm',
-      message: 'Are you sure you want to quit?',
-    })
-    if (choice == 1) {
-      e.preventDefault()
-    }
-  })
-  */
-
   return window
 }
 
