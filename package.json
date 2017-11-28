@@ -45,5 +45,8 @@
     "renderer": {
       "webpackConfig": "webpack.config.js"
     }
+  },
+  "build": {
+    "productName": "编排小钢炮"
   }
 }
