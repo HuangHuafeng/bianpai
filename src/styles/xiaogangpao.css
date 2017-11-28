@@ -11,6 +11,7 @@ div#xiaogangpao h1 {
 
 th {
   text-align: center;
+  font-weight: normal;
 }
 
 table thead tr {
@@ -59,7 +60,6 @@ div#playerlist button {
 
 .playerinvalidingame {
   color: red;
-  font-weight: bold;
 }
 
 div#printing-buttons {
