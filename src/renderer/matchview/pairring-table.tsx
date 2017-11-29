@@ -17,9 +17,15 @@ interface IPairringTableProps {
 interface IPairringTableState {}
 
 export class PairringTable extends React.PureComponent<IPairringTableProps, IPairringTableState> {
+  private currentTable: number
+  private currentPlayer: Player
+  private playerListPopover: any
+
   constructor(props: IPairringTableProps) {
     super(props)
     debugLog('PairringTable constructed')
+    this.playerListPopover = undefined
+    this.buildPlayerListPopover(this.props.playerList)
   }
 
   public render() {
@@ -184,13 +190,19 @@ export class PairringTable extends React.PureComponent<IPairringTableProps, IPai
     return <th>{gameResult}</th>
   }
 
+  private setPlayerToBeExchanged(table: number, player: Player) {
+    this.currentTable = table
+    this.currentPlayer = player
+  }
+
   private renderActions(row: Game) {
     const actions = (
       <th>
         <OverlayTrigger
           trigger="focus"
           placement="left"
-          overlay={this.buildPlayerListPopover(row.table, row.redPlayer, this.props.playerList)}
+          onEnter={() => this.setPlayerToBeExchanged(row.table, row.redPlayer)}
+          overlay={this.playerListPopover}
         >
           <Button bsSize="xsmall" bsStyle="primary">
             指定红方
@@ -199,7 +211,8 @@ export class PairringTable extends React.PureComponent<IPairringTableProps, IPai
         <OverlayTrigger
           trigger="focus"
           placement="left"
-          overlay={this.buildPlayerListPopover(row.table, row.blackPlayer, this.props.playerList)}
+          onEnter={() => this.setPlayerToBeExchanged(row.table, row.blackPlayer)}
+          overlay={this.playerListPopover}
         >
           <Button bsSize="xsmall" bsStyle="primary">
             指定黑方
@@ -211,7 +224,7 @@ export class PairringTable extends React.PureComponent<IPairringTableProps, IPai
     return actions
   }
 
-  private buildPlayerListPopover(currentGameIndex: number, currentPlayer: Player, playerList: Immutable.List<Player>) {
+  private buildPlayerListPopover(playerList: Immutable.List<Player>) {
     // sort the players, so it would be easier for the user to find the player to switch
     const match = this.props.manager.getMatch()
     const sortedPlayerList = match.sortPlayers(playerList)
@@ -219,34 +232,25 @@ export class PairringTable extends React.PureComponent<IPairringTableProps, IPai
     let ret = []
     for (let index = 0; index < sortedPlayerList.size; index++) {
       const player = sortedPlayerList.get(index)
-      if (player === currentPlayer) {
-        // don't add himself
-        continue
-      }
       ret.push(
-        <ListGroupItem
-          bsStyle="success"
-          key={index}
-          onClick={() => this.exchangePlayerInGame(currentGameIndex, currentPlayer, player)}
-        >
+        <ListGroupItem bsStyle="success" key={index} onClick={() => this.exchangePlayerInGame(player)}>
           <strong>{player.name}：</strong> 分数：{player.score}
         </ListGroupItem>
       )
     }
-    return (
+    this.playerListPopover = (
       <Popover id="players-to-select" title="选择交换位置的选手" width="200" height="400">
         <ListGroup id="playerlist">{ret}</ListGroup>
       </Popover>
     )
   }
 
-  private exchangePlayerInGame(table: number, currentPlayer: Player, withPlayer: Player) {
-    if (currentPlayer === withPlayer) {
+  private exchangePlayerInGame(withPlayer: Player) {
+    if (this.currentPlayer === withPlayer) {
       // nothing to do if exchanging with himself
-      throw new Error('IMPOSSIBLE!')
     }
 
-    this.props.changePlayerCallback(table, currentPlayer.number, withPlayer.number)
+    this.props.changePlayerCallback(this.currentTable, this.currentPlayer.number, withPlayer.number)
   }
   /**
    * Changing a player in a game/table should not be done here, instead it should send an actioin
