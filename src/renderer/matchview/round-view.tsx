@@ -6,6 +6,7 @@ import { Round } from '../../common/immutable-round'
 import { PairringTable } from './pairring-table'
 import { FightingTable } from './fighting-table'
 import { FinishedTable } from './finished-table'
+import { SupportedPrintContentType } from '../print-view'
 
 interface IRoundViewProps {
   readonly manager: Manager
@@ -138,11 +139,11 @@ export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewSt
   }
 
   private printResultToPDF = () => {
-    this.props.manager.print({ type: 'round-result', round: this.props.round })
+    this.props.manager.print({ type: SupportedPrintContentType.RoundResult, round: this.props.round })
   }
 
   private printPairingToPDF = () => {
-    this.props.manager.print({ type: 'round-pairing', round: this.props.round })
+    this.props.manager.print({ type: SupportedPrintContentType.RoundPairingTable, round: this.props.round })
   }
 
   private restorePairing = () => {

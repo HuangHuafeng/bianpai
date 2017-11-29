@@ -25,7 +25,7 @@ export interface IAppProps {
   readonly manager: Manager
 }
 
-interface IAppState {}
+interface IAppState { }
 
 export class App extends React.Component<IAppProps, IAppState> {
   private currentFile: string | undefined
@@ -104,7 +104,7 @@ export class App extends React.Component<IAppProps, IAppState> {
     /* show a file-open dialog and read the first selected file */
     var fileNames = Electron.remote.dialog.showOpenDialog(Electron.remote.getCurrentWindow(), {
       properties: ['openFile'],
-      filters: [{ name: '', extensions: ['json'] }],
+      filters: [{ name: 'JSON 文件', extensions: ['json'] }],
     })
 
     if (fileNames && fileNames[0] !== this.currentFile) {
@@ -119,7 +119,7 @@ export class App extends React.Component<IAppProps, IAppState> {
   private saveMatch() {
     if (this.currentFile === undefined) {
       const options = {
-        filters: [{ name: '', extensions: ['json'] }],
+        filters: [{ name: 'JSON 文件', extensions: ['json'] }],
       }
       /* show a file-open dialog and read the first selected file */
       var fileName = Electron.remote.dialog.showSaveDialog(Electron.remote.getCurrentWindow(), options)

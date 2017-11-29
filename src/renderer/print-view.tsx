@@ -7,6 +7,12 @@ import { FinishedTable } from './matchview/finished-table'
 import { MatchResult } from './matchview/match-result'
 import { MatchFooter } from './matchview/match-footer'
 
+export const SupportedPrintContentType = {
+  RoundResult: 'ROUND_RESULT',
+  RoundPairingTable: 'ROUND_PAIRING_TABLE',
+  PlayerRanking: 'PLAYER_RANKING'
+}
+
 interface IPrintViewProps {
   readonly manager: Manager
   readonly conetent: any
@@ -44,14 +50,42 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
   }
 
   private saveToPDF = () => {
+    const defaultName = this.generateDefaultFileName()
     const options = {
-      filters: [{ name: '', extensions: ['pdf'] }],
+      defaultPath: defaultName,
+      filters: [{ name: 'Adobe Acrobat Document', extensions: ['pdf'] }],
     }
     /* show a file-open dialog and read the first selected file */
     var fileName = Electron.remote.dialog.showSaveDialog(Electron.remote.getCurrentWindow(), options)
     if (fileName) {
       fs.writeFileSync(fileName, this.state.pdfData)
     }
+  }
+
+  private generateDefaultFileName(): string {
+    if (this.props.conetent.type === undefined) {
+      return ''
+    }
+
+    let fileName: string = ''
+    switch (this.props.conetent.type) {
+      case SupportedPrintContentType.PlayerRanking:
+        fileName = '名次'
+        break
+
+      case SupportedPrintContentType.RoundPairingTable:
+        fileName = '第' + this.props.conetent.round + '轮对阵表'
+        break
+
+      case SupportedPrintContentType.RoundResult:
+        fileName = '第' + this.props.conetent.round + '轮结果'
+        break
+
+      default:
+        throw new Error('UNEXPECTED! unknown print content.')
+    }
+
+    return fileName
   }
 
   public render() {
@@ -84,7 +118,7 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
   }
 
   private renderRoundResult() {
-    if (this.props.conetent.type === undefined || this.props.conetent.type !== 'round-result') {
+    if (this.props.conetent.type === undefined || this.props.conetent.type !== SupportedPrintContentType.RoundResult) {
       return null
     }
 
@@ -102,7 +136,7 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
   }
 
   private renderRoundPairing() {
-    if (this.props.conetent.type === undefined || this.props.conetent.type !== 'round-pairing') {
+    if (this.props.conetent.type === undefined || this.props.conetent.type !== SupportedPrintContentType.RoundPairingTable) {
       return null
     }
 
@@ -120,7 +154,7 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
   }
 
   private renderMatchResult() {
-    if (this.props.conetent.type === undefined || this.props.conetent.type !== 'pairing-match-result') {
+    if (this.props.conetent.type === undefined || this.props.conetent.type !== SupportedPrintContentType.PlayerRanking) {
       return null
     }
 

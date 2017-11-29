@@ -7,6 +7,7 @@ import { MatchResult } from './match-result'
 import { Tabs, Tab } from 'react-bootstrap'
 import { Test } from '../test'
 import { sendMenuEvent } from '../../common/menu-event'
+import { SupportedPrintContentType } from '../print-view'
 
 const TabEditMatch: string = 'editmatch'
 
@@ -26,9 +27,9 @@ export class MatchContent extends React.Component<IMatchContentProps, IMatchCont
     const lastPrintContent = props.manager.getLastPrintContent()
     let activeTab: number = 2
     if (lastPrintContent) {
-      if (lastPrintContent.type === 'pairing-match-result') {
+      if (lastPrintContent.type === SupportedPrintContentType.PlayerRanking) {
         activeTab = 4
-      } else if (lastPrintContent.type === 'round-result' || lastPrintContent.type === 'round-pairing') {
+      } else if (lastPrintContent.type === SupportedPrintContentType.RoundResult || lastPrintContent.type === SupportedPrintContentType.RoundPairingTable) {
         activeTab = 3
       }
     }

@@ -5,6 +5,7 @@ import { Manager } from '../manager'
 import { ImmutableMatch, MatchStatus } from '../../common/immutable-match'
 import { RoundView } from './round-view'
 import { debugLog } from '../../common/helper-functions'
+import { SupportedPrintContentType } from '../print-view'
 
 interface IMatchRoundsProps {
   readonly manager: Manager
@@ -22,7 +23,7 @@ export class MatchRounds extends React.PureComponent<IMatchRoundsProps, IMatchRo
     const lastPrintContent = props.manager.getLastPrintContent()
     let activeTab: number = 1
     if (lastPrintContent) {
-      if (lastPrintContent.type === 'round-result' || lastPrintContent.type === 'round-pairing') {
+      if (lastPrintContent.type === SupportedPrintContentType.RoundPairingTable || lastPrintContent.type === SupportedPrintContentType.RoundResult) {
         activeTab = lastPrintContent.round
       }
     }

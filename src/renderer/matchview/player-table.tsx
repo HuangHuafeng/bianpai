@@ -14,7 +14,7 @@ interface IPlayerTableProps {
   readonly match: ImmutableMatch
 }
 
-interface IPlayerTableState {}
+interface IPlayerTableState { }
 
 export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerTableState> {
   constructor(props: IPlayerTableProps) {
@@ -87,7 +87,7 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
     /* show a file-open dialog and read the first selected file */
     var fileNames = Electron.remote.dialog.showOpenDialog(Electron.remote.getCurrentWindow(), {
       properties: ['openFile'],
-      filters: [{ name: '选手.xls', extensions: ['xls', 'xlsx', 'csv'] }],
+      filters: [{ name: 'Excel 文件', extensions: ['xls', 'xlsx', 'csv'] }],
     })
     if (fileNames) {
       this.parseFileAndImportPlayers(fileNames[0])
@@ -136,7 +136,7 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
 
   private exportPlayersToFile = (): void => {
     const options = {
-      filters: [{ name: 'Excel files', extensions: ['xlsx', 'xls', 'csv'] }],
+      filters: [{ name: 'Excel 文件', extensions: ['xlsx', 'xls', 'csv'] }],
     }
     /* show a file-open dialog and read the first selected file */
     var fileName = Electron.remote.dialog.showSaveDialog(Electron.remote.getCurrentWindow(), options)
