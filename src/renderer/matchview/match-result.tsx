@@ -21,6 +21,7 @@ export class MatchResult extends React.PureComponent<IMatchResultProps, IMatchRe
   }
 
   public render() {
+    // add responsive to Table causes print issues
     return (
       <div id="match-result">
         <div id="match-result-status-and-actions">
@@ -30,7 +31,7 @@ export class MatchResult extends React.PureComponent<IMatchResultProps, IMatchRe
             {this.renderActions()}
           </p>
         </div>
-        <Table striped bordered condensed hover responsive>
+        <Table striped bordered condensed hover>
           <thead>{this.renderTableHead()}</thead>
           <tbody>{this.renderTableBody()}</tbody>
         </Table>

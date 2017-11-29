@@ -16,8 +16,9 @@ export class FightingTable extends React.PureComponent<IFightingTableProps, IFig
   }
 
   public render() {
+    // add responsive to Table causes print issues
     return (
-      <Table striped bordered condensed hover responsive>
+      <Table striped bordered condensed hover>
         <thead>{this.renderTableHead()}</thead>
         <tbody>{this.renderTableBody()}</tbody>
       </Table>

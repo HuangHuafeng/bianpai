@@ -16,8 +16,9 @@ export class FinishedTable extends React.PureComponent<IFinishedTableProps, IFin
   }
 
   public render() {
+    // add responsive to Table causes print issues
     return (
-      <Table striped bordered condensed hover responsive>
+      <Table bordered striped condensed hover>
         <thead>{this.renderTableHead()}</thead>
         <tbody>{this.renderTableBody()}</tbody>
       </Table>

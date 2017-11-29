@@ -23,8 +23,9 @@ export class PairringTable extends React.PureComponent<IPairringTableProps, IPai
   }
 
   public render() {
+    // add responsive to Table causes print issues
     return (
-      <Table striped bordered condensed hover responsive>
+      <Table striped bordered condensed hover>
         <thead>{this.renderTableHead()}</thead>
         <tbody>{this.renderTableBody()}</tbody>
       </Table>

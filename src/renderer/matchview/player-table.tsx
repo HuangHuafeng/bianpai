@@ -25,6 +25,7 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
     const numberOfPlayers = this.props.match.playerList.size
     const disabled = this.props.match.disallowUpdatePlayers()
 
+    // add responsive to Table causes print issues
     return (
       <div id="players">
         <div id="players-modify">
@@ -43,7 +44,7 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
           </Button>
         </div>
         <div id="players-list">
-          <Table striped bordered condensed hover responsive>
+          <Table striped bordered condensed hover>
             <thead>{this.renderTableHead()}</thead>
             <tbody>{this.renderTableBody()}</tbody>
           </Table>
