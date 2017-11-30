@@ -288,9 +288,19 @@ export class Manager {
     this.matchStore.saveMatch(fileName)
   }
 
-  public loadMatch(fileName: string): void {
-    this.matchStore.loadMatch(fileName)
+  public closeMatch(): void {
+    this.matchStore.closeMatch()
     this.updateAppState()
+  }
+
+  public loadMatch(fileName: string): number {
+    const ret = this.matchStore.loadMatch(fileName)
+    if (ret === 0) {
+      // successfully loaded the file
+      this.updateAppState()
+    }
+
+    return ret
   }
 
   public changePlayerInGame(table: number, currentPlayerNumber: number, withPlayerNumber: number) {

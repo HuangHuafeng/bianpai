@@ -10,6 +10,7 @@ import { RemovePlayer } from './remove-player'
 import { EditPlayer } from './edit-player'
 import { RemoveAllPlayers } from './remove-all-players'
 import { PrintView } from './print-view'
+import { getFileName } from '../common/helper-functions'
 
 const notImplemented = (name: string) => {
   const options = {
@@ -25,7 +26,7 @@ export interface IAppProps {
   readonly manager: Manager
 }
 
-interface IAppState { }
+interface IAppState {}
 
 export class App extends React.Component<IAppProps, IAppState> {
   private currentFile: string | undefined
@@ -107,10 +108,18 @@ export class App extends React.Component<IAppProps, IAppState> {
       filters: [{ name: 'JSON 文件', extensions: ['json'] }],
     })
 
-    if (fileNames && fileNames[0] !== this.currentFile) {
-      this.currentFile = fileNames[0]
-      this.props.manager.loadMatch(this.currentFile)
-      this.lastSavedMatch = this.props.manager.getMatch()
+    if (fileNames) {
+      if (this.props.manager.loadMatch(fileNames[0]) === 0) {
+        this.currentFile = fileNames[0]
+        this.lastSavedMatch = this.props.manager.getMatch()
+      } else {
+        const options = {
+          type: 'warning',
+          buttons: ['OK'],
+          message: `加载失败，"${getFileName(fileNames[0])}"不是一个合法的比赛文件！`,
+        }
+        Electron.remote.dialog.showMessageBox(Electron.remote.getCurrentWindow(), options)
+      }
     }
 
     this.updateWindowTitle()
@@ -160,11 +169,12 @@ export class App extends React.Component<IAppProps, IAppState> {
           // save current math
           this.saveMatch()
         }
-
-        // close current match
-        this.currentFile = undefined
-        this.lastSavedMatch = undefined
       }
+
+      // close current match
+      this.currentFile = undefined
+      this.lastSavedMatch = undefined
+      this.props.manager.closeMatch()
     }
 
     return true
@@ -179,8 +189,7 @@ export class App extends React.Component<IAppProps, IAppState> {
     }
     */
     if (this.currentFile) {
-      const separator = __WIN32__ ? '\\' : '/'
-      title += ' - ' + this.currentFile.split(separator).pop()
+      title += ' - ' + getFileName(this.currentFile)
     } else {
       title += ' - ' + '未命名.json'
     }

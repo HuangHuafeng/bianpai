@@ -23,3 +23,8 @@ export function toZeorOrPositiveIntegerString(str: string): string | undefined {
     return undefined
   }
 }
+
+export function getFileName(path: string): string | undefined {
+  const separator = __WIN32__ ? '\\' : '/'
+  return path.split(separator).pop()
+}

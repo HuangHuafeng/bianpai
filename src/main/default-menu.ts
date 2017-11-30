@@ -24,6 +24,9 @@ export function buildDefaultMenu(): Electron.Menu {
       ],
     },
     {
+      role: 'editMenu',
+    },
+    {
       label: '帮助',
       role: 'help',
       submenu: [],
@@ -31,7 +34,7 @@ export function buildDefaultMenu(): Electron.Menu {
   ]
 
   if (__DEV__) {
-    template.splice(1, 0, {
+    template.splice(2, 0, {
       label: 'View',
       submenu: [
         {

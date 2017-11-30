@@ -35,8 +35,7 @@ export class MatchStore {
   actionHistory: MatchAction[]
 
   constructor() {
-    this.match = new ImmutableMatch()
-    this.actionHistory = []
+    this.closeMatch()
   }
 
   private doMatchAction(action: MatchAction): void {
@@ -272,6 +271,11 @@ export class MatchStore {
   public saveMatch(fileName: string): void {
     const conetentToSave = this.generateSaveContent(this.actionHistory)
     fs.writeFileSync(fileName, JSON.stringify(conetentToSave))
+  }
+
+  public closeMatch(): void {
+    this.match = new ImmutableMatch()
+    this.actionHistory = []
   }
 
   /**
