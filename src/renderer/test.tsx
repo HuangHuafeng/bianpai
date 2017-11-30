@@ -50,6 +50,7 @@ export class Test extends React.Component<ITestProps, ITestState> {
     const html = ['<body>', printHtml, '</body>'].join('')
     win.loadURL('data:text/html;charset=utf-8,' + encodeURI(html))
     win.show()
+    console.log(Electron.remote.app.getLocale())
     /*
     let win: Electron.BrowserWindow | null = new Electron.remote.BrowserWindow({ width: 400, height: 320 })
     win.on('close', function() {
