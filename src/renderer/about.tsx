@@ -1,6 +1,7 @@
 import * as React from 'react'
-import { Modal, Button } from 'react-bootstrap'
+import { Modal } from 'react-bootstrap'
 import { debugLog } from '../common/helper-functions'
+import logo from '../../build/icon.png'
 
 interface IAboutProps {
   readonly onDismissed: () => void
@@ -19,21 +20,18 @@ export class About extends React.Component<IAboutProps, IAboutState> {
   public render() {
     const name = this.props.applicationName
     const version = this.props.applicationVersion
+    console.log(logo)
 
     return (
       <Modal show={true} onHide={this.props.onDismissed} bsSize="small">
-        <Modal.Header closeButton>
-          <Modal.Title>关于{name}</Modal.Title>
-        </Modal.Header>
         <Modal.Body>
-          <p>{name}</p>
-          <p>{version}</p>
+          <div id="about-body">
+            <img src={logo} />
+            <p>{name}</p>
+            <p>{version}</p>
+            <p>作者：锋大</p>
+          </div>
         </Modal.Body>
-        <Modal.Footer>
-          <Button bsStyle="primary" onClick={this.props.onDismissed}>
-            确定
-          </Button>
-        </Modal.Footer>
       </Modal>
     )
   }

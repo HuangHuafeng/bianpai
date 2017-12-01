@@ -4,6 +4,10 @@ body {
   font-family: 'Hiragino Sans GB', 'Microsoft YaHei', 'WenQuanYi Micro Hei', sans-serif;
 }
 
+div#about-body {
+  text-align: center;
+}
+
 div#xiaogangpao {
   text-align: center;
 }
