@@ -88,6 +88,7 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
     /* show a file-open dialog and read the first selected file */
     var fileNames = Electron.remote.dialog.showOpenDialog(Electron.remote.getCurrentWindow(), {
       properties: ['openFile'],
+      defaultPath: this.props.match.name + '选手',
       filters: [{ name: 'Excel 文件', extensions: ['xls', 'xlsx', 'csv'] }],
     })
     if (fileNames) {
@@ -137,6 +138,7 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
 
   private exportPlayersToFile = (): void => {
     const options = {
+      defaultPath: this.props.match.name + '选手',
       filters: [{ name: 'Excel 文件', extensions: ['xlsx', 'xls', 'csv'] }],
     }
     /* show a file-open dialog and read the first selected file */
