@@ -129,6 +129,7 @@ export class App extends React.Component<IAppProps, IAppState> {
   private saveMatch() {
     if (this.currentFile === undefined) {
       const options = {
+        defaultPath: this.props.manager.getMatch().name,
         filters: [{ name: 'JSON 文件', extensions: ['json'] }],
       }
       /* show a file-open dialog and read the first selected file */
