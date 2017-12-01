@@ -7,7 +7,7 @@ import { MatchResult } from './match-result'
 import { Tabs, Tab } from 'react-bootstrap'
 import { Test } from '../test'
 import { sendMenuEvent } from '../../common/menu-event'
-import { SupportedPrintContentType } from '../print-view'
+import { debugLog } from '../../common/helper-functions'
 
 const TabEditMatch: string = 'editmatch'
 
@@ -23,17 +23,9 @@ interface IMatchContentState {
 export class MatchContent extends React.Component<IMatchContentProps, IMatchContentState> {
   constructor(props: IMatchContentProps) {
     super(props)
+    debugLog('MatchContent constructed')
 
-    const lastPrintContent = props.manager.getLastPrintContent()
-    let activeTab: number = 2
-    if (lastPrintContent) {
-      if (lastPrintContent.type === SupportedPrintContentType.PlayerRanking) {
-        activeTab = 4
-      } else if (lastPrintContent.type === SupportedPrintContentType.RoundResult || lastPrintContent.type === SupportedPrintContentType.RoundPairingTable) {
-        activeTab = 3
-      }
-    }
-    this.state = { activeTab }
+    this.state = { activeTab: 2 }
   }
 
   private handleSelect = (key: any) => {

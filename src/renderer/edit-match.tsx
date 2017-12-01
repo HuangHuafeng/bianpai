@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Manager } from './manager'
 import { Alert, Modal, Button, FormGroup, FormControl, ControlLabel, Form, Col } from 'react-bootstrap'
-import { removingHeadingTrailingSpaces, toZeorOrPositiveIntegerString } from '../common/helper-functions'
+import { debugLog, removingHeadingTrailingSpaces, toZeorOrPositiveIntegerString } from '../common/helper-functions'
 import { ImmutableMatch } from '../common/immutable-match'
 
 interface IEditMatchProps {
@@ -27,6 +27,7 @@ export class EditMatch extends React.Component<IEditMatchProps, IEditMatchState>
 
   constructor(props: IEditMatchProps) {
     super(props)
+    debugLog('EditMatch constructed')
 
     if (props.match) {
       this.match = props.match

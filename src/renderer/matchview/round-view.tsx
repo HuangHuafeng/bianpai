@@ -7,6 +7,7 @@ import { PairringTable } from './pairring-table'
 import { FightingTable } from './fighting-table'
 import { FinishedTable } from './finished-table'
 import { SupportedPrintContentType } from '../print-view'
+import { debugLog } from '../../common/helper-functions'
 
 interface IRoundViewProps {
   readonly manager: Manager
@@ -21,32 +22,8 @@ interface IRoundViewState {
 export class RoundView extends React.PureComponent<IRoundViewProps, IRoundViewState> {
   constructor(props: IRoundViewProps) {
     super(props)
+    debugLog('RoundView constructed')
   }
-
-  /*
-  public componentWillReceiveProps(nextProps: IRoundViewProps) {
-    if (this.props.match.equals(nextProps.match) === false) {
-      const roundDataInMatch: Round = nextProps.match.getRoundData(this.props.round)
-      this.setState({ roundData: roundDataInMatch })
-    }
-  }
-
-  public shouldComponentUpdate(nextProps: IRoundViewProps, nextState: IRoundViewState, nextContext: any): boolean {
-    if (
-      nextProps.match !== this.props.match ||
-      nextProps.round !== this.props.round ||
-      nextProps.manager !== this.props.manager
-    ) {
-      return true
-    }
-
-    if (nextState.roundData !== undefined) {
-      return true
-    }
-
-    return false
-  }
-  */
 
   public render() {
     const roundStatus = this.props.match.getRoundStatus(this.props.round)

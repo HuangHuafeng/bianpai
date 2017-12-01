@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Table } from 'react-bootstrap'
 import { Round } from '../../common/immutable-round'
 import { Game } from '../../common/immutable-game'
+import { debugLog } from '../../common/helper-functions'
 
 interface IFinishedTableProps {
   readonly roundData: Round
@@ -13,6 +14,7 @@ interface IFinishedTableState {}
 export class FinishedTable extends React.PureComponent<IFinishedTableProps, IFinishedTableState> {
   constructor(props: IFinishedTableProps) {
     super(props)
+    debugLog('FinishedTable constructed')
   }
 
   public render() {

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Modal, Button } from 'react-bootstrap'
+import { debugLog } from '../common/helper-functions'
 
 interface IAboutProps {
   readonly onDismissed: () => void
@@ -12,6 +13,7 @@ interface IAboutState {}
 export class About extends React.Component<IAboutProps, IAboutState> {
   constructor(props: IAboutProps) {
     super(props)
+    debugLog('About constructed')
   }
 
   public render() {

@@ -4,6 +4,7 @@ import { ImmutableMatch, MatchStatus } from '../../common/immutable-match'
 import { Player } from '../../common/immutable-player'
 import { Button, Table } from 'react-bootstrap'
 import { SupportedPrintContentType } from '../print-view'
+import { debugLog } from '../../common/helper-functions'
 
 interface IMatchResultProps {
   readonly manager: Manager
@@ -11,11 +12,12 @@ interface IMatchResultProps {
   readonly printing?: boolean
 }
 
-interface IMatchResultState { }
+interface IMatchResultState {}
 
 export class MatchResult extends React.PureComponent<IMatchResultProps, IMatchResultState> {
   constructor(props: IMatchResultProps) {
     super(props)
+    debugLog('MatchResult constructed')
   }
   private printPairingToPDF = () => {
     this.props.manager.print({ type: SupportedPrintContentType.PlayerRanking })

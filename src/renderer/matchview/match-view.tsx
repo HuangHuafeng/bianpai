@@ -6,6 +6,7 @@ import { sendMenuEvent } from '../../common/menu-event'
 import { MatchHeader } from './match-header'
 import { MatchFooter } from './match-footer'
 import { MatchContent } from './match-content'
+import { debugLog } from '../../common/helper-functions'
 
 interface IMatchViewProps {
   readonly manager: Manager
@@ -17,6 +18,7 @@ interface IMatchViewState {}
 export class MatchView extends React.Component<IMatchViewProps, IMatchViewState> {
   constructor(props: IMatchViewProps) {
     super(props)
+    debugLog('MatchView constructed')
   }
 
   public render() {

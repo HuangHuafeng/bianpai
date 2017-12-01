@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Button, Table } from 'react-bootstrap'
 import { Round } from '../../common/immutable-round'
 import { Game } from '../../common/immutable-game'
+import { debugLog } from '../../common/helper-functions'
 
 interface IFightingTableProps {
   readonly roundData: Round
@@ -13,6 +14,7 @@ interface IFightingTableState {}
 export class FightingTable extends React.PureComponent<IFightingTableProps, IFightingTableState> {
   constructor(props: IFightingTableProps) {
     super(props)
+    debugLog('FightingTable constructed')
   }
 
   public render() {

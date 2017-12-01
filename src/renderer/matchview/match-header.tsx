@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Manager } from '../manager'
 import { ImmutableMatch } from '../../common/immutable-match'
+import { debugLog } from '../../common/helper-functions'
 
 interface IMatchHeaderProps {
   readonly manager: Manager
@@ -12,6 +13,7 @@ interface IMatchHeaderState {}
 export class MatchHeader extends React.PureComponent<IMatchHeaderProps, IMatchHeaderState> {
   constructor(props: IMatchHeaderProps) {
     super(props)
+    debugLog('MatchHeader constructed')
   }
 
   public render() {

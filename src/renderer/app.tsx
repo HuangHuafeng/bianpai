@@ -10,7 +10,7 @@ import { RemovePlayer } from './remove-player'
 import { EditPlayer } from './edit-player'
 import { RemoveAllPlayers } from './remove-all-players'
 import { PrintView } from './print-view'
-import { getFileName } from '../common/helper-functions'
+import { getFileName, debugLog } from '../common/helper-functions'
 
 const notImplemented = (name: string) => {
   const options = {
@@ -34,6 +34,7 @@ export class App extends React.Component<IAppProps, IAppState> {
 
   public constructor(props: IAppProps) {
     super(props)
+    debugLog('App constructed')
 
     this.currentFile = undefined
     this.lastSavedMatch = undefined
@@ -174,6 +175,7 @@ export class App extends React.Component<IAppProps, IAppState> {
       // close current match
       this.currentFile = undefined
       this.lastSavedMatch = undefined
+      this.props.manager.print(undefined)
       this.props.manager.closeMatch()
     }
 
@@ -321,17 +323,17 @@ export class App extends React.Component<IAppProps, IAppState> {
 
   public render() {
     const printContent = this.props.manager.getPrintContent()
+    let printView = null
     if (printContent !== undefined) {
-      return (
-        <div id="xiaogangpao">
-          <PrintView manager={this.props.manager} conetent={printContent} />
-        </div>
-      )
+      printView = <PrintView manager={this.props.manager} conetent={printContent} />
     }
 
     return (
       <div id="xiaogangpao">
-        <MatchView manager={this.props.manager} match={this.props.manager.getMatch()} />
+        <div id="match" hidden={printView !== null}>
+          <MatchView manager={this.props.manager} match={this.props.manager.getMatch()} />
+        </div>
+        {printView}
         {this.renderDialogs()}
       </div>
     )

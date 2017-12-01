@@ -6,11 +6,12 @@ import { Button } from 'react-bootstrap'
 import { FinishedTable } from './matchview/finished-table'
 import { MatchResult } from './matchview/match-result'
 import { MatchFooter } from './matchview/match-footer'
+import { debugLog } from '../common/helper-functions'
 
 export const SupportedPrintContentType = {
   RoundResult: 'ROUND_RESULT',
   RoundPairingTable: 'ROUND_PAIRING_TABLE',
-  PlayerRanking: 'PLAYER_RANKING'
+  PlayerRanking: 'PLAYER_RANKING',
 }
 
 interface IPrintViewProps {
@@ -25,6 +26,7 @@ interface IPrintViewState {
 export class PrintView extends React.Component<IPrintViewProps, IPrintViewState> {
   constructor(props: IPrintViewProps) {
     super(props)
+    debugLog('PrintView constructed')
 
     this.state = { pdfData: undefined }
   }
@@ -136,7 +138,10 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
   }
 
   private renderRoundPairing() {
-    if (this.props.conetent.type === undefined || this.props.conetent.type !== SupportedPrintContentType.RoundPairingTable) {
+    if (
+      this.props.conetent.type === undefined ||
+      this.props.conetent.type !== SupportedPrintContentType.RoundPairingTable
+    ) {
       return null
     }
 
@@ -154,7 +159,10 @@ export class PrintView extends React.Component<IPrintViewProps, IPrintViewState>
   }
 
   private renderMatchResult() {
-    if (this.props.conetent.type === undefined || this.props.conetent.type !== SupportedPrintContentType.PlayerRanking) {
+    if (
+      this.props.conetent.type === undefined ||
+      this.props.conetent.type !== SupportedPrintContentType.PlayerRanking
+    ) {
       return null
     }
 

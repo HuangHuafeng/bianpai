@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Manager } from './manager'
 import { Player } from '../common/immutable-player'
 import { Alert, Modal, Button, FormGroup, FormControl, ControlLabel } from 'react-bootstrap'
-import { removingHeadingTrailingSpaces, toZeorOrPositiveIntegerString } from '../common/helper-functions'
+import { debugLog, removingHeadingTrailingSpaces, toZeorOrPositiveIntegerString } from '../common/helper-functions'
 
 interface IEditPlayerProps {
   readonly manager: Manager
@@ -22,6 +22,7 @@ export class EditPlayer extends React.Component<IEditPlayerProps, IEditPlayerSta
 
   constructor(props: IEditPlayerProps) {
     super(props)
+    debugLog('EditPlayer constructed')
 
     this.addOrEdit = 'edit'
     let player = this.props.manager.getPlayerToDeleteOrEdit()

@@ -24,6 +24,7 @@ export class PairringTable extends React.PureComponent<IPairringTableProps, IPai
   constructor(props: IPairringTableProps) {
     super(props)
     debugLog('PairringTable constructed')
+
     this.playerListPopover = undefined
     this.buildPlayerListPopover(this.props.playerList)
   }

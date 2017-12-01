@@ -29,16 +29,11 @@ export class Manager {
   private app?: App
   private matchStore: MatchStore
   private playerToDeleteOrEdit: number | undefined
-  private lastPrintContent: any
 
   constructor() {
     this.contentToPrint = undefined
     this.openDialogs = []
     this.matchStore = new MatchStore()
-  }
-
-  public getLastPrintContent() {
-    return this.lastPrintContent
   }
 
   public getMatch(): ImmutableMatch {
@@ -57,9 +52,6 @@ export class Manager {
 
   public print(contentToPrint: any) {
     this.contentToPrint = contentToPrint
-    if (contentToPrint !== undefined) {
-      this.lastPrintContent = contentToPrint
-    }
     this.updateAppState()
   }
 

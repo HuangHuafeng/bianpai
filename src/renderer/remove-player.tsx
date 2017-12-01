@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Manager } from './manager'
 import { Modal, Button } from 'react-bootstrap'
+import { debugLog } from '../common/helper-functions'
 
 interface IRemovePlayerProps {
   readonly manager: Manager
@@ -12,6 +13,7 @@ interface IRemovePlayerState {}
 export class RemovePlayer extends React.Component<IRemovePlayerProps, IRemovePlayerState> {
   constructor(props: IRemovePlayerProps) {
     super(props)
+    debugLog('RemovePlayer constructed')
   }
 
   private onOK = () => {

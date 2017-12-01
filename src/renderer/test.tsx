@@ -32,6 +32,7 @@ interface ITestState {}
 export class Test extends React.Component<ITestProps, ITestState> {
   constructor(props: ITestProps) {
     super(props)
+    debugLog('Test constructed')
   }
 
   private testCode = () => {

@@ -14,11 +14,12 @@ interface IPlayerTableProps {
   readonly match: ImmutableMatch
 }
 
-interface IPlayerTableState { }
+interface IPlayerTableState {}
 
 export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerTableState> {
   constructor(props: IPlayerTableProps) {
     super(props)
+    debugLog('PlayerTable constructed')
   }
 
   public render() {
