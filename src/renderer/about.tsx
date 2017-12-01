@@ -9,7 +9,7 @@ interface IAboutProps {
   readonly applicationVersion: string
 }
 
-interface IAboutState {}
+interface IAboutState { }
 
 export class About extends React.Component<IAboutProps, IAboutState> {
   constructor(props: IAboutProps) {
@@ -26,7 +26,7 @@ export class About extends React.Component<IAboutProps, IAboutState> {
       <Modal show={true} onHide={this.props.onDismissed} bsSize="small">
         <Modal.Body>
           <div id="about-body">
-            <img src={logo} />
+            <p><img src={logo} /></p>
             <p>{name}</p>
             <p>{version}</p>
             <p>作者：锋大</p>

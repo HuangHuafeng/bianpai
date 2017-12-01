@@ -34,7 +34,7 @@ let MatchBase = Immutable.Record({
   drawScore: 1,
   name: '',
   organizer: '',
-  totalRounds: 1,
+  totalRounds: 7,
   currentRound: 0,
   status: MatchStatus.NotStarted,
   playerList: Immutable.List(),
