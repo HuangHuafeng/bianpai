@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Modal } from 'react-bootstrap'
 import { debugLog } from '../common/helper-functions'
-import logo from '../../build/icon.png'
+const logo = require('../../build/icon.png')
 
 interface IAboutProps {
   readonly onDismissed: () => void
