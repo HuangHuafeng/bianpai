@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as Electron from 'electron'
 import * as assert from 'assert'
-import { MenuEvent } from '../common/menu-event'
+import { MenuEvent, sendMenuEvent } from '../common/menu-event'
 import { About } from './about'
 import { Manager, PopupType } from './manager'
 import { EditMatch } from './edit-match'
@@ -10,7 +10,7 @@ import { RemovePlayer } from './remove-player'
 import { EditPlayer } from './edit-player'
 import { RemoveAllPlayers } from './remove-all-players'
 import { PrintView } from './print-view'
-import { getFileName, debugLog } from '../common/helper-functions'
+import { debugLog } from '../common/helper-functions'
 
 const notImplemented = (name: string) => {
   const options = {
@@ -29,38 +29,35 @@ export interface IAppProps {
 interface IAppState {}
 
 export class App extends React.Component<IAppProps, IAppState> {
-  private currentFile: string | undefined
-  private lastSavedMatch: any
-
   public constructor(props: IAppProps) {
     super(props)
     debugLog('App constructed')
-
-    this.currentFile = undefined
-    this.lastSavedMatch = undefined
 
     Electron.ipcRenderer.on('menu-event', (event: Electron.IpcMessageEvent, { name }: { name: MenuEvent }) => {
       this.onMenuEvent(name)
     })
 
-    window.addEventListener('beforeunload', ev => {
-      if (this.closeCurrentMatch()) {
-        return undefined
-      } else {
-        ev.returnValue = 'shouldnotclose'
-        return 'shouldnotclose'
-      }
-    })
+    Electron.ipcRenderer.on('updateReady', this.onUpdateReady)
   }
 
   public componentDidMount() {
     this.props.manager.registerApp(this)
   }
 
+  private onUpdateReady = (event: any, text: any) => {
+    const options = {
+      type: 'info',
+      buttons: ['现在升级', '稍后再说'],
+      message: '新版本下载完成，现在就升级吗？\n选择稍后升级后，可以在帮助菜单里选择“重启并安装新版本”升级。',
+    }
+    const response = Electron.remote.dialog.showMessageBox(Electron.remote.getCurrentWindow(), options)
+    if (response === 0) {
+      sendMenuEvent('quitAndInstall')
+    }
+  }
+
   public update() {
-    // rerender myself
     this.setState({})
-    this.updateWindowTitle()
   }
 
   /**
@@ -73,7 +70,7 @@ export class App extends React.Component<IAppProps, IAppState> {
         return this.props.manager.showPopup(PopupType.About)
 
       case 'file-new':
-        if (this.closeCurrentMatch() === false) {
+        if (this.props.manager.closeCurrentMatch() === false) {
           return
         }
         return this.props.manager.showPopup(PopupType.NewMatch)
@@ -88,116 +85,30 @@ export class App extends React.Component<IAppProps, IAppState> {
         return this.props.manager.showPopup(PopupType.RemoveAllPlayers)
 
       case 'file-save':
-        return this.saveMatch()
+        return this.props.manager.saveMatch()
 
       case 'file-open':
-        return this.loadMatch()
+        if (this.props.manager.closeCurrentMatch() === false) {
+          return
+        }
+        return this.props.manager.loadMatch()
+
+      case 'file-close':
+        return this.props.manager.closeCurrentMatch()
+
+      case 'checkForUpdate':
+        Electron.ipcRenderer.send('checkForUpdate')
+        return
+
+      case 'quitAndInstall':
+        if (this.props.manager.closeCurrentMatch() === false) {
+          return
+        }
+        Electron.ipcRenderer.send('quitAndInstall')
+        return
 
       default:
         return notImplemented(event)
-    }
-  }
-
-  private loadMatch() {
-    if (this.closeCurrentMatch() === false) {
-      return
-    }
-
-    /* show a file-open dialog and read the first selected file */
-    var fileNames = Electron.remote.dialog.showOpenDialog(Electron.remote.getCurrentWindow(), {
-      properties: ['openFile'],
-      filters: [{ name: 'JSON 文件', extensions: ['json'] }],
-    })
-
-    if (fileNames) {
-      if (this.props.manager.loadMatch(fileNames[0]) === 0) {
-        this.currentFile = fileNames[0]
-        this.lastSavedMatch = this.props.manager.getMatch()
-      } else {
-        const options = {
-          type: 'warning',
-          buttons: ['OK'],
-          message: `加载失败，"${getFileName(fileNames[0])}"不是一个合法的比赛文件！`,
-        }
-        Electron.remote.dialog.showMessageBox(Electron.remote.getCurrentWindow(), options)
-      }
-    }
-
-    this.updateWindowTitle()
-  }
-
-  private saveMatch() {
-    if (this.currentFile === undefined) {
-      const options = {
-        defaultPath: this.props.manager.getMatch().name,
-        filters: [{ name: 'JSON 文件', extensions: ['json'] }],
-      }
-      /* show a file-open dialog and read the first selected file */
-      var fileName = Electron.remote.dialog.showSaveDialog(Electron.remote.getCurrentWindow(), options)
-      if (fileName) {
-        this.currentFile = fileName
-        this.updateWindowTitle()
-        this.props.manager.saveMatch(this.currentFile)
-        this.lastSavedMatch = this.props.manager.getMatch()
-      }
-    } else {
-      if (this.lastSavedMatch !== this.props.manager.getMatch()) {
-        this.props.manager.saveMatch(this.currentFile)
-        this.lastSavedMatch = this.props.manager.getMatch()
-      }
-    }
-  }
-
-  /**
-   * true: OK to proceed
-   * false: NOK, user cancel, so caller should stop current action
-   */
-  private closeCurrentMatch(): boolean {
-    // TODO: check if the current match need to be save or not
-    const match = this.props.manager.getMatch()
-    if (match.name !== '') {
-      if (this.currentFile === undefined || this.lastSavedMatch !== match) {
-        const options = {
-          type: 'warning',
-          buttons: ['保存', '不保存', '取消'],
-          message: `要保存当前的比赛"${match.name}"吗？`,
-        }
-        const response = Electron.remote.dialog.showMessageBox(Electron.remote.getCurrentWindow(), options)
-        if (response === 2) {
-          return false
-        }
-
-        if (response === 0) {
-          // save current math
-          this.saveMatch()
-        }
-      }
-
-      // close current match
-      this.currentFile = undefined
-      this.lastSavedMatch = undefined
-      this.props.manager.print(undefined)
-      this.props.manager.closeMatch()
-    }
-
-    return true
-  }
-
-  private updateWindowTitle() {
-    let title: string = Electron.remote.app.getName()
-    /*
-    const match = this.props.manager.getMatch()
-    if (match.name !== '') {
-      title = match.name
-    }
-    */
-    if (this.currentFile) {
-      title += ' - ' + getFileName(this.currentFile)
-    } else {
-      title += ' - ' + '未命名.json'
-    }
-    if (title !== Electron.remote.getCurrentWindow().getTitle()) {
-      Electron.remote.getCurrentWindow().setTitle(title)
     }
   }
 

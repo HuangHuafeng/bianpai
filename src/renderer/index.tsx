@@ -8,5 +8,18 @@ import { App } from './app'
 // our sass into css and inject it into the DOM.
 require('../styles/xiaogangpao.css')
 
-let manager = new Manager()
-ReactDOM.render(<App manager={manager} />, document.getElementById('app'))
+/**
+ * it seems that in build from 'yarn dist', the window is closed before
+ * this function finishes, why?
+ */
+window.onbeforeunload = ev => {
+  const manager = Manager.getManager()
+  if (manager.closeCurrentMatch()) {
+    return undefined
+  } else {
+    ev.returnValue = 'shouldnotclose'
+    return 'shouldnotclose'
+  }
+}
+
+ReactDOM.render(<App manager={Manager.getManager()} />, document.getElementById('app'))

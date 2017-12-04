@@ -67,7 +67,7 @@ export class PlayerTable extends React.PureComponent<IPlayerTableProps, IPlayerT
   }
 
   private renderTableBody() {
-    const players = this.props.match.playerList
+    const players = this.props.match.playerList.sort((a, b) => a.number - b.number)
     let ret: any[] = []
     for (let index = 0; index < players.size; index++) {
       const player = players.get(index)

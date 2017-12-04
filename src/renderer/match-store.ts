@@ -147,9 +147,7 @@ export class MatchStore {
   }
 
   public newMatch(match: ImmutableMatch) {
-    this.match = new ImmutableMatch()
-    this.actionHistory = []
-
+    this.closeMatch()
     this.updateMatch(match)
   }
 
@@ -274,8 +272,10 @@ export class MatchStore {
   }
 
   public closeMatch(): void {
-    this.match = new ImmutableMatch()
-    this.actionHistory = []
+    if (this.match === undefined || this.match.name !== '') {
+      this.match = new ImmutableMatch()
+      this.actionHistory = []
+    }
   }
 
   /**
@@ -290,11 +290,8 @@ export class MatchStore {
       return 1
     }
 
-    // we should do something like ask user to save the current match
-
     // move a new match
-    this.match = new ImmutableMatch()
-    this.actionHistory = []
+    this.closeMatch()
     const actionHistory: MatchAction[] = contentFromFile.content
     for (let index = 0; index < actionHistory.length; index++) {
       this.doMatchAction(actionHistory[index])

@@ -7,11 +7,13 @@
  *  * anything else
  */
 
-import { App } from './app'
 import * as assert from 'assert'
+import * as Electron from 'electron'
+import { App } from '../renderer/app'
 import { Player } from '../common/immutable-player'
 import { MatchStore } from './match-store'
 import { ImmutableMatch, MAXIMUM_TOTAL_ROUNDS } from '../common/immutable-match'
+import { getFileName } from '../common/helper-functions'
 
 export enum PopupType {
   About = 1,
@@ -24,25 +26,144 @@ export enum PopupType {
 }
 
 export class Manager {
+  private static instance: Manager
   private contentToPrint: any
   private openDialogs: PopupType[]
   private app?: App
   private matchStore: MatchStore
   private playerToDeleteOrEdit: number | undefined
+  private currentFile: string | undefined
+  private lastSavedMatch: ImmutableMatch
 
-  constructor() {
-    this.contentToPrint = undefined
+  private constructor() {
     this.openDialogs = []
     this.matchStore = new MatchStore()
+    this.closeMatch()
+  }
+
+  public static getManager(): Manager {
+    if (Manager.instance === undefined) {
+      Manager.instance = new Manager()
+    }
+
+    return Manager.instance
   }
 
   public getMatch(): ImmutableMatch {
     return this.matchStore.getMatch()
   }
 
+  /**
+   * true: OK to proceed
+   * false: NOK, user cancel, so caller should stop current action
+   */
+  public closeCurrentMatch(): boolean {
+    // check if the current match need to be save or not
+    const match = this.matchStore.getMatch()
+    if (match.name !== '') {
+      if (this.currentFile === undefined || this.lastSavedMatch !== match) {
+        const options = {
+          type: 'warning',
+          buttons: ['保存', '不保存', '取消'],
+          message: `要保存当前的比赛"${match.name}"吗？`,
+        }
+        const response = Electron.remote.dialog.showMessageBox(Electron.remote.getCurrentWindow(), options)
+        if (response === 2) {
+          return false
+        }
+
+        if (response === 0) {
+          this.saveMatch()
+        }
+        this.closeMatch()
+      } else {
+        this.closeMatch()
+      }
+    }
+
+    return true
+  }
+
+  private closeMatch() {
+    this.matchStore.closeMatch()
+    this.contentToPrint = undefined
+    this.currentFile = undefined
+    this.lastSavedMatch = this.matchStore.getMatch()
+    this.updateAppState()
+    this.updateWindowTitle()
+  }
+
+  public saveMatch() {
+    if (this.currentFile === undefined) {
+      const options = {
+        defaultPath: this.matchStore.getMatch().name,
+        filters: [{ name: 'JSON 文件', extensions: ['json'] }],
+      }
+      /* show a file-open dialog and read the first selected file */
+      var fileName = Electron.remote.dialog.showSaveDialog(Electron.remote.getCurrentWindow(), options)
+      if (fileName) {
+        this.currentFile = fileName
+        this.updateWindowTitle()
+        this.matchStore.saveMatch(this.currentFile)
+        this.lastSavedMatch = this.matchStore.getMatch()
+      }
+    } else {
+      if (this.lastSavedMatch !== this.matchStore.getMatch()) {
+        this.matchStore.saveMatch(this.currentFile)
+        this.lastSavedMatch = this.matchStore.getMatch()
+      }
+    }
+  }
+
+  public loadMatch() {
+    /* show a file-open dialog and read the first selected file */
+    var fileNames = Electron.remote.dialog.showOpenDialog(Electron.remote.getCurrentWindow(), {
+      properties: ['openFile'],
+      filters: [{ name: 'JSON 文件', extensions: ['json'] }],
+    })
+
+    if (fileNames) {
+      if (this.matchStore.loadMatch(fileNames[0]) === 0) {
+        this.currentFile = fileNames[0]
+        this.lastSavedMatch = this.matchStore.getMatch()
+        this.updateWindowTitle()
+        this.updateAppState()
+      } else {
+        const options = {
+          type: 'warning',
+          buttons: ['OK'],
+          message: `加载失败，"${getFileName(fileNames[0])}"不是一个合法的比赛文件！`,
+        }
+        Electron.remote.dialog.showMessageBox(Electron.remote.getCurrentWindow(), options)
+      }
+    }
+  }
+
+  private updateWindowTitle() {
+    let title: string = Electron.remote.app.getName()
+    /*
+    const match = this.props.manager.getMatch()
+    if (match.name !== '') {
+      title = match.name
+    }
+    */
+    const match = this.matchStore.getMatch()
+    if (match.name !== '') {
+      if (this.currentFile) {
+        title += ' - ' + getFileName(this.currentFile)
+      } else {
+        title += ' - ' + '未命名.json'
+      }
+    }
+    if (title !== Electron.remote.getCurrentWindow().getTitle()) {
+      Electron.remote.getCurrentWindow().setTitle(title)
+    }
+  }
+
   public newMatch(match: ImmutableMatch) {
     this.matchStore.newMatch(match)
     this.updateAppState()
+    this.updateWindowTitle()
   }
 
   public updateMatch(match: ImmutableMatch) {
@@ -274,25 +395,6 @@ export class Manager {
     const currentRound = this.matchStore.getMatch().currentRound
     this.matchStore.endCurrentRound(currentRound)
     this.updateAppState()
-  }
-
-  public saveMatch(fileName: string): void {
-    this.matchStore.saveMatch(fileName)
-  }
-
-  public closeMatch(): void {
-    this.matchStore.closeMatch()
-    this.updateAppState()
-  }
-
-  public loadMatch(fileName: string): number {
-    const ret = this.matchStore.loadMatch(fileName)
-    if (ret === 0) {
-      // successfully loaded the file
-      this.updateAppState()
-    }
-
-    return ret
   }
 
   public changePlayerInGame(table: number, currentPlayerNumber: number, withPlayerNumber: number) {
